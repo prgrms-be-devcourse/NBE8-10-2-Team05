@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "4.0.1"
 	id("io.spring.dependency-management") version "1.1.7"
+    id("com.diffplug.spotless") version "8.1.0"
 }
 
 group = "com"
@@ -10,8 +11,35 @@ description = "back"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
+}
+
+spotless {
+    java {
+        // Java 표준 포맷
+        palantirJavaFormat()
+
+        // import 정렬 순서
+        importOrder(
+            "java",
+            "javax",
+            "org",
+            "com",
+            ""
+        )
+
+        removeUnusedImports()
+        target("src/**/*.java")
+    }
+
+    // Java 외 파일
+    format("misc") {
+        target("*.gradle", "*.md", ".gitignore")
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
 }
 
 configurations {

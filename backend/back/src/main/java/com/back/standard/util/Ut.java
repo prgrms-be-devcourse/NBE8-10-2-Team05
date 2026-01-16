@@ -1,16 +1,17 @@
 package com.back.standard.util;
 
+import java.security.Key;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.crypto.SecretKey;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import tools.jackson.databind.ObjectMapper;
-
-import javax.crypto.SecretKey;
-import java.security.Key;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class Ut {
     public static class jwt {
@@ -42,10 +43,7 @@ public class Ut {
             SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
             try {
-                Jwts.parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parseSignedClaims(jwtStr);
+                Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwtStr);
             } catch (Exception e) {
                 return false;
             }
@@ -57,13 +55,11 @@ public class Ut {
             SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
             try {
-                return new LinkedHashMap<>(
-                        Jwts.parser()
-                                .verifyWith(secretKey)
-                                .build()
-                                .parseSignedClaims(jwtStr)
-                                .getPayload()
-                );
+                return new LinkedHashMap<>(Jwts.parser()
+                        .verifyWith(secretKey)
+                        .build()
+                        .parseSignedClaims(jwtStr)
+                        .getPayload());
             } catch (Exception e) {
                 return null;
             }
