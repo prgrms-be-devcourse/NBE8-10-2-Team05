@@ -71,6 +71,10 @@ repositories {
 checkstyle {
     toolVersion = "10.12.4"
     configFile = file("$rootDir/config/checkstyle/naver-checkstyle-rules.xml")
+    // naver-checkstyle-rules.xml에서 사용하는 suppressionFile 변수 설정
+    configProperties = mapOf(
+        "suppressionFile" to file("$rootDir/config/checkstyle/naver-checkstyle-suppressions.xml").absolutePath
+    )
 }
 
 dependencies {
