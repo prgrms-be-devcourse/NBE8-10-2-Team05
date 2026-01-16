@@ -26,6 +26,8 @@ public abstract class BaseEntity {
     @Setter(PROTECTED)
     private int id;
 
+     private int num;
+
     @CreatedDate
     private LocalDateTime createDate;
 
