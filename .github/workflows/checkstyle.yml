@@ -13,7 +13,7 @@ jobs:
             - name: Set up JDK
               uses: actions/setup-java@v3
               with:
-                  java-version: '17' # 프로젝트 JDK 버전
+                  java-version: '21' # 프로젝트 JDK 버전
                   distribution: 'temurin'
                   cache: 'gradle'
 
