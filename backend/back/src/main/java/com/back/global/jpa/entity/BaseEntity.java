@@ -26,8 +26,6 @@ public abstract class BaseEntity {
     @Setter(PROTECTED)
     private int id;
 
-     private int num;
-
     @CreatedDate
     private LocalDateTime createDate;
 
@@ -39,15 +37,15 @@ public abstract class BaseEntity {
         if (o == this) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if      (o == null || getClass() != o.getClass()) {
             return false;
         }
-        BaseEntity that = (BaseEntity) o;
-        return id == that.id;
+        BaseEntity that =     (BaseEntity) o;
+        return id ==        that.id;
     }
 
     @Override
-    public int hashCode() {
+    public int     hashCode() {
         return Objects.hashCode(id);
     }
 }
