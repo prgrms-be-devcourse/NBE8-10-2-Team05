@@ -21,31 +21,31 @@ import lombok.Setter;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 public abstract class BaseEntity {
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Setter(PROTECTED)
-    private int id;
+	@Id
+	@GeneratedValue(strategy = IDENTITY)
+	@Setter(PROTECTED)
+	private int id;
 
-    @CreatedDate
-    private LocalDateTime createDate;
+	@CreatedDate
+	private LocalDateTime createDate;
 
-    @LastModifiedDate
-    private LocalDateTime modifyDate;
+	@LastModifiedDate
+	private LocalDateTime modifyDate;
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BaseEntity that = (BaseEntity) o;
-        return id == that.id;
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		BaseEntity that = (BaseEntity) o;
+		return id == that.id;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
 }

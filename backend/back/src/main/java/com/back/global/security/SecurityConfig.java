@@ -10,10 +10,10 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final CustomAuthenticationFilter customAuthenticationFilter;
+	private final CustomAuthenticationFilter customAuthenticationFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
-        return null;
-    }
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) {
+		return null;
+	}
 }

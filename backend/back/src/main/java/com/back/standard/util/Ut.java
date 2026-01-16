@@ -14,71 +14,71 @@ import io.jsonwebtoken.security.Keys;
 import tools.jackson.databind.ObjectMapper;
 
 public class Ut {
-    public static class Jwt {
-        public static String toString(String secret, int expireSeconds, Map<String, Object> body) {
-            ClaimsBuilder claimsBuilder = Jwts.claims();
+	public static class Jwt {
+		public static String toString(String secret, int expireSeconds, Map<String, Object> body) {
+			ClaimsBuilder claimsBuilder = Jwts.claims();
 
-            for (Map.Entry<String, Object> entry : body.entrySet()) {
-                claimsBuilder.add(entry.getKey(), entry.getValue());
-            }
+			for (Map.Entry<String, Object> entry : body.entrySet()) {
+				claimsBuilder.add(entry.getKey(), entry.getValue());
+			}
 
-            Claims claims = claimsBuilder.build();
+			Claims claims = claimsBuilder.build();
 
-            Date issuedAt = new Date();
-            Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
+			Date issuedAt = new Date();
+			Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
 
-            Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+			Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
-            String jwt = Jwts.builder()
-                    .claims(claims)
-                    .issuedAt(issuedAt)
-                    .expiration(expiration)
-                    .signWith(secretKey)
-                    .compact();
+			String jwt = Jwts.builder()
+					.claims(claims)
+					.issuedAt(issuedAt)
+					.expiration(expiration)
+					.signWith(secretKey)
+					.compact();
 
-            return jwt;
-        }
+			return jwt;
+		}
 
-        public static boolean isValid(String secret, String jwtStr) {
-            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+		public static boolean isValid(String secret, String jwtStr) {
+			SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
-            try {
-                Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwtStr);
-            } catch (Exception e) {
-                return false;
-            }
+			try {
+				Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwtStr);
+			} catch (Exception e) {
+				return false;
+			}
 
-            return true;
-        }
+			return true;
+		}
 
-        public static Map<String, Object> payload(String secret, String jwtStr) {
-            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+		public static Map<String, Object> payload(String secret, String jwtStr) {
+			SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
-            try {
-                return new LinkedHashMap<>(Jwts.parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parseSignedClaims(jwtStr)
-                        .getPayload());
-            } catch (Exception e) {
-                return null;
-            }
-        }
-    }
+			try {
+				return new LinkedHashMap<>(Jwts.parser()
+						.verifyWith(secretKey)
+						.build()
+						.parseSignedClaims(jwtStr)
+						.getPayload());
+			} catch (Exception e) {
+				return null;
+			}
+		}
+	}
 
-    public static class Json {
-        private static final ObjectMapper objectMapper = new ObjectMapper();
+	public static class Json {
+		private static final ObjectMapper objectMapper = new ObjectMapper();
 
-        public static String toString(Object object) {
-            return toString(object, null);
-        }
+		public static String toString(Object object) {
+			return toString(object, null);
+		}
 
-        public static String toString(Object object, String defaultValue) {
-            try {
-                return objectMapper.writeValueAsString(object);
-            } catch (Exception e) {
-                return defaultValue;
-            }
-        }
-    }
+		public static String toString(Object object, String defaultValue) {
+			try {
+				return objectMapper.writeValueAsString(object);
+			} catch (Exception e) {
+				return defaultValue;
+			}
+		}
+	}
 }
