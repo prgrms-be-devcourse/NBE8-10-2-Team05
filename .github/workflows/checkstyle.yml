@@ -14,6 +14,8 @@ jobs:
               uses: actions/setup-java@v3
               with:
                   java-version: '17' # 프로젝트 JDK 버전
+                  distribution: 'temurin'
+                  cache: 'gradle'
 
             - name: Run Gradle Checkstyle
               run: ./gradlew checkstyleMain checkstyleTest
