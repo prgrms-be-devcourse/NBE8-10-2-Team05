@@ -30,11 +30,11 @@ public class Ut {
 			Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
 			String jwt = Jwts.builder()
-					.claims(claims)
-					.issuedAt(issuedAt)
-					.expiration(expiration)
-					.signWith(secretKey)
-					.compact();
+				.claims(claims)
+				.issuedAt(issuedAt)
+				.expiration(expiration)
+				.signWith(secretKey)
+				.compact();
 
 			return jwt;
 		}
@@ -56,10 +56,10 @@ public class Ut {
 
 			try {
 				return new LinkedHashMap<>(Jwts.parser()
-						.verifyWith(secretKey)
-						.build()
-						.parseSignedClaims(jwtStr)
-						.getPayload());
+					.verifyWith(secretKey)
+					.build()
+					.parseSignedClaims(jwtStr)
+					.getPayload());
 			} catch (Exception e) {
 				return null;
 			}
