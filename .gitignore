@@ -1,0 +1,69 @@
+################################
+# Backend (backend/back 기준)
+################################
+
+backend/back/HELP.md
+backend/back/.gradle/
+backend/back/build/
+
+!backend/back/gradle/wrapper/gradle-wrapper.jar
+!backend/back/**/src/main/**/build/
+!backend/back/**/src/test/**/build/
+
+################################
+# STS
+################################
+
+backend/back/.apt_generated
+backend/back/.classpath
+backend/back/.factorypath
+backend/back/.project
+backend/back/.settings
+backend/back/.springBeans
+backend/back/.sts4-cache
+backend/back/bin/
+
+!backend/back/**/src/main/**/bin/
+!backend/back/**/src/test/**/bin/
+
+################################
+# IntelliJ IDEA
+################################
+
+backend/back/.idea
+backend/back/*.iws
+backend/back/*.iml
+backend/back/*.ipr
+backend/back/out/
+
+!backend/back/**/src/main/**/out/
+!backend/back/**/src/test/**/out/
+
+################################
+# NetBeans
+################################
+
+backend/back/nbproject/private/
+backend/back/nbbuild/
+backend/back/dist/
+backend/back/nbdist/
+backend/back/.nb-gradle/
+
+################################
+# VS Code
+################################
+
+backend/back/.vscode/
+
+################################
+# Custom (DB files)
+################################
+
+backend/back/db_dev.mv.db
+backend/back/db_dev.trace.db
+
+backend/back/src/main/resources/application-dev.yml
+backend/back/src/main/resources/application-test.yml
+
+
+.idea/
