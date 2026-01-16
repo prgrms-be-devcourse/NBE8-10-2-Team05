@@ -1,4 +1,3 @@
 package com.back.domain.member.entity;
 
-public class Bookmark {
-}
+public class Bookmark {}

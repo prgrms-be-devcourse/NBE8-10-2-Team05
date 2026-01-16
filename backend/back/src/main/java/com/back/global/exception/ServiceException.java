@@ -1,7 +1,5 @@
 package com.back.global.exception;
 
-
-
 public class ServiceException extends RuntimeException {
     private final String resultCode;
     private final String msg;

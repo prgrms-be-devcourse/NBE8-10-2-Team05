@@ -1,4 +1,3 @@
 package com.back.domain.member.entity;
 
-public class Application {
-}
+public class Application {}
