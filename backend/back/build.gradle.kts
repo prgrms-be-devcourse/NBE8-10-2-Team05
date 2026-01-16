@@ -23,11 +23,9 @@ spotless {
         palantirJavaFormat()   // 기본 포맷팅
         removeUnusedImports()  // 안 쓰는 import 제거
         trimTrailingWhitespace() // 줄 끝 공백 제거
-        importOrder()          // import 구문을 알파벳 순서나 특정 규칙대로 정렬 (코드 리뷰 시 편함)
         formatAnnotations()    // @Test, @Override 같은 어노테이션 배치 최적화
         endWithNewline()       // 모든 파일의 끝에 빈 줄 하나를 추가 (POSIX 표준 준수
-
-        // import 정렬 순서
+        // import 구문을 알파벳 순서나 특정 규칙대로 정렬 (코드 리뷰 시 편함)
         importOrder(
             "java",
             "javax",
