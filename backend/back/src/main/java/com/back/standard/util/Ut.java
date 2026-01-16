@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.Keys;
 import tools.jackson.databind.ObjectMapper;
 
 public class Ut {
-    public static class jwt {
+    public static class Jwt {
         public static String toString(String secret, int expireSeconds, Map<String, Object> body) {
             ClaimsBuilder claimsBuilder = Jwts.claims();
 
@@ -66,7 +66,7 @@ public class Ut {
         }
     }
 
-    public static class json {
+    public static class Json {
         private static final ObjectMapper objectMapper = new ObjectMapper();
 
         public static String toString(Object object) {

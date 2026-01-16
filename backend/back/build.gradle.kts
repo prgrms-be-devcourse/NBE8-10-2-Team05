@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "4.0.1"
 	id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.1.0"
+    id("checkstyle")
 }
 
 group = "com"
@@ -50,6 +51,11 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+checkstyle {
+    toolVersion = "10.12.4"
+    configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
 }
 
 dependencies {
