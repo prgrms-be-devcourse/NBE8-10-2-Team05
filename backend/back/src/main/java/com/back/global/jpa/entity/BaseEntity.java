@@ -34,9 +34,9 @@ public abstract class BaseEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this)
+        if (o == this) {
             return true;
-
+        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
