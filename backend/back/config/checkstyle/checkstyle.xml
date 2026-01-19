@@ -114,13 +114,6 @@ The following rules in the Naver coding convention cannot be checked by this con
         <message key="name.invalidPattern"
                  value="[1-top-level-class] one.top.level.class=Top-level class {0} has to reside in its own source file."/>
 
-        <!-- [avoid-star-import] -->
-        <module name="AvoidStarImport">
-            <property name="allowStaticMemberImports" value="true"/>
-            <message key="import.avoidStar"
-                     value="[avoid-star-import] Using the ''.*'' form of import should be avoided - {0}."/>
-        </module>
-
         <!-- [modifier-order] -->
         <module name="ModifierOrder">
             <message key="mod.order"
