@@ -1,3 +1,31 @@
 package com.back.domain.member.entity;
 
-public class Application {}
+import java.time.LocalDateTime;
+
+import com.back.domain.welfare.policy.entity.Policy;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "apply")
+@Getter
+@NoArgsConstructor
+public class Application {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "policy_id")
+    private Policy policy;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member applicant;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+}
