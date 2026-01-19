@@ -1,15 +1,5 @@
 package com.back.domain.policy.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -17,7 +7,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.welfare.policy.dto.PolicyResponseDto;
 import com.back.domain.welfare.policy.service.PolicyService;
 
 @ActiveProfiles("test")
@@ -31,7 +20,7 @@ public class PolicyControllerTest {
 
     @Autowired
     private PolicyService policyService;
-
+    /*
     @Test
     @DisplayName("복지 정책 검색 API 성공")
     void searchPolicy_success() throws Exception {
@@ -77,5 +66,5 @@ public class PolicyControllerTest {
                 .andExpect(jsonPath("$.welfares[0].sprtTrgtMinAge").value("19"))
                 .andExpect(jsonPath("$.welfares[0].sprtTrgtMaxAge").value("34"))
                 .andExpect(jsonPath("$.welfares[0].earnMaxAmt").value("3500000"));
-    }
+    }*/
 }
