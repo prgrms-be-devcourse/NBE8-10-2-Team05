@@ -9,7 +9,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
-import com.back.domain.welfare.estate.dto.EstateItem;
 import com.back.domain.welfare.estate.repository.EstateRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class EstateService {
     private final EstateRepository estateRepository;
 
-    public List<EstateItem> fetchEstateList(EstateFetchRequestDto requestDto) {
+    public List<EstateFetchResponseDto> fetchEstateList(EstateFetchRequestDto requestDto) {
         // api 받아오기
         String apiUrl = "http://apis.data.go.kr/1613000/HWSPR02/rsdtRcritNtcList";
         String apiKey = "";
@@ -35,6 +34,6 @@ public class EstateService {
 
         // repository.save(EstateList)
 
-        return responseDto.get().items();
+        return List.of();
     }
 }

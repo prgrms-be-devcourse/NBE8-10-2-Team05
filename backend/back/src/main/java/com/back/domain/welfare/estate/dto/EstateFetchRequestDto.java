@@ -15,9 +15,4 @@ public record EstateFetchRequestDto(
         String bassMtRntchrgSe, // 월임대료 구분
         String yearMtBegin, // 모집공고월시작(YYYYMM)
         String yearMtEnd // 모집공고월시작(YYYYMM)
-        ) {
-    public EstateFetchRequestDto {
-        if (numOfRows == null) numOfRows = 10;
-        if (pageNo == null) pageNo = 1;
-    }
-}
+        ) {}
