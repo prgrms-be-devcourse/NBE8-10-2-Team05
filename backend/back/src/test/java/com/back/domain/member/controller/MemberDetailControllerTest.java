@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,7 +30,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @ActiveProfiles("test")
 @SpringBootTest
-@org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+@AutoConfigureMockMvc
 @Transactional
 public class MemberDetailControllerTest {
 
@@ -65,7 +66,7 @@ public class MemberDetailControllerTest {
     }
 
     @Test
-    @DisplayName("회원 상세 정보 조회")
+    @DisplayName("멤버 상세 정보 조회")
     void t1() throws Exception {
         // when
         ResultActions resultActions =
@@ -81,7 +82,7 @@ public class MemberDetailControllerTest {
     }
 
     @Test
-    @DisplayName("회원 상세 정보 수정")
+    @DisplayName("멤버 상세 정보 수정")
     void t2() throws Exception {
 
         MemberDetailReq request = new MemberDetailReq(
@@ -97,5 +98,30 @@ public class MemberDetailControllerTest {
                 .andExpect(jsonPath("$.regionCode").value("54321"))
                 .andExpect(jsonPath("$.income").value(5000))
                 .andExpect(jsonPath("$.marriageStatus").value("MARRIED"));
+    }
+
+    @Test
+    @DisplayName("상세 정보 없는 멤버 정보 조회 -> MemberDetail 자동 생성 & null 값인지 확인")
+    void t3() throws Exception {
+        // 1. 상세 정보가 없는 신규 회원 생성
+        Member newMember = Member.createEmailUser("신규회원", "new@email.com", "pass", 000101, 1);
+        Member savedNewMember = memberRepository.save(newMember);
+        Long newMemberId = savedNewMember.getId();
+
+        // 2. GET 요청 수행
+        ResultActions resultActions =
+                mockMvc.perform(get("/api/v1/member/detail/" + newMemberId)).andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                // Member 정보는 정상적으로 출력되어야함.
+                .andExpect(jsonPath("$.name").value("신규회원"))
+                .andExpect(jsonPath("$.email").value("new@email.com"))
+                // 상세 정보 필드들은 null이어야 함
+                .andExpect(jsonPath("$.regionCode").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.income").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.marriageStatus").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.employmentStatus").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.educationLevel").value(org.hamcrest.Matchers.nullValue()));
     }
 }
