@@ -17,5 +17,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {}
+            throws ServletException, IOException {
+
+        // 지금은 인증 로직 없음 → 그냥 통과
+        filterChain.doFilter(request, response);
+    }
 }
