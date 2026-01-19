@@ -5,9 +5,18 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record EstateFetchResponseDto(
-        @JsonProperty("numOfRows") String numOfRows,
-        @JsonProperty("pageNo") String pageNo,
-        @JsonProperty("totalCount") String totalCount,
-        @JsonProperty("item") List<EstateItem> items) {}
-// 태스트
-// 빈 {} 해결
+        @JsonProperty("response") Response response) {
+    public record Response(
+            @JsonProperty("header") HeaderDto header,
+            @JsonProperty("body") ResponseDto body) {
+        public record HeaderDto(
+                @JsonProperty("resultCode") String resultCode,
+                @JsonProperty("resultMsg") String resultMsg) {}
+
+        public record ResponseDto(
+                @JsonProperty("numOfRows") String numOfRows,
+                @JsonProperty("pageNo") String pageNo,
+                @JsonProperty("totalCount") String totalCount,
+                @JsonProperty("item") List<EstateItem> items) {}
+    }
+}

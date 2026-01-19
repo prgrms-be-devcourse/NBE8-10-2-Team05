@@ -21,6 +21,4 @@ public record EstateItem(
         @JsonProperty("mtRntchrg") Long mtRntchrg,
         @JsonProperty("beginDe") String beginDe, // "20260116"
         @JsonProperty("endDe") String endDe // "20260116"
-        ) {
-    // public static
-}
+        ) {}

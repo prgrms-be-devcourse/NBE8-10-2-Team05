@@ -1,5 +1,6 @@
 package com.back.domain.welfare.estate.service;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +27,10 @@ public class EstateService {
 
     public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
 
-        String uri = UriComponentsBuilder.fromUriString("http://apis.data.go.kr/...")
+        URI uri = UriComponentsBuilder.fromUriString(apiUrl)
                 .queryParam("serviceKey", apiKey)
-                .queryParam("brtcCode", requestDto.brtcCode())
-                .build(false) // 공공데이터는 인코딩 방지를 위해 false를 쓰기도 함
-                .toUriString();
+                .build(true)
+                .toUri();
 
         Optional<EstateFetchResponseDto> responseDto =
                 Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
