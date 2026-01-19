@@ -33,14 +33,14 @@ public abstract class BaseEntity {
     private LocalDateTime modifyDate;
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) {
+    public boolean equals(Object object) {
+        if (object == this) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        BaseEntity that = (BaseEntity) o;
+        BaseEntity that = (BaseEntity) object;
         return id == that.id;
     }
 
