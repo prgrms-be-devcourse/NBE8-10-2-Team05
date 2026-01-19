@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class MemberDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(length = 5)
@@ -35,6 +34,7 @@ public class MemberDetail {
     private String specialStatus;
 
     @OneToOne
+    @MapsId
     @JoinColumn(name = "member_id")
     private Member member;
 
