@@ -27,3 +27,6 @@ jobs:
       - name: Test with Gradle6
         run: ./gradlew test
         working-directory: ./backend/back
+        env:
+          CUSTOM_API_ESTATE_KEY: ${{secrets.CUSTOM_API_ESTATE_KEY}}
+          CUSTOM_API_ESTATE_URL: ${{secrets.CUSTOM_API_ESTATE_URL}}
