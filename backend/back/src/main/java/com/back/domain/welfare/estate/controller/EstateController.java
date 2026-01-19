@@ -1,7 +1,5 @@
 package com.back.domain.welfare.estate.controller;
 
-import java.util.List;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +16,8 @@ public class EstateController {
     private EstateService estateService;
 
     @GetMapping("/list")
-    public List<EstateFetchResponseDto> getEstateItems() {
-        List<EstateFetchResponseDto> estateList = estateService.fetchEstateList(null);
+    public EstateFetchResponseDto getEstateItems() {
+        EstateFetchResponseDto estateList = estateService.fetchEstateList(null);
 
         return estateList;
     }

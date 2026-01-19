@@ -1,6 +1,5 @@
 package com.back.domain.welfare.estate.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class EstateService {
     private final EstateRepository estateRepository;
 
-    public List<EstateFetchResponseDto> fetchEstateList(EstateFetchRequestDto requestDto) {
+    public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
         // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스
         String apiUrl = "http://apis.data.go.kr/1613000/HWSPR02/rsdtRcritNtcList";
         String apiKey = "SgWKaXt9FYqTmctvceuHwbb8QlVKEtphZ0fFDtIb40qm5UvMNPGkyIXAiufeOYnyWu39WYNP5W+4a1T+KPHRuw==";
@@ -35,6 +34,6 @@ public class EstateService {
         //
         // repository.save(EstateList)
 
-        return List.of();
+        return responseDto.orElseThrow(() -> new RuntimeException(""));
     }
 }
