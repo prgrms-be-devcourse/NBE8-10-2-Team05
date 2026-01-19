@@ -43,7 +43,7 @@ public class MemberService {
             throw new ServiceException("MEMBER_409", "이미 존재하는 이메일입니다");
         }
 
-        // 3비밀번호 암호화
+        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(req.password());
 
         // 회원 생성 (엔티티 팩토리 메서드 사용)
@@ -74,8 +74,8 @@ public class MemberService {
             throw new ServiceException("AUTH-400", "소셜 로그인 계정입니다. 소셜 로그인을 이용해주세요.");
         }
 
-        // 단순 문자열 비교(다음 단계에서 PasswordEncoder.matches로 교체)
-        if (!member.getPassword().equals(req.getPassword())) {
+        // 암호화 비밀번호 비교
+        if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
             throw new ServiceException("AUTH-401", "비밀번호가 일치하지 않습니다.");
         }
 
