@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,11 +27,15 @@ class EstateServiceTest {
     @Autowired
     private EstateService estateService;
 
+    @Value("${custom.api.estate.url}")
+    String apiUrl;
+
+    @Value("${custom.api.estate.key}")
+    String apiKey;
+
     @Test
     @DisplayName("국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API 테스트")
     void t1() throws Exception {
-        String apiUrl = "http://apis.data.go.kr/1613000/HWSPR02/rsdtRcritNtcList";
-        String apiKey = "SgWKaXt9FYqTmctvceuHwbb8QlVKEtphZ0fFDtIb40qm5UvMNPGkyIXAiufeOYnyWu39WYNP5W+4a1T+KPHRuw==";
 
         ResultActions resultActions =
                 mvc.perform(get(apiUrl).param("serviceKey", apiKey)).andDo(print());
@@ -39,6 +44,10 @@ class EstateServiceTest {
     }
 
     @Test
-    @DisplayName(" EstateFetchResponseDto 테스트")
-    void t2() {}
+    @DisplayName("fetchEstateList 테스트")
+    void t2() {
+        // EstateFetchRequestDto requestDto = new EstateFetchRequestDto();
+        // estateService.fetchEstateList();
+
+    }
 }

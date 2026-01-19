@@ -2,6 +2,7 @@ package com.back.domain.welfare.estate.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,10 +18,13 @@ import lombok.RequiredArgsConstructor;
 public class EstateService {
     private final EstateRepository estateRepository;
 
+    @Value("${custom.api.estate.url}")
+    String apiUrl;
+
+    @Value("${custom.api.estate.key}")
+    String apiKey;
+
     public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
-        // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스
-        String apiUrl = "http://apis.data.go.kr/1613000/HWSPR02/rsdtRcritNtcList";
-        String apiKey = "SgWKaXt9FYqTmctvceuHwbb8QlVKEtphZ0fFDtIb40qm5UvMNPGkyIXAiufeOYnyWu39WYNP5W+4a1T+KPHRuw==";
 
         String uri = UriComponentsBuilder.fromUriString("http://apis.data.go.kr/...")
                 .queryParam("serviceKey", apiKey)
@@ -33,6 +37,7 @@ public class EstateService {
 
         //
         // repository.save(EstateList)
+        // List<Estate>
 
         return responseDto.orElseThrow(() -> new RuntimeException(""));
     }
