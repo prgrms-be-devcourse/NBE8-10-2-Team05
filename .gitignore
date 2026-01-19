@@ -59,8 +59,8 @@ backend/back/.vscode/
 # Custom (DB files)
 ################################
 
-backend/back/db_dev.mv.db
-backend/back/db_dev.trace.db
+**/*.mv.db
+**/*.trace.db
 
 backend/back/src/main/resources/application-dev.yml
 backend/back/src/main/resources/application-test.yml
