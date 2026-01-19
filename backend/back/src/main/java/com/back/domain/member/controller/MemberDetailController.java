@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.back.domain.member.dto.MemberDetailReq;
 import com.back.domain.member.dto.MemberDetailRes;
-import com.back.domain.member.entity.MemberDetail;
 import com.back.domain.member.service.MemberDetailService;
 
 import jakarta.validation.Valid;
@@ -26,8 +25,8 @@ public class MemberDetailController {
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberDetailRes> getMemberDetail(
             @PathVariable Long memberId, @Valid @RequestBody MemberDetailReq reqBody) {
-        MemberDetail memberDetail = memberDetailService.findByMemberId(memberId);
-        // memberDetailService.modify(reqBody);
+        memberDetailService.modify(memberId, reqBody);
+
         MemberDetailRes response = memberDetailService.getDetail(memberId);
         return ResponseEntity.ok(response);
     }
