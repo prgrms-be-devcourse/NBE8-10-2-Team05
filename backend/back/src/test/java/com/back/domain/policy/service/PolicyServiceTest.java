@@ -32,19 +32,19 @@ public class PolicyServiceTest {
         MockitoAnnotations.openMocks(this);
 
         // 테스트용 PolicyRequestDto
-        requestDto = PolicyRequestDto.builder()
-                .sprtTrgtMinAge(20)
-                .sprtTrgtMaxAge(30)
-                .zipCd("12345")
-                .schoolCd("SCH001")
-                .jobCd("JOB001")
-                .earnMinAmt(2000)
-                .earnMaxAmt(5000)
-                .build();
+        PolicyRequestDto requestDto = new PolicyRequestDto(
+                20, // sprtTrgtMinAge
+                30, // sprtTrgtMaxAge
+                "12345", // zipCd
+                "SCH001", // schoolCd
+                "JOB001", // jobCd
+                2000, // earnMinAmt
+                5000 // earnMaxAmt
+                );
 
         // 테스트용 PolicyResponseDto
         responseDto = new PolicyResponseDto(
-                1L,
+                1,
                 "PLCY001",
                 "Test Policy",
                 "설명",
@@ -75,7 +75,7 @@ public class PolicyServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).plcyNm()).isEqualTo("Test Policy");
+        assertThat(result.getFirst().plcyNm()).isEqualTo("Test Policy");
 
         // repository의 search 메서드가 정확히 1번 호출되었는지 검증
         verify(policyRepository, times(1)).search(requestDto);

@@ -3,7 +3,7 @@ package com.back.domain.welfare.policy.dto;
 import com.querydsl.core.annotations.QueryProjection;
 
 public record PolicyResponseDto(
-        Long id,
+        Integer id,
         String plcyNo,
         String plcyNm,
         String plcyExplnCn,

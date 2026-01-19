@@ -1,16 +1,15 @@
 package com.back.domain.welfare.policy.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.querydsl.core.annotations.QueryProjection;
 
-@Builder
-@Getter
-public class PolicyRequestDto {
-    private Integer sprtTrgtMinAge;
-    private Integer sprtTrgtMaxAge;
-    private String zipCd;
-    private String schoolCd;
-    private String jobCd;
-    private Integer earnMinAmt;
-    private Integer earnMaxAmt;
+public record PolicyRequestDto(
+        Integer sprtTrgtMinAge,
+        Integer sprtTrgtMaxAge,
+        String zipCd,
+        String schoolCd,
+        String jobCd,
+        Integer earnMinAmt,
+        Integer earnMaxAmt) {
+    @QueryProjection
+    public PolicyRequestDto {}
 }

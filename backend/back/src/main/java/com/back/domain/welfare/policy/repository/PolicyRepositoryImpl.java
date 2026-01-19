@@ -26,30 +26,30 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
         BooleanBuilder builder = new BooleanBuilder();
 
         // 나이 조건
-        if (condition.getSprtTrgtMinAge() != null) {
-            builder.and(policy.sprtTrgtMinAge.goe(String.valueOf(condition.getSprtTrgtMinAge())));
+        if (condition.sprtTrgtMinAge() != null) {
+            builder.and(policy.sprtTrgtMinAge.goe(String.valueOf(condition.sprtTrgtMinAge())));
         }
-        if (condition.getSprtTrgtMaxAge() != null) {
-            builder.and(policy.sprtTrgtMaxAge.loe(String.valueOf(condition.getSprtTrgtMaxAge())));
+        if (condition.sprtTrgtMaxAge() != null) {
+            builder.and(policy.sprtTrgtMaxAge.loe(String.valueOf(condition.sprtTrgtMaxAge())));
         }
 
         // 우편번호, 학교, 직업 조건
-        if (condition.getZipCd() != null) {
-            builder.and(policy.zipCd.eq(condition.getZipCd()));
+        if (condition.zipCd() != null) {
+            builder.and(policy.zipCd.eq(condition.zipCd()));
         }
-        if (condition.getSchoolCd() != null) {
-            builder.and(policy.schoolCd.eq(condition.getSchoolCd()));
+        if (condition.schoolCd() != null) {
+            builder.and(policy.schoolCd.eq(condition.schoolCd()));
         }
-        if (condition.getJobCd() != null) {
-            builder.and(policy.jobCd.eq(condition.getJobCd()));
+        if (condition.jobCd() != null) {
+            builder.and(policy.jobCd.eq(condition.jobCd()));
         }
 
         // 소득 조건
-        if (condition.getEarnMinAmt() != null) {
-            builder.and(policy.earnMinAmt.goe(String.valueOf(condition.getEarnMinAmt())));
+        if (condition.earnMinAmt() != null) {
+            builder.and(policy.earnMinAmt.goe(String.valueOf(condition.earnMinAmt())));
         }
-        if (condition.getEarnMaxAmt() != null) {
-            builder.and(policy.earnMaxAmt.loe(String.valueOf(condition.getEarnMaxAmt())));
+        if (condition.earnMaxAmt() != null) {
+            builder.and(policy.earnMaxAmt.loe(String.valueOf(condition.earnMaxAmt())));
         }
 
         // Projection: PolicyResponseDto record에 맞게 select
