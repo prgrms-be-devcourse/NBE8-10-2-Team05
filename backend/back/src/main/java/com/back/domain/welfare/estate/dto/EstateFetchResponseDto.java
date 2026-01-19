@@ -9,3 +9,5 @@ public record EstateFetchResponseDto(
         @JsonProperty("pageNo") String pageNo,
         @JsonProperty("totalCount") String totalCount,
         @JsonProperty("item") List<EstateItem> items) {}
+// 태스트
+// 빈 {} 해결

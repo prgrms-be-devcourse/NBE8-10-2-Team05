@@ -19,9 +19,9 @@ public class EstateService {
     private final EstateRepository estateRepository;
 
     public List<EstateFetchResponseDto> fetchEstateList(EstateFetchRequestDto requestDto) {
-        // api 받아오기
+        // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스
         String apiUrl = "http://apis.data.go.kr/1613000/HWSPR02/rsdtRcritNtcList";
-        String apiKey = "";
+        String apiKey = "SgWKaXt9FYqTmctvceuHwbb8QlVKEtphZ0fFDtIb40qm5UvMNPGkyIXAiufeOYnyWu39WYNP5W+4a1T+KPHRuw==";
 
         String uri = UriComponentsBuilder.fromUriString("http://apis.data.go.kr/...")
                 .queryParam("serviceKey", apiKey)
@@ -32,6 +32,7 @@ public class EstateService {
         Optional<EstateFetchResponseDto> responseDto =
                 Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
 
+        //
         // repository.save(EstateList)
 
         return List.of();
