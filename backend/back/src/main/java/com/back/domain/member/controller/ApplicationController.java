@@ -30,8 +30,8 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getApplicationList(member));
     }
 
-    @PostMapping("/welfare-application/{id}")
-    public ResponseEntity<AddApplicationResponseDto> addApplication(@PathVariable Integer id) {
+    @PostMapping("/welfare-application/{policyId}")
+    public ResponseEntity<AddApplicationResponseDto> addApplication(@PathVariable Integer policyId) {
         Member member = new Member(); // TODO: jwt에서 멤버 추출
 
         if (member == null) {
@@ -40,7 +40,7 @@ public class ApplicationController {
             return ResponseEntity.status(addApplicationResponseDto.getStatus()).body(addApplicationResponseDto);
         }
 
-        Application application = applicationService.addApplication(member, id);
+        Application application = applicationService.addApplication(member, policyId);
 
         if (application != null) {
             AddApplicationResponseDto addApplicationResponseDto =
