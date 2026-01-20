@@ -91,11 +91,17 @@ public class MemberService {
             throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
         }
 
-        // 우리가 JWT subject에 email 넣는다고 가정 (보통 이 방식)
-        String email = auth.getName();
+        Long memberId;
+        try {
+            // principal에 memberId를 넣어둔 상태라서 이렇게 꺼내면 됨
+            memberId = (Long) auth.getPrincipal();
+        } catch (ClassCastException e) {
+            // 혹시 String으로 들어오는 경우 대비
+            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
+        }
 
         Member member = memberRepository
-                .findByEmail(email)
+                .findById(memberId)
                 .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
 
         return new MeResponse(member.getId(), member.getName(), member.getEmail());
