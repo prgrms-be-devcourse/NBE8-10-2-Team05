@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.back.domain.welfare.policy.entity.Policy;
 
 @Repository
-public interface PolicyRepository extends JpaRepository<Policy, Integer> {}
+public interface PolicyRepository extends JpaRepository<Policy, Integer> {
+    Policy findPolicyById(int policyId);
+}
