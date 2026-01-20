@@ -8,15 +8,15 @@ public record EstateFetchResponseDto(
         @JsonProperty("response") Response response) {
     public record Response(
             @JsonProperty("header") HeaderDto header,
-            @JsonProperty("body") ResponseDto body) {
+            @JsonProperty("body") BodyDto body) {
         public record HeaderDto(
                 @JsonProperty("resultCode") String resultCode,
                 @JsonProperty("resultMsg") String resultMsg) {}
 
-        public record ResponseDto(
+        public record BodyDto(
                 @JsonProperty("numOfRows") String numOfRows,
                 @JsonProperty("pageNo") String pageNo,
                 @JsonProperty("totalCount") String totalCount,
-                @JsonProperty("item") List<EstateItem> items) {}
+                @JsonProperty("item") List<EstateDto> items) {}
     }
 }

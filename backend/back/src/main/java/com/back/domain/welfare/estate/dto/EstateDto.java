@@ -2,7 +2,7 @@ package com.back.domain.welfare.estate.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record EstateItem(
+public record EstateDto(
         @JsonProperty("suplyHoCo") String suplyHoCo,
         @JsonProperty("pblancId") String pblancId,
         @JsonProperty("houseSn") Integer houseSn,
