@@ -1,15 +1,14 @@
 package com.back.domain.welfare.estate.service;
 
-import java.net.URI;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.repository.EstateRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,27 +17,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EstateService {
     private final EstateRepository estateRepository;
+    private final EstateApiClient estateApiClient;
 
-    @Value("${custom.api.estate.url}")
-    String apiUrl;
+    public List<Estate> fetchEstateList(EstateFetchRequestDto requestDto) {
 
-    @Value("${custom.api.estate.key}")
-    String apiKey;
+        // api가 한번에 모든 정보를 갖고오도록
+        int pageSize = 100;
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, 1);
+        int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
+        int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
 
-    public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
+        // 대부분 100개 안에서 해결될 것이라 가정
+        List<Estate> estateList = new ArrayList<>(estateListFromResponse(responseDto));
 
-        URI uri = UriComponentsBuilder.fromUriString(apiUrl)
-                .queryParam("serviceKey", apiKey)
-                .build(true)
-                .toUri();
+        for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
+            EstateFetchResponseDto nextResponseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, pageNo);
+            estateList.addAll(estateListFromResponse(nextResponseDto));
+            // sleep()
+        }
 
-        Optional<EstateFetchResponseDto> responseDto =
-                Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
+        return estateRepository.saveAll(estateList);
+    }
 
-        //
-        // repository.save(EstateList)
-        // List<Estate>
+    @Transactional
+    public List<Estate> saveEstateList(EstateFetchResponseDto responseDto) {
+        return estateRepository.saveAll(estateListFromResponse(responseDto));
+    }
 
-        return responseDto.orElseThrow(() -> new RuntimeException(""));
+    private List<Estate> estateListFromResponse(EstateFetchResponseDto responseDto) {
+        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
+        if (body.items() == null || body.items().isEmpty()) {
+            return List.of();
+        }
+        return body.items().stream().map(Estate::new).toList();
     }
 }

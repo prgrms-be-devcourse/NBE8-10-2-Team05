@@ -1,8 +1,14 @@
 package com.back.domain.welfare.estate.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,11 +17,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.welfare.estate.dto.EstateDto;
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.domain.welfare.estate.entity.Estate;
+import com.back.domain.welfare.estate.repository.EstateRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -28,6 +38,12 @@ class EstateServiceTest {
     @Autowired
     private EstateService estateService;
 
+    @MockitoBean
+    private EstateApiClient estateApiClient;
+
+    @Autowired
+    private EstateRepository estateRepository;
+
     @Value("${custom.api.estate.url}")
     String apiUrl;
 
@@ -35,34 +51,109 @@ class EstateServiceTest {
     String apiKey;
 
     @Test
-    @DisplayName("국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API 테스트")
-    void t1() throws Exception {
-        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        EstateFetchResponseDto responseDto = estateService.fetchEstateList(requestDto);
+    @DisplayName("mockResponse 테스트")
+    void t0() {
+        EstateFetchResponseDto responseDto = mockResponse(10, 9);
 
         assertNotNull(responseDto, "ResponseDto가 null입니다.");
         assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
         assertNotNull(responseDto.response().body(), "ResponseDto.response.body가 null입니다.");
 
-        EstateFetchResponseDto.Response.ResponseDto body =
-                responseDto.response().body();
+        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
+
+        assertFalse(body.numOfRows().isBlank(), "numOfRows가 비어있습니다.");
+        assertFalse(body.pageNo().isBlank(), "pageNo가 비어있습니다.");
+        assertFalse(body.totalCount().isBlank(), "totalCount가 비어있습니다.");
+
+        assertEquals(9, body.items().size());
+    }
+
+    @Test
+    @DisplayName("fetchEstatePage 테스트")
+    void t1() throws Exception {
+        EstateFetchResponseDto mockRes = mockResponse(10, 9);
+        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
+
+        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 100, 1);
+
+        assertNotNull(responseDto, "ResponseDto가 null입니다.");
+        assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
+        assertNotNull(responseDto.response().body(), "ResponseDto.response.body가 null입니다.");
+
+        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
 
         assertFalse(body.numOfRows().isBlank(), "numOfRows가 비어있습니다.");
         assertFalse(body.pageNo().isBlank(), "pageNo가 비어있습니다.");
         assertFalse(body.totalCount().isBlank(), "totalCount가 비어있습니다.");
         assertNotNull(body.items(), "items 리스트 자체가 null입니다.");
-        assertFalse(body.items().isEmpty(), "items 리스트가 비어있습니다.");
+    }
+
+    @Test
+    @DisplayName("saveEstateList 테스트")
+    void t2() {
+        EstateFetchResponseDto mockRes = mockResponse(10, 9);
+        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
+
+        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 10, 1);
+
+        List<Estate> estateList = estateService.saveEstateList(responseDto);
+        int savedCnt = (int) estateRepository.count();
+
+        assertEquals(estateList.size(), savedCnt);
     }
 
     @Test
     @DisplayName("fetchEstateList 테스트")
-    void t2() {
-        // EstateFetchRequestDto requestDto = new EstateFetchRequestDto();
-        // estateService.fetchEstateList();
-        //        ResultActions resultActions =
-        //            mvc.perform(get(apiUrl).param("serviceKey", apiKey)).andDo(print());
-        //
-        //        resultActions.andExpect(status().isOk());
+    void t3() {
+        EstateFetchResponseDto mockRes = mockResponse(10, 9);
+        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
 
+        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
+        List<Estate> estateList = estateService.fetchEstateList(requestDto);
+        int savedCount = (int) estateRepository.count();
+
+        assertEquals(9, estateList.size());
+        assertEquals(9, savedCount);
+    }
+
+    @Test
+    @DisplayName("fetchEstateList 테스트 : return값이 200개일 때")
+    void t4() {
+        EstateFetchResponseDto mockRes1 = mockResponse(200, 100);
+        EstateFetchResponseDto mockRes2 = mockResponse(200, 100);
+        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt()))
+                .willReturn(mockRes1)
+                .willReturn(mockRes2);
+
+        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
+        List<Estate> estateList = estateService.fetchEstateList(requestDto);
+
+        int totalCnt = 200;
+        int savedCount = (int) estateRepository.count();
+
+        verify(estateApiClient, times(2)).fetchEstatePage(any(), anyInt(), anyInt());
+        assertEquals(totalCnt, estateList.size());
+        assertEquals(savedCount, estateList.size());
+    }
+
+    private EstateFetchResponseDto mockResponse(int pageSize, int currCnt) {
+        List<EstateDto> mockItems = IntStream.range(0, currCnt)
+                .mapToObj(i -> EstateDto.builder().build()) // EstateDto에도 @Builder가 있어야 합니다.
+                .toList();
+
+        EstateFetchResponseDto.Response.BodyDto body = new EstateFetchResponseDto.Response.BodyDto(
+                "100", // numOfRows
+                "1", // pageNo
+                String.valueOf(pageSize), // totalCount
+                mockItems);
+
+        EstateFetchResponseDto.Response.HeaderDto header =
+                new EstateFetchResponseDto.Response.HeaderDto("00", "NORMAL SERVICE.");
+
+        return EstateFetchResponseDto.builder()
+                .response(new EstateFetchResponseDto.Response(header, body))
+                .build();
     }
 }
