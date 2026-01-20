@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 // 결혼상태코드
 @Getter
 @RequiredArgsConstructor
-public enum MarriageCondition implements CodeEnum {
+public enum MarriageRequirement implements CodeEnum {
     MARRIED("055001", "기혼"),
     SINGLE("055002", "미혼"),
-    NO_LIMIT("ALL", "제한없음");
+    NO_LIMIT("0055003", "제한없음");
 
     private final String code;
     private final String description;

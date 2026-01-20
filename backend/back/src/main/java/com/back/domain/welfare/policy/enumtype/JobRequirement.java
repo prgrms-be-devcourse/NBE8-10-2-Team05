@@ -15,7 +15,10 @@ public enum JobRequirement implements CodeEnum {
     FREELANCER("013004", "프리랜서"),
     DAILY_WORKER("013005", "일용근로자"),
     PRE_STARTUP("013006", "(예비)창업자"),
-    NO_LIMIT("ALL", "제한없음");
+    SHORT_TERM_WORKER("013007", "단기근로자"),
+    AGRICULTURAL_WORKER("013008", "영농종사자"),
+    ETC("013009", "기타"),
+    NO_LIMIT("013010", "제한없음");
 
     private final String code;
     private final String description;
