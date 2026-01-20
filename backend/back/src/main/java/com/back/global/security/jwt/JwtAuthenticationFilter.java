@@ -58,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // 3) 토큰 검증 + Claims 추출
             Claims claims = jwtProvider.getClaims(token);
+            //            System.out.println("JWT subject = " + claims.getSubject());
+            //            System.out.println("JWT role = " + claims.get("role"));
 
             // 4) Claims에서 필요한 정보 추출
             Long memberId = Long.valueOf(claims.getSubject());
