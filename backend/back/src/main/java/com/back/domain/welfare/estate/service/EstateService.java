@@ -27,18 +27,19 @@ public class EstateService {
     @Value("${custom.api.estate.key}")
     String apiKey;
 
-    // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API
     public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
 
-        URI uri = UriComponentsBuilder.fromUriString(apiUrl)
-                .queryParam("serviceKey", apiKey)
-                .build(true)
-                .toUri();
+        // api가 한번에 모든 정보를 갖고오도록
+        EstateFetchResponseDto responseDto = fetchEstatePage(requestDto, 100, 1);
+        int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
+        if (totalCnt > 100) {
+            // totalCnt가 너무 커서 서버 용량이 오버되는 경우 고려해야 함.
+            responseDto = fetchEstatePage(requestDto, totalCnt, 1);
+        }
 
-        Optional<EstateFetchResponseDto> responseDto =
-                Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
+        saveEstateList(responseDto);
 
-        return responseDto.orElseThrow(() -> new RuntimeException(""));
+        return responseDto;
     }
 
     public List<Estate> saveEstateList(EstateFetchResponseDto responseDto) {
@@ -46,5 +47,21 @@ public class EstateService {
                 responseDto.response().body().items().stream().map(Estate::new).toList();
 
         return estateRepository.saveAll(estateList);
+    }
+
+    // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API
+    public EstateFetchResponseDto fetchEstatePage(EstateFetchRequestDto requestDto, int pageSize, int pageNo) {
+
+        URI uri = UriComponentsBuilder.fromUriString(apiUrl)
+                .queryParam("serviceKey", apiKey)
+                .queryParam("numOfRows", String.valueOf(pageSize))
+                .queryParam("pageNo", String.valueOf(pageNo))
+                .build(true)
+                .toUri();
+
+        Optional<EstateFetchResponseDto> responseDto =
+                Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
+
+        return responseDto.orElseThrow(() -> new RuntimeException(""));
     }
 }

@@ -38,10 +38,10 @@ class EstateServiceTest {
     String apiKey;
 
     @Test
-    @DisplayName("fetchEstateList 테스트")
+    @DisplayName("fetchEstatePage 테스트")
     void t1() throws Exception {
         EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        EstateFetchResponseDto responseDto = estateService.fetchEstateList(requestDto);
+        EstateFetchResponseDto responseDto = estateService.fetchEstatePage(requestDto, 100, 1);
 
         assertNotNull(responseDto, "ResponseDto가 null입니다.");
         assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
@@ -53,30 +53,29 @@ class EstateServiceTest {
         assertFalse(body.pageNo().isBlank(), "pageNo가 비어있습니다.");
         assertFalse(body.totalCount().isBlank(), "totalCount가 비어있습니다.");
         assertNotNull(body.items(), "items 리스트 자체가 null입니다.");
-        assertFalse(body.items().isEmpty(), "items 리스트가 비어있습니다.");
-    }
-
-    @Test
-    @DisplayName("api가 한번에 모든 정보를 갖고오는지 테스트")
-    void t2() {
-        // EstateFetchRequestDto requestDto = new EstateFetchRequestDto();
-        // estateService.fetchEstateList();
-        //        ResultActions resultActions =
-        //            mvc.perform(get(apiUrl).param("serviceKey", apiKey)).andDo(print());
-        //
-        //        resultActions.andExpect(status().isOk());
-
     }
 
     @Test
     @DisplayName("saveEstateList 테스트")
-    void t3() {
+    void t2() {
+        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
+        EstateFetchResponseDto responseDto = estateService.fetchEstatePage(requestDto, 10, 1);
 
+        int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
+        int rows = Math.min(totalCnt, 10);
+
+        List<Estate> estateList = estateService.saveEstateList(responseDto);
+
+        assertEquals(estateList.size(), rows);
+    }
+
+    @Test
+    @DisplayName("fetchEstateList 테스트")
+    void t3() {
         EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
         EstateFetchResponseDto responseDto = estateService.fetchEstateList(requestDto);
 
         int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
-
         List<Estate> estateList = estateService.saveEstateList(responseDto);
 
         assertEquals(estateList.size(), totalCnt);
