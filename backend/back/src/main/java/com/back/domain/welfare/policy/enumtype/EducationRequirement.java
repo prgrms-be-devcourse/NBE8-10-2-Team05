@@ -18,7 +18,7 @@ public enum EducationRequirement implements CodeEnum {
     UNIVERSITY_GRADUATED("049007", "대학 졸업"),
     MASTER_DOCTOR("049008", "석·박사"),
     ETC("049009", "기타"),
-    NO_LIMIT("ALL", "제한없음");
+    NO_LIMIT("049010", "제한없음");
 
     private final String code;
     private final String description;
