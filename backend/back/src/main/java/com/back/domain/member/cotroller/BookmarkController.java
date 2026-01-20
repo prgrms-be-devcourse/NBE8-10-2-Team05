@@ -29,6 +29,11 @@ public class BookmarkController {
     public ResponseEntity<BookmarkPolicyResponseDto> getBookmarks() {
 
         Member member = new Member(); // TODO : jwt로 멤버 정보 가지고 오기
+        // TODO: JWT 인증 기능 구현 전까지는 임시 처리
+        if (member.getId() == null) {
+            // 인증 기능 구현 전까지 빈 리스트 반환
+            return ResponseEntity.ok(new BookmarkPolicyResponseDto(200, new ArrayList<>()));
+        }
 
         List<Bookmark> bookmarks = bookmarkRepository.getBookmarksByApplicantId(member.getId());
 
