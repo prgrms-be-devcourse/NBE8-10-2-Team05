@@ -29,9 +29,9 @@ public class MemberControllerTest {
     private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("로그인 성공 - 200 반환 + memberId/name 반환")
+    @DisplayName("로그인 성공 - 200 반환 + memberId/name + accessToken 반환")
     void login_success() throws Exception {
-        // given: 회원 1명 가입(회원가입 API 호출로 세팅해도 되고, repo로 직접 넣어도 됨)
+        // given: 회원 가입
         String joinBody = """
         {
           "name": "홍길동",
@@ -60,12 +60,19 @@ public class MemberControllerTest {
                         .content(loginBody))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+
+                // 로그인 응답 기본 필드
                 .andExpect(jsonPath("$.memberId").exists())
-                .andExpect(jsonPath("$.name").value("홍길동"));
+                .andExpect(jsonPath("$.name").value("홍길동"))
+
+                // JWT Access Token 검증
+                .andExpect(jsonPath("$.accessToken").exists())
+                .andExpect(jsonPath("$.accessToken").isString())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty());
     }
 
     @Test
-    @DisplayName("로그인 실패 - 비밀번호 불일치면 4xx 반환")
+    @DisplayName("로그인 실패 - 비밀번호 불일치면 401 반환")
     void login_fail_wrong_password() throws Exception {
         // given
         String joinBody = """
@@ -93,11 +100,12 @@ public class MemberControllerTest {
         mvc.perform(post("/api/v1/member/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("AUTH-401"));
     }
 
     @Test
-    @DisplayName("로그인 실패 - 존재하지 않는 이메일이면 4xx 반환")
+    @DisplayName("로그인 실패 - 존재하지 않는 이메일이면 404 반환")
     void login_fail_email_not_found() throws Exception {
         // given
         String loginBody = """
@@ -110,7 +118,8 @@ public class MemberControllerTest {
         mvc.perform(post("/api/v1/member/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("MEMBER-404"));
     }
 
     @Test
