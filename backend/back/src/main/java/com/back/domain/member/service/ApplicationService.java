@@ -24,7 +24,7 @@ public class ApplicationService {
     private final PolicyRepository policyRepository;
 
     public List<Application> getApplicationList(Member member) {
-        return applicationRepository.getApplicationsById(member.getId());
+        return applicationRepository.findAllByApplicant_Id(member.getId());
     }
 
     public Application addApplication(Member member, int policyId) {
