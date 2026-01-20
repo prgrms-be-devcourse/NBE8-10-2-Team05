@@ -1,13 +1,12 @@
 package com.back.domain.member.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.dto.JoinRequest;
-import com.back.domain.member.dto.JoinResponse;
-import com.back.domain.member.dto.LoginRequest;
-import com.back.domain.member.dto.LoginResponse;
+import com.back.domain.member.dto.*;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
@@ -82,5 +81,23 @@ public class MemberService {
                 jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
 
         return new LoginResponse(member.getId(), member.getName(), token);
+    }
+
+    @Transactional(readOnly = true)
+    public MeResponse me() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || auth.getName() == null) {
+            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
+        }
+
+        // 우리가 JWT subject에 email 넣는다고 가정 (보통 이 방식)
+        String email = auth.getName();
+
+        Member member = memberRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+
+        return new MeResponse(member.getId(), member.getName(), member.getEmail());
     }
 }
