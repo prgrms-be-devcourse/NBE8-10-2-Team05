@@ -114,8 +114,8 @@ class EstateServiceTest {
         List<Estate> estateList = estateService.fetchEstateList(requestDto);
         int savedCount = (int) estateRepository.count();
 
-        assertEquals(estateList.size(), 9);
-        assertEquals(savedCount, 9);
+        assertEquals(9, estateList.size());
+        assertEquals(9, savedCount);
     }
 
     @Test
