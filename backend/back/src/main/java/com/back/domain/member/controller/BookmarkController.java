@@ -1,4 +1,4 @@
-package com.back.domain.member.cotroller;
+package com.back.domain.member.controller;
 
 import java.util.ArrayList;
 import java.util.List;
