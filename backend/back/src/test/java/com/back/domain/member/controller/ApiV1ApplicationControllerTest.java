@@ -3,6 +3,7 @@ package com.back.domain.member.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.lang.reflect.Field;
@@ -182,7 +183,8 @@ public class ApiV1ApplicationControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").exists())
                 .andExpect(jsonPath("$[0].policy").exists())
-                .andExpect(jsonPath("$[0].applicant").exists());
+                .andExpect(jsonPath("$[0].applicant").exists())
+                .andDo(print());
     }
 
     @Test
