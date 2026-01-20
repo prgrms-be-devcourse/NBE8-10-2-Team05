@@ -28,13 +28,9 @@ public class ApplicationService {
     }
 
     public Application addApplication(Member member, int policyId) {
-        Policy policy = policyRepository.findPolicyById(policyId);
-
-        if (policy == null) {
-            return null; // Policy가 존재하지 않으면 null 반환
-        }
-
         Application application = new Application();
+
+        Policy policy = policyRepository.findPolicyById(policyId);
         application.setPolicy(policy);
         application.setApplicant(member);
 
