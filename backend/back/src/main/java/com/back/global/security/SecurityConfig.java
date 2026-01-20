@@ -3,6 +3,7 @@ package com.back.global.security;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -39,6 +40,10 @@ public class SecurityConfig {
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
+
+                // 토큰 없거나 인증 실패 → 401로 통일
+                .exceptionHandling(eh -> eh.authenticationEntryPoint(
+                        (req, resp, ex) -> resp.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized")))
                 // JWT 필터를 Spring Security 필터 체인에 등록
                 // UsernamePasswordAuthenticationFilter 이전에 실행되게 두는 게 일반적
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
