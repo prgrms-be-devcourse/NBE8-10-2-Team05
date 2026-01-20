@@ -29,7 +29,7 @@ public class MemberController {
         return ResponseEntity.ok(res);
     }
 
-    // ✅ 보호 API: 토큰 있어야만 접근 가능하게 만들 거임
+    // 보호 API: 토큰 있어야만 접근 가능하게 만들 거임
     @GetMapping("/me")
     public ResponseEntity<MeResponse> me() {
         return ResponseEntity.ok(memberService.me());
