@@ -11,8 +11,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class EstateApiClient {
+    private final RestTemplate restTemplate;
+
     @Value("${custom.api.estate.url}")
     String apiUrl;
 
@@ -30,7 +35,7 @@ public class EstateApiClient {
                 .toUri();
 
         Optional<EstateFetchResponseDto> responseDto =
-                Optional.ofNullable(new RestTemplate().getForObject(uri, EstateFetchResponseDto.class));
+                Optional.ofNullable(restTemplate.getForObject(uri, EstateFetchResponseDto.class));
 
         return responseDto.orElseThrow(() -> new RuntimeException(""));
     }
