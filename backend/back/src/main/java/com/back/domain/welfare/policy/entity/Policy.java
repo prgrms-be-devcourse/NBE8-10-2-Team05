@@ -21,7 +21,7 @@ public class Policy {
     private String plcySprtCn; // 정책지원내용
 
     private String sprvsnInstCdNm; // 주관기관코드명(주관기관명)
-    private String operInstCdNm; // 운영기관코드명
+    private String operInstCdNm; // 운영기관코드명(운영기관명)
 
     private String aplyPrdSeCd; // 신청기간구분코드(상시, 특정기간 등)
 
