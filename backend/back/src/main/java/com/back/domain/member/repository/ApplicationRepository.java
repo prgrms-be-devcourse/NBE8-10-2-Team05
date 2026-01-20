@@ -9,4 +9,6 @@ import com.back.domain.member.entity.Application;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
     List<Application> getApplicationsById(Long id);
+
+    Application getApplicationById(Long id);
 }

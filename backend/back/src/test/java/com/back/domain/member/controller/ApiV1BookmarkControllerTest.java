@@ -1,4 +1,4 @@
-package com.back.domain.member;
+package com.back.domain.member.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

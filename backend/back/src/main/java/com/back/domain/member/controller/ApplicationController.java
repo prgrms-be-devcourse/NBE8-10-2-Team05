@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.back.domain.member.dto.AddApplicationResponseDto;
+import com.back.domain.member.dto.DeleteApplicationResponseDto;
 import com.back.domain.member.entity.Application;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.service.ApplicationService;
@@ -36,7 +37,7 @@ public class ApplicationController {
         if (member == null) {
             AddApplicationResponseDto addApplicationResponseDto =
                     new AddApplicationResponseDto(HttpStatus.BAD_REQUEST.value(), "로그인 후 이용해주세요");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(addApplicationResponseDto);
+            return ResponseEntity.status(addApplicationResponseDto.getStatus()).body(addApplicationResponseDto);
         }
 
         Application application = applicationService.addApplication(member, id);
@@ -44,11 +45,19 @@ public class ApplicationController {
         if (application != null) {
             AddApplicationResponseDto addApplicationResponseDto =
                     new AddApplicationResponseDto(HttpStatus.OK.value(), "저장되었습니다!");
-            return ResponseEntity.status(HttpStatus.OK).body(addApplicationResponseDto);
+            return ResponseEntity.status(addApplicationResponseDto.getStatus()).body(addApplicationResponseDto);
         } else {
             AddApplicationResponseDto addApplicationResponseDto =
                     new AddApplicationResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "저장 중 문제가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(addApplicationResponseDto);
+            return ResponseEntity.status(addApplicationResponseDto.getStatus()).body(addApplicationResponseDto);
         }
+    }
+
+    @PutMapping("/welfare-application/{id}")
+    public ResponseEntity<DeleteApplicationResponseDto> deleteAplication(@PathVariable long id) {
+        Member member = new Member(); // TODO: jwt로 멤버 추출
+        DeleteApplicationResponseDto deleteApplicationResponseDto = applicationService.deleteApplication(member, id);
+
+        return ResponseEntity.status(deleteApplicationResponseDto.getCode()).body(deleteApplicationResponseDto);
     }
 }
