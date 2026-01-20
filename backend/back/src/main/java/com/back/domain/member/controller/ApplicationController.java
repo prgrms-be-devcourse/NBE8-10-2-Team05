@@ -58,7 +58,7 @@ public class ApplicationController {
             return null;
         }
 
-        Long memberId;
+        long memberId;
         if (memberIdObj instanceof Integer) {
             memberId = ((Integer) memberIdObj).longValue();
         } else if (memberIdObj instanceof Long) {
