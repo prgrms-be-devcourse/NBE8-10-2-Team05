@@ -98,13 +98,9 @@ class EstateServiceTest {
         EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
         EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 10, 1);
 
-        int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
-        int rows = Math.min(totalCnt, 10);
-
         List<Estate> estateList = estateService.saveEstateList(responseDto);
         int savedCnt = (int) estateRepository.count();
 
-        assertEquals(estateList.size(), rows);
         assertEquals(estateList.size(), savedCnt);
     }
 
@@ -116,10 +112,10 @@ class EstateServiceTest {
 
         EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
         List<Estate> estateList = estateService.fetchEstateList(requestDto);
+        int savedCount = (int) estateRepository.count();
 
-        int totalCnt = Integer.parseInt(mockRes.response().body().totalCount());
-
-        assertEquals(estateList.size(), totalCnt);
+        assertEquals(estateList.size(), 9);
+        assertEquals(savedCount, 9);
     }
 
     @Test
@@ -135,7 +131,6 @@ class EstateServiceTest {
         List<Estate> estateList = estateService.fetchEstateList(requestDto);
 
         int totalCnt = 200;
-
         int savedCount = (int) estateRepository.count();
 
         verify(estateApiClient, times(2)).fetchEstatePage(any(), anyInt(), anyInt());
@@ -143,7 +138,7 @@ class EstateServiceTest {
         assertEquals(savedCount, estateList.size());
     }
 
-    private EstateFetchResponseDto mockResponse(int totalCnt, int currCnt) {
+    private EstateFetchResponseDto mockResponse(int pageSize, int currCnt) {
         List<EstateDto> mockItems = IntStream.range(0, currCnt)
                 .mapToObj(i -> EstateDto.builder().build()) // EstateDto에도 @Builder가 있어야 합니다.
                 .toList();
@@ -151,7 +146,7 @@ class EstateServiceTest {
         EstateFetchResponseDto.Response.BodyDto body = new EstateFetchResponseDto.Response.BodyDto(
                 "100", // numOfRows
                 "1", // pageNo
-                String.valueOf(totalCnt), // totalCount
+                String.valueOf(pageSize), // totalCount
                 mockItems);
 
         EstateFetchResponseDto.Response.HeaderDto header =

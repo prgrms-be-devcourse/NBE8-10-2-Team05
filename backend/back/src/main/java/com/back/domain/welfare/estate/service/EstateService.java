@@ -1,5 +1,6 @@
 package com.back.domain.welfare.estate.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class EstateService {
         int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
 
         // 대부분 100개 안에서 해결될 것이라 가정
-        List<Estate> estateList = estateListFromResponse(responseDto);
+        List<Estate> estateList = new ArrayList<>(estateListFromResponse(responseDto));
 
         for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
             EstateFetchResponseDto nextResponseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, pageNo);
