@@ -18,7 +18,6 @@ public class EstateService {
     private final EstateRepository estateRepository;
     private final EstateApiClient estateApiClient;
 
-    @Transactional
     public List<Estate> fetchEstateList(EstateFetchRequestDto requestDto) {
 
         // api가 한번에 모든 정보를 갖고오도록
@@ -28,22 +27,27 @@ public class EstateService {
         int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
 
         // 대부분 100개 안에서 해결될 것이라 가정
-        List<Estate> estateList = saveEstateList(responseDto);
+        List<Estate> estateList = estateListFromResponse(responseDto);
 
         for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
             EstateFetchResponseDto nextResponseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, pageNo);
-            estateList.addAll(saveEstateList(nextResponseDto));
+            estateList.addAll(estateListFromResponse(nextResponseDto));
             // sleep()
         }
 
-        return estateList;
+        return estateRepository.saveAll(estateList);
     }
 
     @Transactional
     public List<Estate> saveEstateList(EstateFetchResponseDto responseDto) {
-        List<Estate> estateList =
-                responseDto.response().body().items().stream().map(Estate::new).toList();
+        return estateRepository.saveAll(estateListFromResponse(responseDto));
+    }
 
-        return estateRepository.saveAll(estateList);
+    private List<Estate> estateListFromResponse(EstateFetchResponseDto responseDto) {
+        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
+        if (body.items() == null || body.items().isEmpty()) {
+            return List.of();
+        }
+        return body.items().stream().map(Estate::new).toList();
     }
 }
