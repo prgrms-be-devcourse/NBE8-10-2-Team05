@@ -17,8 +17,8 @@ public class EstateController {
 
     @GetMapping("/list")
     public EstateFetchResponseDto getEstateItems() {
-        EstateFetchResponseDto estateList = estateService.fetchEstateList(null);
+        estateService.fetchEstateList(null);
 
-        return estateList;
+        return null;
     }
 }

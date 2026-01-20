@@ -19,19 +19,24 @@ public class EstateService {
     private final EstateApiClient estateApiClient;
 
     @Transactional
-    public EstateFetchResponseDto fetchEstateList(EstateFetchRequestDto requestDto) {
+    public List<Estate> fetchEstateList(EstateFetchRequestDto requestDto) {
 
         // api가 한번에 모든 정보를 갖고오도록
-        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 100, 1);
+        int pageSize = 100;
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, 1);
         int totalCnt = Integer.parseInt(responseDto.response().body().totalCount());
-        if (totalCnt > 100) {
-            // totalCnt가 너무 커서 서버 용량이 오버되는 경우 고려해야 함.
-            responseDto = estateApiClient.fetchEstatePage(requestDto, totalCnt, 1);
+        int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
+
+        // 대부분 100개 안에서 해결될 것이라 가정
+        List<Estate> estateList = saveEstateList(responseDto);
+
+        for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
+            EstateFetchResponseDto nextResponseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, pageNo);
+            estateList.addAll(saveEstateList(nextResponseDto));
+            // sleep()
         }
 
-        saveEstateList(responseDto);
-
-        return responseDto;
+        return estateList;
     }
 
     @Transactional
