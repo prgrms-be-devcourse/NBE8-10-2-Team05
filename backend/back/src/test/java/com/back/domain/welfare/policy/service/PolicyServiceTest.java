@@ -1,4 +1,4 @@
-package com.back.domain.policy.service;
+package com.back.domain.welfare.policy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -14,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import com.back.domain.welfare.policy.dto.PolicyRequestDto;
 import com.back.domain.welfare.policy.dto.PolicyResponseDto;
 import com.back.domain.welfare.policy.repository.PolicyRepositoryCustom;
-import com.back.domain.welfare.policy.service.PolicyService;
 
 public class PolicyServiceTest {
 
