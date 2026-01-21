@@ -18,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/welfare/policy")
 @RequiredArgsConstructor
 public class PolicyController {
-    PolicyService policyService;
-    PolicyFetchService policyFetchService;
+    private final PolicyService policyService;
+    private final PolicyFetchService policyFetchService;
 
     @GetMapping("/search")
     public List<PolicyResponseDto> search(PolicyRequestDto policyRequestDto) {

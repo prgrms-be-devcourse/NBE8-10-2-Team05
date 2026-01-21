@@ -18,15 +18,15 @@ public class PolicyFetchService {
 
     public String fetchPolicies(PolicyFetchRequestDto requestDto) {
 
+        String requestUrl = properties.url()
+                + "?apiKeyNm=" + properties.key()
+                + "&pageType=" + requestDto.pageType()
+                + "&pageSize=" + requestDto.pageSize()
+                + "&rtnType=" + requestDto.rtnType();
+
         return webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(properties.url())
-                        .queryParam("apiKeyNm", properties.key())
-                        .queryParam("pageType", requestDto.pageType())
-                        .queryParam("pageSize", requestDto.pageSize())
-                        .queryParam("rtnType", requestDto.rtnType())
-                        .build())
+                .uri(requestUrl)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
