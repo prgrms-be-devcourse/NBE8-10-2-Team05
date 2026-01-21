@@ -35,10 +35,15 @@ public class GlobalExceptionHandler {
         }
 
         if (httpStatus == 500) {
-            if (fullCode.contains("401")) httpStatus = 401;
-            else if (fullCode.contains("404")) httpStatus = 404;
-            else if (fullCode.contains("409")) httpStatus = 409;
-            else if (fullCode.contains("400")) httpStatus = 400;
+            if (fullCode.contains("401")) {
+                httpStatus = 401;
+            } else if (fullCode.contains("404")) {
+                httpStatus = 404;
+            } else if (fullCode.contains("409")) {
+                httpStatus = 409;
+            } else if (fullCode.contains("400")) {
+                httpStatus = 400;
+            }
         }
 
         return ResponseEntity.status(httpStatus).body(Map.of("resultCode", fullCode, "msg", ex.getMsg()));
