@@ -46,10 +46,10 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
 
         // 소득 조건
         if (condition.earnMinAmt() != null) {
-            builder.and(policy.earnMinAmt.goe(String.valueOf(condition.earnMinAmt())));
+            builder.and(policy.earnMinAmt.goe(condition.earnMinAmt().toString()));
         }
         if (condition.earnMaxAmt() != null) {
-            builder.and(policy.earnMaxAmt.loe(String.valueOf(condition.earnMaxAmt())));
+            builder.and(policy.earnMaxAmt.loe(condition.earnMaxAmt().toString()));
         }
 
         // Projection: PolicyResponseDto record에 맞게 select
