@@ -10,6 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,17 +27,20 @@ public class EstateApiClient {
 
     // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API
     public EstateFetchResponseDto fetchEstatePage(EstateFetchRequestDto requestDto, int pageSize, int pageNo) {
+        try {
+            URI uri = UriComponentsBuilder.fromUriString(apiUrl)
+                    .queryParam("serviceKey", apiKey)
+                    .queryParam("numOfRows", String.valueOf(pageSize))
+                    .queryParam("pageNo", String.valueOf(pageNo))
+                    .build(true)
+                    .toUri();
 
-        URI uri = UriComponentsBuilder.fromUriString(apiUrl)
-                .queryParam("serviceKey", apiKey)
-                .queryParam("numOfRows", String.valueOf(pageSize))
-                .queryParam("pageNo", String.valueOf(pageNo))
-                .build(true)
-                .toUri();
+            Optional<EstateFetchResponseDto> responseDto =
+                    Optional.ofNullable(restTemplate.getForObject(uri, EstateFetchResponseDto.class));
 
-        Optional<EstateFetchResponseDto> responseDto =
-                Optional.ofNullable(restTemplate.getForObject(uri, EstateFetchResponseDto.class));
-
-        return responseDto.orElseThrow(() -> new RuntimeException(""));
+            return responseDto.orElseThrow(() -> new ServiceException("501", "fetchEstatePage API return값이 null입니다."));
+        } catch (RuntimeException e) {
+            throw new ServiceException("501", "fetchEstatePage API호출과정에 에러가 생겼습니다.");
+        }
     }
 }

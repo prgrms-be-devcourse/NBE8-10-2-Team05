@@ -12,14 +12,19 @@ import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.repository.EstateRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EstateService {
     private final EstateRepository estateRepository;
     private final EstateApiClient estateApiClient;
 
+    @SneakyThrows
     public List<Estate> fetchEstateList(EstateFetchRequestDto requestDto) {
+        log.info("EstateService : fetchEstateList 실행");
 
         // api가 한번에 모든 정보를 갖고오도록
         int pageSize = 100;
@@ -31,9 +36,10 @@ public class EstateService {
         List<Estate> estateList = new ArrayList<>(estateListFromResponse(responseDto));
 
         for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
+            log.debug("EstateService : fetchEstatePage(requestDto,%d,%d) 실행".formatted(pageSize, pageNo));
             EstateFetchResponseDto nextResponseDto = estateApiClient.fetchEstatePage(requestDto, pageSize, pageNo);
             estateList.addAll(estateListFromResponse(nextResponseDto));
-            // sleep()
+            Thread.sleep(500);
         }
 
         return estateRepository.saveAll(estateList);
