@@ -87,7 +87,10 @@ public class MemberService {
     public MeResponse me() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || auth.getName() == null) {
+        if (auth == null
+                || !auth.isAuthenticated()
+                || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
             throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
         }
 

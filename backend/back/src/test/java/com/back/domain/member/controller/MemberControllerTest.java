@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -229,13 +234,20 @@ public class MemberControllerTest {
                 Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
         Member saved = memberRepository.save(member);
 
-        // 토큰 발급
-        String accessToken = jwtProvider.issueAccessToken(
-                saved.getId(), saved.getEmail(), saved.getRole().name());
+        //        // 토큰 발급
+        //        String accessToken = jwtProvider.issueAccessToken(
+        //                saved.getId(), saved.getEmail(), saved.getRole().name());
+
+        // test에서는 JWT를 안 타므로, SecurityContext에 직접 인증 주입
+        var auth = new UsernamePasswordAuthenticationToken(
+                saved.getId(), // principal을 memberId(Long)로 넣기 (서비스가 이걸 꺼냄)
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + saved.getRole().name())));
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         // when & then
         mvc.perform(get("/api/v1/member/me")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + null)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

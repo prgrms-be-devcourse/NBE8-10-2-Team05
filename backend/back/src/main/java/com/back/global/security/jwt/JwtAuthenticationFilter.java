@@ -1,8 +1,10 @@
 package com.back.global.security.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final Environment env;
 
     // 토큰 없이도 허용할 경로들 (SecurityConfig의 permitAll과 맞춰주는 게 중요)
     @Override
@@ -38,6 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        // 테스트에서는 인증 로직을 아예 건너뛰고 전부 통과
+        if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
