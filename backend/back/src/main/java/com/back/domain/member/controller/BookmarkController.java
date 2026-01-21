@@ -1,24 +1,21 @@
 package com.back.domain.member.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.back.domain.member.dto.BookmarkPolicyResponseDto;
-import com.back.domain.member.entity.Bookmark;
+import com.back.domain.member.dto.BookmarkUpdateResponseDto;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.BookmarkRepository;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.domain.member.service.BookmarkService;
 import com.back.domain.welfare.policy.entity.Policy;
+import com.back.domain.welfare.policy.repository.PolicyRepository;
 import com.back.standard.util.Ut;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,7 @@ public class BookmarkController {
     private final BookmarkRepository bookmarkRepository;
     private final BookmarkService bookmarkService;
     private final MemberRepository memberRepository;
+    private final PolicyRepository policyRepository;
 
     @Value("${custom.jwt.secretKey}")
     private String jwtSecretKey;
@@ -89,15 +87,34 @@ public class BookmarkController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseDto);
         }
 
-        List<Bookmark> bookmarks = bookmarkRepository.getBookmarksByApplicantId(member.getId());
-
-        List<Policy> policies = new ArrayList<>();
-        for (Bookmark bookmark : bookmarks) {
-            policies.add(bookmark.getPolicy());
-        }
+        List<Policy> policies = bookmarkService.getPolicies(member);
 
         BookmarkPolicyResponseDto response = new BookmarkPolicyResponseDto(200, "", policies);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/welfare-bookmarks/{policyId}")
+    public ResponseEntity<BookmarkUpdateResponseDto> updateBookmark(
+            @RequestParam int policyId,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        Member member = extractMemberFromJwt(authorizationHeader);
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // policyId로 policy 가져오기
+        Policy policy = policyRepository.findById(policyId).orElse(null);
+
+        if (policy == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // policy-member가 북마크에 연동 되어있는지 확인
+        String message = bookmarkService.changeBookmarkStatus(member, policy);
+
+        BookmarkUpdateResponseDto responseDto = new BookmarkUpdateResponseDto(200, message);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 }
