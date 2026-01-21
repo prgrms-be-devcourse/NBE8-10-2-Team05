@@ -9,11 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +22,16 @@ import com.back.domain.member.entity.MemberDetail.EmploymentStatus;
 import com.back.domain.member.entity.MemberDetail.MarriageStatus;
 import com.back.domain.member.repository.MemberDetailRepository;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.global.test.BaseAuthControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
 @Transactional
-public class MemberDetailControllerTest {
+public class MemberDetailControllerTest extends BaseAuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    //    @Autowired
+    //    private MockMvc mockMvc;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -70,7 +66,7 @@ public class MemberDetailControllerTest {
     void t1() throws Exception {
         // when
         ResultActions resultActions =
-                mockMvc.perform(get("/api/v1/member/detail/" + savedMemberId)).andDo(print());
+                mvc.perform(get("/api/v1/member/detail/" + savedMemberId)).andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
@@ -88,7 +84,7 @@ public class MemberDetailControllerTest {
         MemberDetailReq request = new MemberDetailReq(
                 "54321", MarriageStatus.MARRIED, 5000, EmploymentStatus.EMPLOYED, EducationLevel.GRADUATE, "수정된 특이사항");
 
-        ResultActions resultActions = mockMvc.perform(put("/api/v1/member/detail/" + savedMemberId)
+        ResultActions resultActions = mvc.perform(put("/api/v1/member/detail/" + savedMemberId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print());
@@ -110,7 +106,7 @@ public class MemberDetailControllerTest {
 
         // 2. GET 요청 수행
         ResultActions resultActions =
-                mockMvc.perform(get("/api/v1/member/detail/" + newMemberId)).andDo(print());
+                mvc.perform(get("/api/v1/member/detail/" + newMemberId)).andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
