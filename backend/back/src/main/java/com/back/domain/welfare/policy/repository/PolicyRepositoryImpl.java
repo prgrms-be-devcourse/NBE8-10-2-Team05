@@ -27,10 +27,10 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
 
         // 나이 조건
         if (condition.sprtTrgtMinAge() != null) {
-            builder.and(policy.sprtTrgtMinAge.goe(String.valueOf(condition.sprtTrgtMinAge())));
+            builder.and(policy.sprtTrgtMinAge.goe(condition.sprtTrgtMinAge().toString()));
         }
         if (condition.sprtTrgtMaxAge() != null) {
-            builder.and(policy.sprtTrgtMaxAge.loe(String.valueOf(condition.sprtTrgtMaxAge())));
+            builder.and(policy.sprtTrgtMaxAge.loe(condition.sprtTrgtMaxAge().toString()));
         }
 
         // 우편번호, 학교, 직업 조건
