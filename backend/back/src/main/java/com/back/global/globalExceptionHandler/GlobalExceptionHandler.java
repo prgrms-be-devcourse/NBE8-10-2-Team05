@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Map<String, Object>> handle(ServiceException ex) {
-        log.debug("[{}] : {}", ex.getLocation(), ex.getMsg());
+        log.debug("[{}] : {} , {}", ex.getLocation(), ex.getResultCode(), ex.getMsg());
 
         int httpStatus = 500;
         String fullCode = ex.getResultCode();
@@ -32,6 +32,13 @@ public class GlobalExceptionHandler {
             }
         } catch (NumberFormatException exception) {
             log.error("유효하지 않은 에러 코드 형식: {}", fullCode);
+        }
+
+        if (httpStatus == 500) {
+            if (fullCode.contains("401")) httpStatus = 401;
+            else if (fullCode.contains("404")) httpStatus = 404;
+            else if (fullCode.contains("409")) httpStatus = 409;
+            else if (fullCode.contains("400")) httpStatus = 400;
         }
 
         return ResponseEntity.status(httpStatus).body(Map.of("resultCode", fullCode, "msg", ex.getMsg()));
