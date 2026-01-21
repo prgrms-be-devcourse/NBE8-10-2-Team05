@@ -12,4 +12,13 @@ public class ServiceException extends RuntimeException {
         this.resultCode = resultCode;
         this.msg = msg;
     }
+
+    public String getLocation() {
+        StackTraceElement[] stackTrace = this.getStackTrace();
+        if (stackTrace != null && stackTrace.length > 0) {
+            StackTraceElement top = stackTrace[0];
+            return String.format("%s.%s:%d", top.getClassName(), top.getMethodName(), top.getLineNumber());
+        }
+        return "Unknown Location";
+    }
 }

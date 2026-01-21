@@ -2,15 +2,20 @@ package com.back.domain.member.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.back.domain.welfare.policy.entity.Policy;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "apply")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Application {
 
@@ -26,6 +31,9 @@ public class Application {
     @JoinColumn(name = "member_id")
     private Member applicant;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime modifiedAt;
 }
