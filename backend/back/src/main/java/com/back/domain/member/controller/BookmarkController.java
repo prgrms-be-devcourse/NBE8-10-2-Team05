@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,7 +64,7 @@ public class BookmarkController {
             return null;
         }
 
-        Long memberId;
+        long memberId;
         if (memberIdObj instanceof Integer) {
             memberId = ((Integer) memberIdObj).longValue();
         } else if (memberIdObj instanceof Long) {
@@ -76,13 +78,15 @@ public class BookmarkController {
     }
 
     @GetMapping("/welfare-bookmarks")
-    public ResponseEntity<BookmarkPolicyResponseDto> getBookmarks() {
+    public ResponseEntity<BookmarkPolicyResponseDto> getBookmarks(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        Member member = new Member(); // TODO : jwt로 멤버 정보 가지고 오기
-        // TODO: JWT 인증 기능 구현 전까지는 임시 처리
-        if (member.getId() == null) {
-            // 인증 기능 구현 전까지 빈 리스트 반환
-            return ResponseEntity.ok(new BookmarkPolicyResponseDto(200, new ArrayList<>()));
+        Member member = extractMemberFromJwt(authorizationHeader);
+
+        if (member == null) {
+            BookmarkPolicyResponseDto responseDto =
+                    new BookmarkPolicyResponseDto(HttpStatus.UNAUTHORIZED.value(), "로그인 후 이용해주세요", null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseDto);
         }
 
         List<Bookmark> bookmarks = bookmarkRepository.getBookmarksByApplicantId(member.getId());
@@ -92,7 +96,7 @@ public class BookmarkController {
             policies.add(bookmark.getPolicy());
         }
 
-        BookmarkPolicyResponseDto response = new BookmarkPolicyResponseDto(200, policies);
+        BookmarkPolicyResponseDto response = new BookmarkPolicyResponseDto(200, "", policies);
 
         return ResponseEntity.ok(response);
     }
