@@ -35,11 +35,11 @@ class CenterServiceTest {
     @Test
     @DisplayName("getCenterData 테스트")
     void t1() {
-        CenterRequestDto requestDto = null;
+        CenterRequestDto requestDto = CenterRequestDto.from(10, 1);
         CenterResponseDto responseDto = createResponseData();
         Mockito.when(centerApiService.fetchCenter(requestDto)).thenReturn(responseDto);
 
-        List<Center> centerList = centerService.getCenterData(requestDto);
+        List<Center> centerList = centerService.getCenterData();
 
         long count = centerRepository.count();
 
