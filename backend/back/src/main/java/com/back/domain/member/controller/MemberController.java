@@ -3,10 +3,7 @@ package com.back.domain.member.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.back.domain.member.dto.JoinRequest;
-import com.back.domain.member.dto.JoinResponse;
-import com.back.domain.member.dto.LoginRequest;
-import com.back.domain.member.dto.LoginResponse;
+import com.back.domain.member.dto.*;
 import com.back.domain.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,5 +27,11 @@ public class MemberController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
         LoginResponse res = memberService.login(req);
         return ResponseEntity.ok(res);
+    }
+
+    // 보호 API: 토큰 있어야만 접근 가능하게 만들 거임
+    @GetMapping("/me")
+    public ResponseEntity<MeResponse> me() {
+        return ResponseEntity.ok(memberService.me());
     }
 }
