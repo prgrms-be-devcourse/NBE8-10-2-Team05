@@ -1,4 +1,4 @@
-package com.back.domain.policy.controller;
+package com.back.domain.welfare.policy.controller;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 

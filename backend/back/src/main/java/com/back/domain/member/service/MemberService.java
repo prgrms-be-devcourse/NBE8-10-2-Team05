@@ -1,18 +1,21 @@
 package com.back.domain.member.service;
 
+import java.time.Duration;
+
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.dto.JoinRequest;
-import com.back.domain.member.dto.JoinResponse;
-import com.back.domain.member.dto.LoginRequest;
-import com.back.domain.member.dto.LoginResponse;
+import com.back.domain.member.dto.*;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.security.jwt.JwtProvider;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -58,7 +61,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest req) {
+    public LoginResponse login(LoginRequest req, HttpServletResponse response) {
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new ServiceException("AUTH-400", "email은 필수입니다.");
         }
@@ -81,6 +84,58 @@ public class MemberService {
         String token =
                 jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
 
+        // Access Token을 HttpOnly 쿠키로 내려준다
+        // 브라우저가 자동으로 저장하고 이후 요청에 자동 포함
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true) // JS에서 접근 불가 (XSS 방어)
+                .secure(false) // dev 환경(http) → false / prod(https) → true
+                .path("/") // 모든 경로에서 쿠키 전송
+                .sameSite("Lax") // 로컬 개발에서 가장 무난
+                .maxAge(Duration.ofMinutes(20)) // Access Token 유효시간
+                .build();
+
+        // Set-Cookie 헤더에 추가
+        response.addHeader("Set-Cookie", cookie.toString());
+
         return new LoginResponse(member.getId(), member.getName(), token);
+    }
+
+    @Transactional(readOnly = true)
+    public MeResponse me() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null
+                || !auth.isAuthenticated()
+                || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
+        }
+
+        Long memberId;
+        try {
+            // principal에 memberId를 넣어둔 상태라서 이렇게 꺼내면 됨
+            memberId = (Long) auth.getPrincipal();
+        } catch (ClassCastException e) {
+            // 혹시 String으로 들어오는 경우 대비
+            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
+        }
+
+        Member member = memberRepository
+                .findById(memberId)
+                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+
+        return new MeResponse(member.getId(), member.getName(), member.getEmail());
+    }
+
+    // accessToken 쿠키를 만료(Max-Age=0)시켜 브라우저에서 제거한다.
+    public String buildLogoutSetCookieHeader() {
+        return ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false) // dev(http) 기준. prod(https)면 true로 분기 필요
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ZERO) // Max-Age=0
+                .build()
+                .toString();
     }
 }

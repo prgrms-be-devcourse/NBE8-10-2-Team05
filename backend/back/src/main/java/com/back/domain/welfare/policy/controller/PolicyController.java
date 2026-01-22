@@ -3,18 +3,33 @@ package com.back.domain.welfare.policy.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.back.domain.welfare.policy.dto.PolicyFetchRequestDto;
 import com.back.domain.welfare.policy.dto.PolicyRequestDto;
 import com.back.domain.welfare.policy.dto.PolicyResponseDto;
+import com.back.domain.welfare.policy.service.PolicyFetchService;
 import com.back.domain.welfare.policy.service.PolicyService;
 
-@RestController
-public class PolicyController {
-    PolicyService policyService;
+import lombok.RequiredArgsConstructor;
 
-    @GetMapping("/api/v1/welfare/policy/search")
+@RestController
+@RequestMapping("/api/v1/welfare/policy")
+@RequiredArgsConstructor
+public class PolicyController {
+    private final PolicyService policyService;
+    private final PolicyFetchService policyFetchService;
+
+    @GetMapping("/search")
     public List<PolicyResponseDto> search(PolicyRequestDto policyRequestDto) {
         return policyService.search(policyRequestDto);
+    }
+
+    @GetMapping("/list")
+    public String getPolicy() {
+        PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto(null, "1", "100", "json");
+
+        return policyFetchService.fetchPolicies(requestDto);
     }
 }

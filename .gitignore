@@ -67,3 +67,4 @@ backend/back/src/main/resources/application-test.yml
 
 
 .idea/
+.DS_Store

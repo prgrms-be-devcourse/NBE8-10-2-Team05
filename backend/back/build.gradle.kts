@@ -9,6 +9,7 @@ plugins {
 group = "com"
 version = "0.0.1-SNAPSHOT"
 description = "back"
+val querydslVersion = "6.10.1"
 
 java {
 	toolchain {
@@ -58,14 +59,29 @@ checkstyle {
     configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
 }
 
+//Querydsl 사용 시 Q클래스 생성 경로 명시
+sourceSets {
+    main {
+        java {
+            srcDir("build/generated/sources/annotationProcessor/java/main")
+        }
+    }
+}
+
 dependencies {
 
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
-    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    // OpenFeign Querydsl (patched version)
+    implementation("io.github.openfeign.querydsl:querydsl-core:$querydslVersion")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:$querydslVersion")
+
+    // Querydsl Q-class 생성용 (Jakarta + JPA)
+    annotationProcessor(
+        "io.github.openfeign.querydsl:querydsl-apt:$querydslVersion:jpa"
+    )
 
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
@@ -84,6 +100,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
     implementation("org.jsoup:jsoup:1.17.2") // 웹 크롤링을 위해 Jsoup 라이브러리 추가
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 tasks.withType<Test> {
