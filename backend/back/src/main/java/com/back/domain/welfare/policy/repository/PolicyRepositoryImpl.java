@@ -70,7 +70,7 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
                         policy.earnMaxAmt,
                         policy.aplyYmd,
                         policy.aplyUrlAddr,
-                        policy.aplyMthdCn,
+                        policy.plcyAplyMthdCn,
                         policy.sbmsnDcmntCn,
                         policy.operInstCdNm))
                 .from(policy)

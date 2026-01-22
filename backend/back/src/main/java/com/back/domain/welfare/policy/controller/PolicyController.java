@@ -27,9 +27,9 @@ public class PolicyController {
     }
 
     @GetMapping("/list")
-    public String getPolicy() {
+    public void getPolicy() {
         PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto(null, "1", "100", "json");
 
-        return policyFetchService.fetchPolicyFromApi(requestDto);
+        policyFetchService.fetchAndSavePolicies(requestDto);
     }
 }
