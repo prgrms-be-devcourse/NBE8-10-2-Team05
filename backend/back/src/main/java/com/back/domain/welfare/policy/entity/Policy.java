@@ -28,7 +28,7 @@ public class Policy {
     private String bizPrdBgngYmd; // 사업기간시작일자
     private String bizPrdEndYmd; // 사업기간종료일자
 
-    private String aplyMthdCn; // 정책신청방법내용
+    private String plcyAplyMthdCn; // 정책신청방법내용
     private String aplyUrlAddr; // 신청URL주소
     private String sbmsnDcmntCn; // 제출서류내용
 
@@ -47,4 +47,9 @@ public class Policy {
 
     private String aplyYmd; // 신청기간
     private String sBizCd; // 정책특화요건코드
+
+    // 🔥 원본 JSON (정책 1건 단위)
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String rawJson;
 }
