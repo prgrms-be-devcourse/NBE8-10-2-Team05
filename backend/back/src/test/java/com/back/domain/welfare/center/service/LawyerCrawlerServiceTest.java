@@ -23,25 +23,25 @@ class LawyerCrawlerTest {
     private LawyerRepository lawyerRepository;
 
     @Test
-    @DisplayName("1,2페이지 크롤링 테스트")
+    @DisplayName("서울 1,2페이지 크롤링 테스트")
     void t1() throws Exception {
         long count = lawyerRepository.count();
 
-        lawyerCrawlerService.crawlMultiPages(1, 2);
+        lawyerCrawlerService.crawlMultiPages("서울", 1, 2);
 
         List<Lawyer> savedLawyers = lawyerRepository.findAll();
         assertThat(savedLawyers.size()).isGreaterThan((int) count);
 
         Lawyer firstLawyer = savedLawyers.get(0);
         assertThat(firstLawyer.getName()).isNotBlank();
-        assertThat(firstLawyer.getDistrict()).isNotBlank();
+        assertThat(firstLawyer.getDistrictArea2()).isNotBlank();
         assertThat(firstLawyer.getCorporation()).isNotBlank();
     }
 
     @Test
-    @DisplayName("첫 페이지 노무사 정보 확인")
+    @DisplayName("서울 첫 페이지 노무사 정보 확인")
     void t2() throws Exception {
-        lawyerCrawlerService.crawlMultiPages(1, 1);
+        lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
 
         List<Lawyer> result = lawyerRepository.findAll();
         assertThat(result).isNotEmpty();
@@ -51,7 +51,19 @@ class LawyerCrawlerTest {
                 .findFirst()
                 .get();
 
-        assertThat(targetLawyer.getDistrict()).containsAnyOf("중구", "종로구", "서초구", "동대문구");
+        assertThat(targetLawyer.getDistrictArea1()).isEqualTo("서울");
+        assertThat(targetLawyer.getDistrictArea2()).containsAnyOf("중구", "종로구", "서초구", "동대문구");
         assertThat(targetLawyer.getCorporation()).isEqualTo("노무법인 케이에스");
+    }
+
+    @Test
+    @DisplayName("서울 지역의 마지막 페이지 번호 조회 확인")
+    void t3() throws Exception {
+        int lastPage = lawyerCrawlerService.getLastPage("서울");
+
+        assertThat(lastPage).isGreaterThan(0);
+        assertThat(lastPage).isGreaterThanOrEqualTo(311);
+
+        System.out.println("서울 마지막 페이지: " + lastPage);
     }
 }
