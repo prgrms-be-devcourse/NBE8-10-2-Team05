@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.welfare.estate.dto.EstateDto;
@@ -32,9 +30,6 @@ import com.back.domain.welfare.estate.repository.EstateRepository;
 @Transactional
 class EstateServiceTest {
     @Autowired
-    private MockMvc mvc;
-
-    @Autowired
     private EstateService estateService;
 
     @MockitoBean
@@ -42,25 +37,6 @@ class EstateServiceTest {
 
     @Autowired
     private EstateRepository estateRepository;
-
-    @Test
-    @DisplayName("실제 API 테스트 : 필요할때만 수동으로 실행")
-    @Disabled
-    void fetchEstateAPI_real() {
-        EstateFetchRequestDto requestDto =
-                EstateFetchRequestDto.builder().numOfRows(10).pageNo(1).build();
-        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
-
-        assertNotNull(responseDto, "ResponseDto가 null입니다.");
-        assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
-        assertNotNull(responseDto.response().body(), "ResponseDto.response.body가 null입니다.");
-
-        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
-
-        assertFalse(body.numOfRows().isBlank(), "numOfRows가 비어있습니다.");
-        assertFalse(body.pageNo().isBlank(), "pageNo가 비어있습니다.");
-        assertFalse(body.totalCount().isBlank(), "totalCount가 비어있습니다.");
-    }
 
     @Test
     @DisplayName("mockResponse 테스트")
@@ -82,7 +58,7 @@ class EstateServiceTest {
 
     @Test
     @DisplayName("fetchEstatePage 테스트")
-    void t1() throws Exception {
+    void t1() {
         EstateFetchResponseDto mockRes = mockResponse(10, 9);
         given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes);
 
@@ -138,7 +114,6 @@ class EstateServiceTest {
         EstateFetchResponseDto mockRes2 = mockResponse(200, 100);
         given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes1).willReturn(mockRes2);
 
-        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
         List<Estate> estateList = estateService.fetchEstateList();
 
         int totalCnt = 200;
