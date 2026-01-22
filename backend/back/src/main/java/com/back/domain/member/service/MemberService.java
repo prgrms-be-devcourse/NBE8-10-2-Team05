@@ -126,4 +126,16 @@ public class MemberService {
 
         return new MeResponse(member.getId(), member.getName(), member.getEmail());
     }
+
+    // accessToken 쿠키를 만료(Max-Age=0)시켜 브라우저에서 제거한다.
+    public String buildLogoutSetCookieHeader() {
+        return ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(false) // dev(http) 기준. prod(https)면 true로 분기 필요
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ZERO) // Max-Age=0
+                .build()
+                .toString();
+    }
 }

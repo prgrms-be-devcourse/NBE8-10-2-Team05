@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/member/login")
                         .permitAll()
+                        .requestMatchers("/api/v1/member/logout")
+                        .permitAll()
 
                         // 나머지는 인증 필요
                         .anyRequest()

@@ -35,4 +35,11 @@ public class MemberController {
     public ResponseEntity<MeResponse> me() {
         return ResponseEntity.ok(memberService.me());
     }
+
+    // 나중에 apikey 리프레쉬토큰 도입하면 그때 delete 로 할지 고민중
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        response.addHeader("Set-Cookie", memberService.buildLogoutSetCookieHeader());
+        return ResponseEntity.ok().build();
+    }
 }
