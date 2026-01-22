@@ -28,12 +28,11 @@ public class GeoApiService {
         //        -H "Authorization: KakaoAK ${REST_API_KEY}" \
         //        --data-urlencode "query=전북 삼성동 100"
 
+        String requestUrl = geoApiProperties.url() + "?query=" + addressDto.roadAddress();
+
         GeoApiResponseDto responseDto = webClient
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(geoApiProperties.url())
-                        .queryParam("query", addressDto.roadAddress())
-                        .build())
+                .uri(requestUrl)
                 .header("Authorization", "KakaoAK " + geoApiProperties.key())
                 .retrieve()
                 .bodyToMono(GeoApiResponseDto.class)

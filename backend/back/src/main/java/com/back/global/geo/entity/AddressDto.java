@@ -1,5 +1,8 @@
 package com.back.global.geo.entity;
 
+import lombok.Builder;
+
+@Builder
 public record AddressDto(
         // 카카오 우편번호 검색 API 제공
         String postcode, // 우편번호
