@@ -1,46 +1,44 @@
 package com.back.domain.welfare.estate.service;
 
-import java.net.URI;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import com.back.domain.welfare.estate.config.EstateConfigProperties;
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EstateApiClient {
-    private final RestTemplate restTemplate;
-
-    @Value("${custom.api.estate.url}")
-    String apiUrl;
-
-    @Value("${custom.api.estate.key}")
-    String apiKey;
+    private final WebClient webClient = WebClient.builder().build();
+    private final EstateConfigProperties estateConfigProperties;
 
     // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API
     public EstateFetchResponseDto fetchEstatePage(EstateFetchRequestDto requestDto, int pageSize, int pageNo) {
-        try {
-            URI uri = UriComponentsBuilder.fromUriString(apiUrl)
-                    .queryParam("serviceKey", apiKey)
-                    .queryParam("numOfRows", String.valueOf(pageSize))
-                    .queryParam("pageNo", String.valueOf(pageNo))
-                    .build(true)
-                    .toUri();
+        log.debug("fetchEstatePage(%d,%d,%d) 실행".formatted(requestDto, pageSize, pageNo));
 
-            Optional<EstateFetchResponseDto> responseDto =
-                    Optional.ofNullable(restTemplate.getForObject(uri, EstateFetchResponseDto.class));
+        String requestUrl = estateConfigProperties.url();
 
-            return responseDto.orElseThrow(() -> new ServiceException("501", "fetchEstatePage API return값이 null입니다."));
-        } catch (RuntimeException e) {
-            throw new ServiceException("501", "fetchEstatePage API호출과정에 에러가 생겼습니다.");
-        }
+        EstateFetchResponseDto responseDto = Optional.ofNullable(webClient
+                        .get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(requestUrl)
+                                .queryParam("serviceKey", estateConfigProperties.key())
+                                .queryParam("numOfRows", String.valueOf(pageSize))
+                                .queryParam("pageNo", String.valueOf(pageNo))
+                                .build())
+                        .retrieve()
+                        .bodyToMono(EstateFetchResponseDto.class)
+                        .block())
+                .orElseThrow(() -> new ServiceException("501", "API호출과정에 에러가 생겼습니다."));
+
+        return responseDto;
     }
 }
