@@ -17,6 +17,7 @@ import com.back.global.exception.ServiceException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,21 +49,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        // 토큰 추출: Authorization 우선, 없으면 쿠키
+        String token = resolveToken(request);
+
+        // String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         // 1) Authorization 헤더가 없으면 그냥 다음으로
         // (단, 보호된 경로는 결국 Security에서 401 처리됨)
-        if (authHeader == null || authHeader.isBlank()) {
+        if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2) Bearer 형식 검사
-        if (!authHeader.startsWith("Bearer ")) {
-            throw new ServiceException("AUTH-401", "Authorization 헤더가 Bearer 형식이 아닙니다.");
-        }
-
-        String token = authHeader.substring("Bearer ".length()).trim();
+        //        // 2) Bearer 형식 검사
+        //        if (!authHeader.startsWith("Bearer ")) {
+        //            throw new ServiceException("AUTH-401", "Authorization 헤더가 Bearer 형식이 아닙니다.");
+        //        }
+        //
+        //        String token = authHeader.substring("Bearer ".length()).trim();
 
         try {
             // 3) 토큰 검증 + Claims 추출
@@ -91,5 +95,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 위조되었거나, 만료되었거나, 파싱 실패한 경우
             throw new ServiceException("AUTH-401", "유효하지 않은 토큰입니다.");
         }
+    }
+
+    // Authorization: Bearer 토큰이 있으면 그걸 사용하고, 없으면 HttpOnly 쿠키(accessToken)에서 읽는다.
+    private String resolveToken(HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        // 헤더가 있으면 Bearer 형식만 허용 (기존 정책 유지)
+        if (authHeader != null && !authHeader.isBlank()) {
+            if (!authHeader.startsWith("Bearer ")) {
+                throw new ServiceException("AUTH-401", "Authorization 헤더가 Bearer 형식이 아닙니다.");
+            }
+            return authHeader.substring("Bearer ".length()).trim();
+        }
+
+        // 헤더가 없으면 쿠키에서 accessToken 읽기
+        return getCookieValue(request, "accessToken");
+    }
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                String value = cookie.getValue();
+                return (value == null || value.isBlank()) ? null : value;
+            }
+        }
+        return null;
     }
 }
