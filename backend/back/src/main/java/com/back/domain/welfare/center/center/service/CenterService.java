@@ -17,12 +17,11 @@ public class CenterService {
     private final CenterApiService centerApiService;
     private final CenterRepository centerRepository;
 
-    public String getCenterData(CenterRequestDto centerRequestDto) {
+    public List<Center> getCenterData(CenterRequestDto centerRequestDto) {
         CenterResponseDto responseDto = centerApiService.fetchCenter(centerRequestDto);
         List<Center> centerList =
                 responseDto.data().stream().map(Center::dtoToEntity).toList();
-        centerRepository.saveAll(centerList);
 
-        return null;
+        return centerRepository.saveAll(centerList);
     }
 }
