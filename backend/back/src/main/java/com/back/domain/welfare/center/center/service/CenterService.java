@@ -25,7 +25,7 @@ public class CenterService {
     public List<Center> getCenterData() {
 
         int pageSize = 100;
-        CenterRequestDto centerRequestDto = CenterRequestDto.from(pageSize, 1);
+        CenterRequestDto centerRequestDto = CenterRequestDto.from(1, pageSize);
         CenterResponseDto responseDto = centerApiService.fetchCenter(centerRequestDto);
 
         int totalCnt = responseDto.totalCount();
@@ -37,9 +37,9 @@ public class CenterService {
         centerRepository.saveAll(centerList);
 
         for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
-            log.debug("fetchCenter pageSize : {},  pageNo : {} 실행", pageSize, pageNo);
+            log.debug("fetchCenter pageNo : {} ,pageSize : {} 실행", pageSize, pageNo);
 
-            centerRequestDto = CenterRequestDto.from(pageSize, pageNo);
+            centerRequestDto = CenterRequestDto.from(pageNo, pageSize);
             CenterResponseDto nextResponseDto = centerApiService.fetchCenter(centerRequestDto);
 
             List<Center> updatedCenterList =
