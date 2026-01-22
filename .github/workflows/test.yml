@@ -28,5 +28,16 @@ jobs:
         run: ./gradlew test
         working-directory: ./backend/back
         env:
+          SPRING_APPLICATION_JSON: >
+            {
+              "custom": {
+                "jwt": {
+                  "secretKey": "${{ secrets.CUSTOM_JWT_SECRET_KEY }}"
+                },
+                "accessToken": {
+                  "expirationSeconds": 1200
+                }
+              }
+            }
           CUSTOM_API_ESTATE_KEY: ${{secrets.CUSTOM_API_ESTATE_KEY}}
           CUSTOM_API_ESTATE_URL: ${{secrets.CUSTOM_API_ESTATE_URL}}
