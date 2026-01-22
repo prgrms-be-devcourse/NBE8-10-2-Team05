@@ -33,9 +33,6 @@ jobs:
               "custom": {
                 "jwt": {
                   "secretKey": "${{ secrets.CUSTOM_JWT_SECRET_KEY }}"
-                },
-                "accessToken": {
-                  "expirationSeconds": 1200
                 }
               }
             }
