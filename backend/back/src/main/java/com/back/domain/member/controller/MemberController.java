@@ -15,12 +15,14 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    // 회원가입
     @PostMapping("/join")
     public ResponseEntity<JoinResponse> join(@RequestBody JoinRequest req) {
         JoinResponse res = memberService.join(req);
         return ResponseEntity.ok(res);
     }
 
+    // 로그인 (JWT 없음)
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
         LoginResponse res = memberService.login(req);
