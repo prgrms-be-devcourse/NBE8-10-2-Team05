@@ -28,6 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                //                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용할 엔드포인트
                         .requestMatchers("/favicon.ico")
@@ -37,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/member/join")
                         .permitAll()
                         .requestMatchers("/api/v1/member/login")
+                        .permitAll()
+                        .requestMatchers("/api/v1/member/logout")
                         .permitAll()
 
                         // 나머지는 인증 필요
