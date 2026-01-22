@@ -1,5 +1,8 @@
 package com.back.domain.member.service;
 
+import java.time.Duration;
+
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +15,7 @@ import com.back.domain.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.security.jwt.JwtProvider;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -57,7 +61,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest req) {
+    public LoginResponse login(LoginRequest req, HttpServletResponse response) {
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new ServiceException("AUTH-400", "email은 필수입니다.");
         }
@@ -79,6 +83,19 @@ public class MemberService {
 
         String token =
                 jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
+
+        // Access Token을 HttpOnly 쿠키로 내려준다
+        // 브라우저가 자동으로 저장하고 이후 요청에 자동 포함
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true) // JS에서 접근 불가 (XSS 방어)
+                .secure(false) // dev 환경(http) → false / prod(https) → true
+                .path("/") // 모든 경로에서 쿠키 전송
+                .sameSite("Lax") // 로컬 개발에서 가장 무난
+                .maxAge(Duration.ofMinutes(20)) // Access Token 유효시간
+                .build();
+
+        // Set-Cookie 헤더에 추가
+        response.addHeader("Set-Cookie", cookie.toString());
 
         return new LoginResponse(member.getId(), member.getName(), token);
     }

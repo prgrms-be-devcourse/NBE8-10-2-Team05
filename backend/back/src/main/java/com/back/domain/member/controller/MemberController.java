@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.back.domain.member.dto.*;
 import com.back.domain.member.service.MemberService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,8 +25,8 @@ public class MemberController {
 
     // 로그인 (JWT 없음)
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
-        LoginResponse res = memberService.login(req);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req, HttpServletResponse response) {
+        LoginResponse res = memberService.login(req, response);
         return ResponseEntity.ok(res);
     }
 
