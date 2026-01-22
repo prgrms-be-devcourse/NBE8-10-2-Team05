@@ -31,5 +31,5 @@ logging:
     com.back: DEBUG
 custom:
   jwt:
-    secretKey: ${secrets.CUSTOM_JWT_SECRET_KEY}
-    accessTokenExpirationSeconds: ${secrets.CUSTOM_ACCESS_TOKEN_EXPIRATION_SECONDS}
+    secretKey: ${{secrets.CUSTOM_JWT_SECRET_KEY}}
+    accessTokenExpirationSeconds: ${{secrets.CUSTOM_ACCESS_TOKEN_EXPIRATION_SECONDS}}
