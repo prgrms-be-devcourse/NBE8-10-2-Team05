@@ -1,12 +1,16 @@
 package com.back.domain.welfare.policy.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "policy")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Policy {
 
@@ -48,7 +52,7 @@ public class Policy {
     private String aplyYmd; // 신청기간
     private String sBizCd; // 정책특화요건코드
 
-    // 🔥 원본 JSON (정책 1건 단위)
+    // 원본 JSON (정책 1건 단위)
     @Lob
     @Column(columnDefinition = "TEXT")
     private String rawJson;

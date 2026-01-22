@@ -30,6 +30,6 @@ public class PolicyController {
     public String getPolicy() {
         PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto(null, "1", "100", "json");
 
-        return policyFetchService.fetchPolicies(requestDto);
+        return policyFetchService.fetchPolicyFromApi(requestDto);
     }
 }
