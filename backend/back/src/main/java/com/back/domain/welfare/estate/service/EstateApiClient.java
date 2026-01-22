@@ -21,8 +21,11 @@ public class EstateApiClient {
     private final EstateConfigProperties estateConfigProperties;
 
     // 국토교통부_마이홈포털 공공주택 모집공고 조회 서비스 API
-    public EstateFetchResponseDto fetchEstatePage(EstateFetchRequestDto requestDto, int pageSize, int pageNo) {
-        log.debug("fetchEstatePage(%d,%d,%d) 실행".formatted(requestDto, pageSize, pageNo));
+    public EstateFetchResponseDto fetchEstatePage(EstateFetchRequestDto requestDto) {
+        int pageSize = requestDto.numOfRows();
+        int pageNo = requestDto.pageNo();
+
+        log.debug("fetchEstatePage requestDto: {}, pageSize : {}, pageNo : {}", requestDto, pageSize, pageNo);
 
         String requestUrl = estateConfigProperties.url();
 

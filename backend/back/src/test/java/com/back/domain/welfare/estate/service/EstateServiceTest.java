@@ -2,7 +2,6 @@ package com.back.domain.welfare.estate.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,10 +71,11 @@ class EstateServiceTest {
     @DisplayName("fetchEstatePage 테스트")
     void t1() throws Exception {
         EstateFetchResponseDto mockRes = mockResponse(10, 9);
-        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
+        given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes);
 
-        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 100, 1);
+        EstateFetchRequestDto requestDto =
+                EstateFetchRequestDto.builder().numOfRows(100).pageNo(1).build();
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
 
         assertNotNull(responseDto, "ResponseDto가 null입니다.");
         assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
@@ -93,10 +93,11 @@ class EstateServiceTest {
     @DisplayName("saveEstateList 테스트")
     void t2() {
         EstateFetchResponseDto mockRes = mockResponse(10, 9);
-        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
+        given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes);
 
-        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto, 10, 1);
+        EstateFetchRequestDto requestDto =
+                EstateFetchRequestDto.builder().numOfRows(10).pageNo(1).build();
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
 
         List<Estate> estateList = estateService.saveEstateList(responseDto);
         int savedCnt = (int) estateRepository.count();
@@ -108,10 +109,9 @@ class EstateServiceTest {
     @DisplayName("fetchEstateList 테스트")
     void t3() {
         EstateFetchResponseDto mockRes = mockResponse(10, 9);
-        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt())).willReturn(mockRes);
+        given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes);
 
-        EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        List<Estate> estateList = estateService.fetchEstateList(requestDto);
+        List<Estate> estateList = estateService.fetchEstateList();
         int savedCount = (int) estateRepository.count();
 
         assertEquals(9, estateList.size());
@@ -123,17 +123,15 @@ class EstateServiceTest {
     void t4() {
         EstateFetchResponseDto mockRes1 = mockResponse(200, 100);
         EstateFetchResponseDto mockRes2 = mockResponse(200, 100);
-        given(estateApiClient.fetchEstatePage(any(), anyInt(), anyInt()))
-                .willReturn(mockRes1)
-                .willReturn(mockRes2);
+        given(estateApiClient.fetchEstatePage(any())).willReturn(mockRes1).willReturn(mockRes2);
 
         EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder().build();
-        List<Estate> estateList = estateService.fetchEstateList(requestDto);
+        List<Estate> estateList = estateService.fetchEstateList();
 
         int totalCnt = 200;
         int savedCount = (int) estateRepository.count();
 
-        verify(estateApiClient, times(2)).fetchEstatePage(any(), anyInt(), anyInt());
+        verify(estateApiClient, times(2)).fetchEstatePage(any());
         assertEquals(totalCnt, estateList.size());
         assertEquals(savedCount, estateList.size());
     }
