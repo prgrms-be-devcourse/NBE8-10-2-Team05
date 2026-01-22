@@ -21,12 +21,11 @@ public class CenterApiService {
     // 보건복지부_사회복지관 시도별 주소 현황 공공 API
     public CenterResponseDto fetchCenter(CenterRequestDto centerRequestDto) {
 
-        String requestUrl = centerApiProperties.url();
+        String requestUrl = centerApiProperties.url() + "?serviceKey=" + centerApiProperties.key();
 
         CenterResponseDto responseDto = Optional.ofNullable(webClient
                         .get()
                         .uri(requestUrl)
-                        .header("Authorization", "" + centerApiProperties.key())
                         .retrieve()
                         .bodyToMono(CenterResponseDto.class)
                         .block())
