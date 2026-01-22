@@ -11,7 +11,6 @@ import lombok.Setter;
 @Component
 @ConfigurationProperties(prefix = "custom.elasticsearch")
 public class ElasticsearchProperties {
-
     private String host = "localhost";
     private int port = 9200;
     private String scheme = "http";
