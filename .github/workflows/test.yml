@@ -28,16 +28,14 @@ jobs:
         run: ./gradlew test
         working-directory: ./backend/back
         env:
-          SPRING_APPLICATION_JSON: |
+          SPRING_APPLICATION_JSON: >
             {
               "custom": {
                 "jwt": {
                   "secretKey": "${{ secrets.CUSTOM_JWT_SECRET_KEY }}"
                 },
-                "access": {
-                  "token": {
-                    "expiration-seconds": 1200
-                  }
+                "accessToken": {
+                  "expirationSeconds": 1200
                 }
               }
             }
