@@ -12,7 +12,6 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,12 +41,6 @@ class EstateServiceTest {
 
     @Autowired
     private EstateRepository estateRepository;
-
-    @Value("${custom.api.estate.url}")
-    String apiUrl;
-
-    @Value("${custom.api.estate.key}")
-    String apiKey;
 
     @Test
     @DisplayName("mockResponse 테스트")
