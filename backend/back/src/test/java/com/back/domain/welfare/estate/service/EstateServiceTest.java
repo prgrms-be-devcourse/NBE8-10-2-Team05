@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,25 @@ class EstateServiceTest {
 
     @Autowired
     private EstateRepository estateRepository;
+
+    @Test
+    @DisplayName("실제 API 테스트 : 필요할때만 수동으로 실행")
+    @Disabled
+    void fetchEstateAPI_real() {
+        EstateFetchRequestDto requestDto =
+                EstateFetchRequestDto.builder().numOfRows(10).pageNo(1).build();
+        EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
+
+        assertNotNull(responseDto, "ResponseDto가 null입니다.");
+        assertNotNull(responseDto.response(), "ResponseDto.response가 null입니다.");
+        assertNotNull(responseDto.response().body(), "ResponseDto.response.body가 null입니다.");
+
+        EstateFetchResponseDto.Response.BodyDto body = responseDto.response().body();
+
+        assertFalse(body.numOfRows().isBlank(), "numOfRows가 비어있습니다.");
+        assertFalse(body.pageNo().isBlank(), "pageNo가 비어있습니다.");
+        assertFalse(body.totalCount().isBlank(), "totalCount가 비어있습니다.");
+    }
 
     @Test
     @DisplayName("mockResponse 테스트")

@@ -1,5 +1,6 @@
 package com.back.domain.welfare.estate.service;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -27,16 +28,14 @@ public class EstateApiClient {
 
         log.debug("fetchEstatePage requestDto: {}, pageSize : {}, pageNo : {}", requestDto, pageSize, pageNo);
 
-        String requestUrl = estateConfigProperties.url();
+        String requestUrl = estateConfigProperties.url()
+                + "?serviceKey=" + estateConfigProperties.key()
+                + "&numOfRows=" + String.valueOf(pageSize)
+                + "&pageNo=" + String.valueOf(pageNo);
 
         EstateFetchResponseDto responseDto = Optional.ofNullable(webClient
                         .get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path(requestUrl)
-                                .queryParam("serviceKey", estateConfigProperties.key())
-                                .queryParam("numOfRows", String.valueOf(pageSize))
-                                .queryParam("pageNo", String.valueOf(pageNo))
-                                .build())
+                        .uri(URI.create(requestUrl))
                         .retrieve()
                         .bodyToMono(EstateFetchResponseDto.class)
                         .block())
