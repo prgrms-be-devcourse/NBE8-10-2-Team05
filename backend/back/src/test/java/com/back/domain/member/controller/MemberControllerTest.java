@@ -1,20 +1,30 @@
 package com.back.domain.member.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.global.security.jwt.JwtProvider;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -27,6 +37,12 @@ public class MemberControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtProvider jwtProvider;
 
     @Test
     @DisplayName("로그인 성공 - 200 반환 + memberId/name + accessToken 반환")
@@ -202,5 +218,41 @@ public class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("me 실패 - 토큰 없으면 401")
+    void me_fail_without_token() throws Exception {
+        mvc.perform(get("/api/v1/member/me")).andExpect(status().isUnauthorized()); // 401
+    }
+
+    @Test
+    @DisplayName("me 성공 - 토큰 있으면 200 + 내 정보 반환")
+    void me_success_with_token() throws Exception {
+        // given: 테스트용 회원 1명 저장(회원가입 API 호출 대신 repo로 직접 저장)
+        Member member =
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+        Member saved = memberRepository.save(member);
+
+        //        // 토큰 발급
+        //        String accessToken = jwtProvider.issueAccessToken(
+        //                saved.getId(), saved.getEmail(), saved.getRole().name());
+
+        // test에서는 JWT를 안 타므로, SecurityContext에 직접 인증 주입
+        var auth = new UsernamePasswordAuthenticationToken(
+                saved.getId(), // principal을 memberId(Long)로 넣기 (서비스가 이걸 꺼냄)
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + saved.getRole().name())));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // when & then
+        mvc.perform(get("/api/v1/member/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + null)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(saved.getId()))
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.email").value("me_test@example.com"));
     }
 }
