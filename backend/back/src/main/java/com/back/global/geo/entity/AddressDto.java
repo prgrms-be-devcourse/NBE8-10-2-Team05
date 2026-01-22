@@ -13,4 +13,17 @@ public record AddressDto(
         String hCode, // "4514069000" 행정동 코드
         Double latitude, // 위도
         Double longitude // 경도
-        ) {}
+        ) {
+    public static AddressDto of(AddressDto base, GeoApiResponseDto.Address geo) {
+        return new AddressDto(
+                base.postcode(),
+                base.addressName(),
+                base.sigunguCode(),
+                base.bCode(),
+                base.roadAddress(),
+                geo.hCode(), // 새로운 값 주입
+                Double.parseDouble(geo.y()), // 위도 (문자열 -> Double 변환)
+                Double.parseDouble(geo.x()) // 경도 (문자열 -> Double 변환)
+                );
+    }
+}
