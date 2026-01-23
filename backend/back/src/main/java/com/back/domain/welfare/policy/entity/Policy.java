@@ -18,7 +18,9 @@ public class Policy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "plcy_no", nullable = false, unique = true)
     private String plcyNo; // 정책번호
+
     private String plcyNm; // 정책명
     private String plcyKywdNm; // 정책키워드명
 
@@ -63,7 +65,7 @@ public class Policy {
     private String aplyYmd; // 신청기간
     private String sBizCd; // 정책특화요건코드
 
-    // 원본 JSON (정책 1건 단위)
+    // 원본 JSON, 추가 요청 조건이 있을 경우 빠르게 반영 가능하도록 저장
     @Lob
     @Column(columnDefinition = "TEXT")
     private String rawJson;
