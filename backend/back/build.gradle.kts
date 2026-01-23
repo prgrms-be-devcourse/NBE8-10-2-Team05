@@ -114,6 +114,7 @@ dependencies {
 
     //Elastic Search
     implementation ("co.elastic.clients:elasticsearch-java:8.11.3")
+    implementation ("org.elasticsearch.client:elasticsearch-rest-client:8.12.")
     implementation ("org.apache.httpcomponents.client5:httpclient5")
 
 }

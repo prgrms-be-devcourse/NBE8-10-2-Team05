@@ -1,0 +1,61 @@
+{
+    "mappings": {
+        "properties": {
+            "id": { "type": "integer" },
+
+            "plcyNo": { "type": "keyword" },
+
+            "plcyNm": {
+                "type": "text",
+                "fields": {
+                    "keyword": { "type": "keyword" }
+                }
+            },
+
+            "plcyKywdNm": { "type": "keyword" },
+
+            "plcyExplnCn": { "type": "text" },
+            "plcySprtCn": { "type": "text" },
+
+            "sprvsnInstCdNm": {
+                "type": "text",
+                "fields": {
+                    "keyword": { "type": "keyword" }
+                }
+            },
+
+            "operInstCdNm": {
+                "type": "text",
+                "fields": {
+                    "keyword": { "type": "keyword" }
+                }
+            },
+
+            "aplyPrdSeCd": { "type": "keyword" },
+
+            "bizPrdBgngYmd": { "type": "keyword" },
+            "bizPrdEndYmd": { "type": "keyword" },
+
+            "aplyMthdCn": { "type": "text" },
+            "aplyUrlAddr": { "type": "keyword" },
+            "sbmsnDcmntCn": { "type": "text" },
+
+            "sprtTrgtMinAge": { "type": "integer" },
+            "sprtTrgtMaxAge": { "type": "integer" },
+            "sprtTrgtAgeLmtYn": { "type": "keyword" },
+
+            "mrgSttsCd": { "type": "keyword" },
+            "earnCndSeCd": { "type": "keyword" },
+
+            "earnMinAmt": { "type": "integer" },
+            "earnMaxAmt": { "type": "integer" },
+
+            "zipCd": { "type": "keyword" },
+            "jobCd": { "type": "keyword" },
+            "schoolCd": { "type": "keyword" },
+
+            "aplyYmd": { "type": "keyword" },
+            "sBizCd": { "type": "keyword" }
+        }
+    }
+}
