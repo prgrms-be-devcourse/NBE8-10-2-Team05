@@ -41,7 +41,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/member/logout")
                         .permitAll()
-
+                        .requestMatchers("/api/v1/auth/reissue")
+                        .permitAll()
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
