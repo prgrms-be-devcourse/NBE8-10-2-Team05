@@ -22,6 +22,11 @@ public class ElasticsearchConfig {
     private RestClient restClient;
 
     @Bean
+    public RestClient restClient() {
+        return RestClient.builder(new HttpHost("localhost", 9200, "http")).build();
+    }
+
+    @Bean
     public ElasticsearchClient elasticsearchClient() {
         log.info("Elasticsearch 연결 설정: {}://{}:{}", properties.getScheme(), properties.getHost(), properties.getPort());
 
