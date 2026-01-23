@@ -1,7 +1,6 @@
 package com.back.global.geo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -16,8 +15,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.global.geo.entity.AddressDto;
-import com.back.global.geo.entity.GeoApiResponseDto;
+import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.GeoApiResponseDto;
+import com.back.domain.member.geo.service.GeoApiService;
+import com.back.domain.member.geo.service.GeoService;
 
 @ActiveProfiles("test")
 @SpringBootTest

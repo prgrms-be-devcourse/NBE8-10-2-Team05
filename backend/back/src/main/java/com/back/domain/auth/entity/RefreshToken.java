@@ -2,7 +2,7 @@ package com.back.domain.auth.entity;
 
 import java.time.LocalDateTime;
 
-import com.back.domain.member.entity.Member;
+import com.back.domain.member.member.entity.Member;
 
 import jakarta.persistence.*;
 import lombok.Getter;

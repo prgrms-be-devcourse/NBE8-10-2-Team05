@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.welfare.center.dto.LawyerRes;
-import com.back.global.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.welfare.center.lawyer.dto.LawyerRes;
+import com.back.domain.welfare.center.lawyer.service.LawyerCrawlerService;
+import com.back.domain.welfare.center.lawyer.service.LawyerService;
 
 @SpringBootTest
 @Transactional

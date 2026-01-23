@@ -22,8 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.entity.Member;
-import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.security.jwt.JwtProvider;
 
 @ActiveProfiles("test")
@@ -58,7 +58,7 @@ public class MemberControllerTest {
         }
         """;
 
-        mvc.perform(post("/api/v1/member/join")
+        mvc.perform(post("/api/v1/member/member/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(joinBody))
                 .andExpect(status().isOk());
@@ -71,7 +71,7 @@ public class MemberControllerTest {
         """;
 
         // when & then
-        mvc.perform(post("/api/v1/member/login")
+        mvc.perform(post("/api/v1/member/member/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class MemberControllerTest {
         }
         """;
 
-        mvc.perform(post("/api/v1/member/join")
+        mvc.perform(post("/api/v1/member/member/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(joinBody))
                 .andExpect(status().isOk());
@@ -113,7 +113,7 @@ public class MemberControllerTest {
         }
         """;
 
-        mvc.perform(post("/api/v1/member/login")
+        mvc.perform(post("/api/v1/member/member/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isUnauthorized())
@@ -131,7 +131,7 @@ public class MemberControllerTest {
         }
         """;
 
-        mvc.perform(post("/api/v1/member/login")
+        mvc.perform(post("/api/v1/member/member/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isNotFound())
@@ -153,7 +153,7 @@ public class MemberControllerTest {
             """;
 
         // when & then
-        mvc.perform(post("/api/v1/member/join")
+        mvc.perform(post("/api/v1/member/member/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -184,13 +184,13 @@ public class MemberControllerTest {
             }
             """;
 
-        mvc.perform(post("/api/v1/member/join")
+        mvc.perform(post("/api/v1/member/member/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk());
 
         // when: 같은 이메일로 2번 가입
-        var result = mvc.perform(post("/api/v1/member/join")
+        var result = mvc.perform(post("/api/v1/member/member/join")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
 
@@ -214,7 +214,7 @@ public class MemberControllerTest {
             }
             """;
 
-        mvc.perform(post("/api/v1/member/join")
+        mvc.perform(post("/api/v1/member/member/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -223,7 +223,7 @@ public class MemberControllerTest {
     @Test
     @DisplayName("me 실패 - 토큰 없으면 401")
     void me_fail_without_token() throws Exception {
-        mvc.perform(get("/api/v1/member/me")).andExpect(status().isUnauthorized()); // 401
+        mvc.perform(get("/api/v1/member/member/me")).andExpect(status().isUnauthorized()); // 401
     }
 
     @Test
@@ -246,7 +246,7 @@ public class MemberControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // when & then
-        mvc.perform(get("/api/v1/member/me")
+        mvc.perform(get("/api/v1/member/member/me")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + null)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

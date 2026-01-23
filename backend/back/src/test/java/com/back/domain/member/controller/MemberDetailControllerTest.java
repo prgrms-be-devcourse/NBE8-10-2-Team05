@@ -17,14 +17,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.dto.MemberDetailReq;
-import com.back.domain.member.entity.Member;
-import com.back.domain.member.entity.MemberDetail;
-import com.back.domain.member.entity.MemberDetail.EducationLevel;
-import com.back.domain.member.entity.MemberDetail.EmploymentStatus;
-import com.back.domain.member.entity.MemberDetail.MarriageStatus;
-import com.back.domain.member.repository.MemberDetailRepository;
-import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.member.member.controller.MemberDetailController;
+import com.back.domain.member.member.dto.MemberDetailReq;
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.entity.MemberDetail;
+import com.back.domain.member.member.entity.MemberDetail.EducationLevel;
+import com.back.domain.member.member.entity.MemberDetail.EmploymentStatus;
+import com.back.domain.member.member.entity.MemberDetail.MarriageStatus;
+import com.back.domain.member.member.repository.MemberDetailRepository;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 

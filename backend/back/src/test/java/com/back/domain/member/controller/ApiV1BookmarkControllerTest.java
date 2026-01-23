@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.service.BookmarkService;
+import com.back.domain.member.bookmark.service.BookmarkService;
 
 import io.jsonwebtoken.Jwt;
 
@@ -36,7 +36,7 @@ public class ApiV1BookmarkControllerTest {
         Jwt jwt = null; // TODO: test token
 
         ResultActions resultActions = mvc.perform(
-                        get("/api/v1/member/welfare-bookmarks").header("Authorization", "Bearer " + jwt))
+                        get("/api/v1/member/bookmark/welfare-bookmarks").header("Authorization", "Bearer " + jwt))
                 .andDo(print());
 
         // TODO: 응답 결과(andExpect) 구현
