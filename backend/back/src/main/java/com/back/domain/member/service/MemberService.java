@@ -97,16 +97,16 @@ public class MemberService {
                 jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
 
         // RefreshToken(UUID) 생성 + DB 저장 (추가)
-        // 2-1) 클라이언트에게 줄 refresh token "원문" 생성 (UUID)
+        // 클라이언트에게 줄 refresh token "원문" 생성 (UUID)
         String rawRefreshToken = RefreshTokenGenerator.generate();
 
-        // 2-2) DB 저장용 hash 생성 (보안상 원문 저장 X)
+        // DB 저장용 hash 생성 (보안상 원문 저장 X)
         String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
 
-        // 2-3) 만료 시각 계산 (ex: 14일 뒤)
+        // 만료 시각 계산 14일 뒤
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_DAYS);
 
-        // 2-4) 엔티티 생성 후 DB 저장
+        // 엔티티 생성 후 DB 저장
         RefreshToken refreshToken = RefreshToken.create(member, refreshTokenHash, expiresAt);
         refreshTokenRepository.save(refreshToken);
 
