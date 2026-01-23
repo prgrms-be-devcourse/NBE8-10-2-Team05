@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.back.domain.member.dto.*;
 import com.back.domain.member.service.MemberService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +24,7 @@ public class MemberController {
         return ResponseEntity.ok(res);
     }
 
-    // 로그인 (JWT 없음)
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req, HttpServletResponse response) {
         LoginResponse res = memberService.login(req, response);
@@ -36,10 +37,14 @@ public class MemberController {
         return ResponseEntity.ok(memberService.me());
     }
 
-    // 나중에 apikey 리프레쉬토큰 도입하면 그때 delete 로 할지 고민중
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        response.addHeader("Set-Cookie", memberService.buildLogoutSetCookieHeader());
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        MemberService.LogoutCookieHeaders headers = memberService.logout(request);
+
+        response.addHeader("Set-Cookie", headers.deleteAccessCookieHeader());
+        response.addHeader("Set-Cookie", headers.deleteRefreshCookieHeader());
+
         return ResponseEntity.ok().build();
     }
 }
