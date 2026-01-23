@@ -11,10 +11,12 @@ import lombok.Setter;
 @Setter
 public class BookmarkPolicyResponseDto {
     private int code;
+    private String message;
     private List<Policy> policies;
 
-    public BookmarkPolicyResponseDto(int code, List<Policy> policies) {
+    public BookmarkPolicyResponseDto(int code, String message, List<Policy> policies) {
         this.code = code;
+        this.message = message;
         this.policies = policies;
     }
 }
