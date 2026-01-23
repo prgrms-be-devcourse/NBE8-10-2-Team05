@@ -71,7 +71,7 @@ public class MemberService {
         return JoinResponse.from(savedMember);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public LoginResponse login(LoginRequest req, HttpServletResponse response) {
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new ServiceException("AUTH-400", "email은 필수입니다.");
@@ -167,14 +167,14 @@ public class MemberService {
                 .toString();
     }
 
+    // 리프레시 토큰은 길게 가져감 -> 14일
     private String buildRefreshCookieHeader(String rawRefreshToken) {
-        // refresh token은 길게(예: 14일)
         return ResponseCookie.from("refreshToken", rawRefreshToken)
                 .httpOnly(true)
                 .secure(false) // dev
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(Duration.ofDays(14))
+                .maxAge(Duration.ofDays(REFRESH_DAYS))
                 .build()
                 .toString();
     }
