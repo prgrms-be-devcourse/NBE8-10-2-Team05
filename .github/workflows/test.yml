@@ -38,5 +38,3 @@ jobs:
             }
           CUSTOM_API_ESTATE_KEY: ${{secrets.CUSTOM_API_ESTATE_KEY}}
           CUSTOM_API_ESTATE_URL: ${{secrets.CUSTOM_API_ESTATE_URL}}
-          CUSTOM_JWT_SECRET_KEY: ${{ secrets.CUSTOM_JWT_SECRET_KEY }}
-          CUSTOM_ACCESS_TOKEN_EXPIRATION_SECONDS: "1200"
