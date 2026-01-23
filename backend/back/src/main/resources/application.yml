@@ -31,4 +31,4 @@ logging:
     com.back: DEBUG
 custom:
   accessToken:
-    expirationSeconds: 1200
+    expirationSeconds: 20

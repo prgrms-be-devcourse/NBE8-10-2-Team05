@@ -36,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/h2-console")
                 || path.equals("/api/v1/member/join")
                 || path.equals("/api/v1/member/login")
+                || path.equals("/api/v1/auth/reissue")
                 || path.equals("/favicon.ico");
     }
 

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Map<String, Object>> handle(ServiceException ex) {
-        log.debug("[{}] : {} , {}", ex.getLocation(), ex.getResultCode(), ex.getMsg());
+        log.debug("[{}] : {} , {}", ex.getLocation(), ex.getResultCode(), ex.getMsg(), ex);
 
         int httpStatus = 500;
         String fullCode = ex.getResultCode();
