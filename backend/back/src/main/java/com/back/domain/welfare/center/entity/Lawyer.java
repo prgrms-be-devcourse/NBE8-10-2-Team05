@@ -27,5 +27,8 @@ public class Lawyer {
     @Column(nullable = false)
     private String corporation;
 
-    private String district;
+    private String districtArea1;
+    // 시/도
+    private String districtArea2;
+    // 군/구
 }
