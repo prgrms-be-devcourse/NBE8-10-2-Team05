@@ -8,6 +8,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -34,5 +35,13 @@ public class JwtProvider {
                 .claim("role", role)
                 .signWith(key)
                 .compact();
+    }
+
+    // 토큰 검증 + Claims 추출
+    // 서명 검증
+    // 만료 검증(exp)
+    // 문제가 있으면 예외 터짐
+    public Claims getClaims(String token) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 }

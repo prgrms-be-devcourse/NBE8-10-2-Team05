@@ -18,7 +18,7 @@ public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
 
-    public List<Policy> getBookmarks(Member member) {
+    public List<Policy> getPolicies(Member member) {
         List<Bookmark> bookmarks = bookmarkRepository.getBookmarksByApplicantId(member.getId());
 
         List<Policy> policies = new ArrayList<>();
@@ -27,5 +27,19 @@ public class BookmarkService {
         }
 
         return policies;
+    }
+
+    // 원래 북마크 목록에 policy가 있었는지를 리턴한다.
+    public String changeBookmarkStatus(Member member, Policy policy) {
+
+        List<Policy> policies = getPolicies(member);
+
+        if (policies.contains(policy)) {
+            policies.remove(policy);
+            return "북마크가 해제되었습니다.";
+        } else {
+            policies.add(policy);
+            return "북마크가 추가되었습니다.";
+        }
     }
 }
