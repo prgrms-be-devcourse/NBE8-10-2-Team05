@@ -22,10 +22,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.entity.Application;
-import com.back.domain.member.entity.Member;
-import com.back.domain.member.repository.ApplicationRepository;
-import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.member.policyaply.controller.ApplicationController;
+import com.back.domain.member.policyaply.entity.Application;
+import com.back.domain.member.policyaply.repository.ApplicationRepository;
 import com.back.domain.welfare.policy.entity.Policy;
 import com.back.domain.welfare.policy.repository.PolicyRepository;
 import com.back.standard.util.Ut;
@@ -77,7 +78,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: POST 요청 보내고 정상적인 응답 확인
-        mockMvc.perform(post("/api/v1/member/welfare-application/" + savedPolicy.getId())
+        mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + savedPolicy.getId())
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -102,7 +103,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: POST 요청 보내고 404 응답 확인
-        mockMvc.perform(post("/api/v1/member/welfare-application/" + nonExistentPolicyId)
+        mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + nonExistentPolicyId)
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -119,7 +120,7 @@ public class ApiV1ApplicationControllerTest {
         Policy savedPolicy = policyRepository.save(policy);
 
         // when & then: JWT 없이 POST 요청 보내고 401 응답 확인
-        mockMvc.perform(post("/api/v1/member/welfare-application/" + savedPolicy.getId())
+        mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + savedPolicy.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -131,7 +132,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 조회 실패 - JWT 토큰이 없는 경우 401 반환")
     void getApplicationsFailNoJwtTest() throws Exception {
         // when & then: JWT 없이 GET 요청 보내고 401 응답 확인
-        mockMvc.perform(get("/api/v1/member/welfare-applications").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(401))
@@ -145,7 +146,7 @@ public class ApiV1ApplicationControllerTest {
         Long nonExistentApplicationId = 99999L;
 
         // when & then: JWT 없이 PUT 요청 보내고 401 응답 확인
-        mockMvc.perform(put("/api/v1/member/welfare-application/" + nonExistentApplicationId)
+        mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + nonExistentApplicationId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -176,7 +177,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: GET 요청 보내고 정상적인 응답 확인
-        mockMvc.perform(get("/api/v1/member/welfare-applications")
+        mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -202,7 +203,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: GET 요청 보내고 빈 리스트 반환 확인
-        mockMvc.perform(get("/api/v1/member/welfare-applications")
+        mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications")
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -234,7 +235,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: PUT 요청 보내고 정상적인 응답 확인
-        mockMvc.perform(put("/api/v1/member/welfare-application/" + savedApplication.getId())
+        mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + savedApplication.getId())
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -259,7 +260,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: PUT 요청 보내고 404 응답 확인
-        mockMvc.perform(put("/api/v1/member/welfare-application/" + nonExistentApplicationId)
+        mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + nonExistentApplicationId)
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -294,7 +295,7 @@ public class ApiV1ApplicationControllerTest {
         String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: PUT 요청 보내고 401 응답 확인
-        mockMvc.perform(put("/api/v1/member/welfare-application/" + savedApplication.getId())
+        mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + savedApplication.getId())
                         .header("Authorization", "Bearer " + jwt)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())

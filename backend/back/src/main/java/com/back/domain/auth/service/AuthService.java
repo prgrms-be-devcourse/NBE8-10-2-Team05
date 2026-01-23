@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.back.domain.auth.entity.RefreshToken;
 import com.back.domain.auth.repository.RefreshTokenRepository;
 import com.back.domain.auth.util.TokenHasher;
-import com.back.domain.member.entity.Member;
+import com.back.domain.member.member.entity.Member;
 import com.back.global.exception.ServiceException;
 import com.back.global.security.jwt.JwtProvider;
 

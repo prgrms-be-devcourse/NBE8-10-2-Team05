@@ -3,7 +3,7 @@ package com.back.global.scheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.back.domain.welfare.center.service.LawyerCrawlerService;
+import com.back.domain.welfare.center.lawyer.service.LawyerCrawlerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
