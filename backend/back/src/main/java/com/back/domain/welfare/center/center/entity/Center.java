@@ -1,4 +1,4 @@
-package com.back.domain.welfare.center.entity;
+package com.back.domain.welfare.center.center.entity;
 
 import com.back.domain.welfare.center.center.dto.CenterResponseDto;
 

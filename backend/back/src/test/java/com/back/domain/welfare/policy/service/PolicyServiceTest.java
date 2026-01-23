@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.back.domain.welfare.policy.dto.PolicyRequestDto;
-import com.back.domain.welfare.policy.dto.PolicyResponseDto;
+import com.back.domain.welfare.policy.dto.PolicySearchRequestDto;
+import com.back.domain.welfare.policy.dto.PolicySearchResponseDto;
 import com.back.domain.welfare.policy.repository.PolicyRepositoryCustom;
 
 public class PolicyServiceTest {
@@ -23,15 +23,15 @@ public class PolicyServiceTest {
     @InjectMocks
     private PolicyService policyService;
 
-    private PolicyRequestDto requestDto;
-    private PolicyResponseDto responseDto;
+    private PolicySearchRequestDto requestDto;
+    private PolicySearchResponseDto responseDto;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
         // 테스트용 PolicyRequestDto
-        PolicyRequestDto requestDto = new PolicyRequestDto(
+        PolicySearchRequestDto requestDto = new PolicySearchRequestDto(
                 20, // sprtTrgtMinAge
                 30, // sprtTrgtMaxAge
                 "12345", // zipCd
@@ -42,7 +42,7 @@ public class PolicyServiceTest {
                 );
 
         // 테스트용 PolicyResponseDto
-        responseDto = new PolicyResponseDto(
+        responseDto = new PolicySearchResponseDto(
                 1,
                 "PLCY001",
                 "Test Policy",
@@ -69,7 +69,7 @@ public class PolicyServiceTest {
         when(policyRepository.search(requestDto)).thenReturn(List.of(responseDto));
 
         // when
-        List<PolicyResponseDto> result = policyService.search(requestDto);
+        List<PolicySearchResponseDto> result = policyService.search(requestDto);
 
         // then
         assertThat(result).isNotNull();
