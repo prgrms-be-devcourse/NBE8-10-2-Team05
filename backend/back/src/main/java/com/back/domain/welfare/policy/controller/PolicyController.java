@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.back.domain.welfare.policy.dto.PolicyFetchRequestDto;
-import com.back.domain.welfare.policy.dto.PolicyRequestDto;
-import com.back.domain.welfare.policy.dto.PolicyResponseDto;
+import com.back.domain.welfare.policy.dto.PolicySearchRequestDto;
+import com.back.domain.welfare.policy.dto.PolicySearchResponseDto;
 import com.back.domain.welfare.policy.service.PolicyFetchService;
 import com.back.domain.welfare.policy.service.PolicyService;
 
@@ -22,14 +22,14 @@ public class PolicyController {
     private final PolicyFetchService policyFetchService;
 
     @GetMapping("/search")
-    public List<PolicyResponseDto> search(PolicyRequestDto policyRequestDto) {
-        return policyService.search(policyRequestDto);
+    public List<PolicySearchResponseDto> search(PolicySearchRequestDto policySearchRequestDto) {
+        return policyService.search(policySearchRequestDto);
     }
 
     @GetMapping("/list")
-    public String getPolicy() {
+    public void getPolicy() {
         PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto(null, "1", "100", "json");
 
-        return policyFetchService.fetchPolicies(requestDto);
+        policyFetchService.fetchAndSavePolicies(requestDto);
     }
 }

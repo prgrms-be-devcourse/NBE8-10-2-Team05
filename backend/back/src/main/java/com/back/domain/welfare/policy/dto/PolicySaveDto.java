@@ -1,8 +1,6 @@
 package com.back.domain.welfare.policy.dto;
 
-import com.querydsl.core.annotations.QueryProjection;
-
-public record PolicyResponseDto(
+public record PolicySaveDto(
         Integer id,
         String plcyNo,
         String plcyNm,
@@ -20,7 +18,5 @@ public record PolicyResponseDto(
         String aplyUrlAddr,
         String aplyMthdCn,
         String sbmsnDcmntCn,
-        String operInstCdNm) {
-    @QueryProjection
-    public PolicyResponseDto {}
-}
+        String operInstCdNm,
+        String rawJson) {}
