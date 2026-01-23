@@ -15,7 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/welfare/center//location/lawyer")
+@RequestMapping("/api/v1/welfare/center/location/lawyer")
 @RequiredArgsConstructor
 public class LawyerController {
     private final LawyerService lawyerService;

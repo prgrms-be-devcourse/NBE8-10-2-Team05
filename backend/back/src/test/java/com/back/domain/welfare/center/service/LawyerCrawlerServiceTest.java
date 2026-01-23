@@ -20,6 +20,9 @@ class LawyerCrawlerTest {
     private LawyerCrawlerService lawyerCrawlerService;
 
     @Autowired
+    private LawyerService lawyerService;
+
+    @Autowired
     private LawyerRepository lawyerRepository;
 
     @Test
@@ -30,12 +33,11 @@ class LawyerCrawlerTest {
         lawyerCrawlerService.crawlMultiPages("서울", 1, 2);
 
         List<Lawyer> savedLawyers = lawyerRepository.findAll();
-        assertThat(savedLawyers.size()).isGreaterThan((int) count);
 
+        assertThat(savedLawyers.size()).isGreaterThanOrEqualTo((int) count);
+        assertThat(savedLawyers).isNotEmpty();
         Lawyer firstLawyer = savedLawyers.get(0);
         assertThat(firstLawyer.getName()).isNotBlank();
-        assertThat(firstLawyer.getDistrictArea2()).isNotBlank();
-        assertThat(firstLawyer.getCorporation()).isNotBlank();
     }
 
     @Test

@@ -116,6 +116,6 @@ public class LawyerCrawlerService {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-        return 1; // 기본으로 1로 리턴
+        return 1;
     }
 }
