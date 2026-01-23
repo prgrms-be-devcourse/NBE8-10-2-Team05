@@ -1,7 +1,6 @@
 package com.back.domain.welfare.center.center.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.ArrayList;
@@ -13,15 +12,17 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.entity.Center;
 import com.back.domain.welfare.center.center.repository.CenterRepository;
-import com.back.domain.welfare.center.entity.Center;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Transactional
 class CenterServiceTest {
     @Autowired
