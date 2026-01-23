@@ -1,8 +1,8 @@
 package com.back.domain.welfare.policy.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,41 +50,27 @@ public class PolicyFetchService {
             }
 
             PolicyFetchResponseDto nextFetchResponse = policyApiClient.fetchPolicyPage(requestDto, pageNum, pageSize);
-            log.info(
-                    "Fetched plcyNos: {}",
-                    nextFetchResponse.result().youthPolicyList().stream()
-                            .map(PolicyItem::plcyNo)
-                            .toList());
-
-            log.info(
-                    "Page {}: items={}",
-                    pageNum,
-                    nextFetchResponse.result().youthPolicyList().size());
             savePolicies(nextFetchResponse.result().youthPolicyList());
         }
     }
 
     private void savePolicies(List<PolicyFetchResponseDto.PolicyItem> items) {
-        Set<String> pagePlcyNos = new HashSet<>();
-        // HashSet으로 메모리 중복 체크
+        // 1. 페이지 내 plcyNo 수집
+        Set<String> pagePlcyNos = items.stream().map(PolicyItem::plcyNo).collect(Collectors.toSet());
+
+        // 2. DB에 이미 존재하는 plcyNo 조회
+        Set<String> existingPlcyNos = policyRepository.findExistingPlcyNos(pagePlcyNos);
+
+        // 3. 페이지 내 중복 + DB 중복 제거
         List<Policy> policies = items.stream()
-                .filter(item -> !pagePlcyNos.contains(item.plcyNo()))
+                .filter(item -> !existingPlcyNos.contains(item.plcyNo()))
                 .map(this::toEntity)
                 .toList();
 
-        // HashSet에 저장 전 현재 상태 확인
-        log.info(
-                "savedPlcyNos size={} preview={}",
-                pagePlcyNos.size(),
-                pagePlcyNos.stream().limit(10).toList());
-        // 저장 전 로그 확인
-        log.info(
-                "Saving {} policies: {}",
-                policies.size(),
-                policies.stream().map(Policy::getPlcyNo).toList());
-
-        // HashSet에 저장
-        policies.forEach(p -> pagePlcyNos.add(p.getPlcyNo()));
+        if (policies.isEmpty()) {
+            log.info("저장할 신규 정책 없음 (페이지 스킵)");
+            return;
+        }
 
         policyRepository.saveAll(policies);
     }
