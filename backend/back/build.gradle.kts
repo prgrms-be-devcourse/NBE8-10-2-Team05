@@ -102,6 +102,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2") // 웹 크롤링을 위해 Jsoup 라이브러리 추가
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation ("co.elastic.clients:elasticsearch-java:8.11.3")
+    implementation ("org.elasticsearch.client:elasticsearch-rest-client:8.12.")
     implementation ("org.apache.httpcomponents.client5:httpclient5")
 
 }
