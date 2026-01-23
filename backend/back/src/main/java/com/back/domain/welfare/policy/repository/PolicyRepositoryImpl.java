@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.back.domain.welfare.policy.dto.PolicySearchRequestDto;
 import com.back.domain.welfare.policy.dto.PolicySearchResponseDto;
-import com.back.domain.welfare.policy.dto.QPolicyResponseDto;
+import com.back.domain.welfare.policy.dto.QPolicySearchResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -54,7 +54,7 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
 
         // Projection: PolicyResponseDto record에 맞게 select
         return queryFactory
-                .select(new QPolicyResponseDto(
+                .select(new QPolicySearchResponseDto(
                         policy.id,
                         policy.plcyNo,
                         policy.plcyNm,
