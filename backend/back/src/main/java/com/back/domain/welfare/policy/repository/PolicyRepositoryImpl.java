@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-import com.back.domain.welfare.policy.dto.PolicyRequestDto;
-import com.back.domain.welfare.policy.dto.PolicyResponseDto;
+import com.back.domain.welfare.policy.dto.PolicySearchRequestDto;
+import com.back.domain.welfare.policy.dto.PolicySearchResponseDto;
 import com.back.domain.welfare.policy.dto.QPolicyResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,7 +21,7 @@ public class PolicyRepositoryImpl implements PolicyRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<PolicyResponseDto> search(PolicyRequestDto condition) {
+    public List<PolicySearchResponseDto> search(PolicySearchRequestDto condition) {
 
         BooleanBuilder builder = new BooleanBuilder();
 

@@ -2,7 +2,7 @@ package com.back.domain.welfare.policy.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-public record PolicyResponseDto(
+public record PolicySearchResponseDto(
         Integer id,
         String plcyNo,
         String plcyNm,
@@ -22,5 +22,5 @@ public record PolicyResponseDto(
         String sbmsnDcmntCn,
         String operInstCdNm) {
     @QueryProjection
-    public PolicyResponseDto {}
+    public PolicySearchResponseDto {}
 }
