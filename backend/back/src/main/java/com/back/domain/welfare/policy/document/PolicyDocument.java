@@ -3,12 +3,14 @@ package com.back.domain.welfare.policy.document;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PolicyDocument {
 
     private Integer policyId;

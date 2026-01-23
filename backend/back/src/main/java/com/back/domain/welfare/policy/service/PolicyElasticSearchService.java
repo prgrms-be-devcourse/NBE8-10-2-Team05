@@ -1,13 +1,15 @@
 package com.back.domain.welfare.policy.service;
 
 import java.io.IOException;
+import java.util.List;
 
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Service;
 
+import com.back.domain.welfare.policy.document.PolicyDocument;
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -15,22 +17,14 @@ import lombok.RequiredArgsConstructor;
 public class PolicyElasticSearchService {
     private final RestClient restClient;
 
-    public String searchByKeyword(String keyword) throws IOException {
-        String query = """
-        {
-          "query": {
-            "match": {
-              "plcyNm": "%s"
-            }
-          }
-        }
-        """.formatted(keyword);
+    private final ElasticsearchClient esClient;
 
-        Request request = new Request("POST", "/policy/_search");
-        request.setJsonEntity(query);
+    public List<PolicyDocument> searchByKeyword(String keyword) throws IOException {
 
-        Response response = restClient.performRequest(request);
+        SearchResponse<PolicyDocument> response = esClient.search(
+                s -> s.index("policy").query(q -> q.match(m -> m.field("plcyNm").query(keyword))),
+                PolicyDocument.class);
 
-        return EntityUtils.toString(response.getEntity());
+        return response.hits().hits().stream().map(hit -> hit.source()).toList();
     }
 }
