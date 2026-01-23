@@ -1,5 +1,6 @@
 package com.back.domain.welfare.center.center.service;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -21,11 +22,14 @@ public class CenterApiService {
     // 보건복지부_사회복지관 시도별 주소 현황 공공 API
     public CenterResponseDto fetchCenter(CenterRequestDto centerRequestDto) {
 
-        String requestUrl = centerApiProperties.url() + "?serviceKey=" + centerApiProperties.key();
+        String requestUrl = centerApiProperties.url()
+                + "?page=" + centerRequestDto.page()
+                + "&perPage=" + centerRequestDto.perPage()
+                + "&serviceKey=" + centerApiProperties.key();
 
         CenterResponseDto responseDto = Optional.ofNullable(webClient
                         .get()
-                        .uri(requestUrl)
+                        .uri(URI.create(requestUrl))
                         .retrieve()
                         .bodyToMono(CenterResponseDto.class)
                         .block())
