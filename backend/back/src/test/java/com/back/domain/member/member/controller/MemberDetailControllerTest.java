@@ -1,4 +1,4 @@
-package com.back.domain.member.controller;
+package com.back.domain.member.member.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.member.controller.MemberDetailController;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.entity.MemberDetail;

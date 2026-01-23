@@ -1,4 +1,4 @@
-package com.back.domain.member.controller;
+package com.back.domain.member.bookmark.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

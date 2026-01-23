@@ -1,4 +1,4 @@
-package com.back.domain.member.controller;
+package com.back.domain.member.policyaply.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
-import com.back.domain.member.policyaply.controller.ApplicationController;
 import com.back.domain.member.policyaply.entity.Application;
 import com.back.domain.member.policyaply.repository.ApplicationRepository;
 import com.back.domain.welfare.policy.entity.Policy;
