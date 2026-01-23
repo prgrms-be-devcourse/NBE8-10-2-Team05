@@ -13,6 +13,12 @@ public class ServiceException extends RuntimeException {
         this.msg = msg;
     }
 
+    public ServiceException(String resultCode, String msg, Throwable cause) {
+        super(resultCode + " : " + msg, cause);
+        this.resultCode = resultCode;
+        this.msg = msg;
+    }
+
     public String getLocation() {
         StackTraceElement[] stackTrace = this.getStackTrace();
         if (stackTrace != null && stackTrace.length > 0) {
