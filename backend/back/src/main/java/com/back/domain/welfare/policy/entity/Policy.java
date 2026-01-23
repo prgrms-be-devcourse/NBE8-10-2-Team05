@@ -21,7 +21,11 @@ public class Policy {
     private String plcyNo; // 정책번호
     private String plcyNm; // 정책명
     private String plcyKywdNm; // 정책키워드명
+
+    @Lob
     private String plcyExplnCn; // 정책설명내용
+    // 너무 긴 반환값을 가지는 칼럼에 한해 큰 객체로 저장하는 어노테이션 추가
+    @Lob
     private String plcySprtCn; // 정책지원내용
 
     private String sprvsnInstCdNm; // 주관기관코드명(주관기관명)
@@ -32,8 +36,13 @@ public class Policy {
     private String bizPrdBgngYmd; // 사업기간시작일자
     private String bizPrdEndYmd; // 사업기간종료일자
 
+    @Lob
     private String plcyAplyMthdCn; // 정책신청방법내용
+
+    @Lob
     private String aplyUrlAddr; // 신청URL주소
+
+    @Lob
     private String sbmsnDcmntCn; // 제출서류내용
 
     private String sprtTrgtMinAge; // 지원대상최소연령
@@ -45,7 +54,9 @@ public class Policy {
     private String earnMinAmt; // 소득최소금액
     private String earnMaxAmt; // 소득최대금액
 
+    @Lob
     private String zipCd; // 정책거주지역코드
+
     private String jobCd; // 정책취업요건코드
     private String schoolCd; // 정책학력요건코드
 
