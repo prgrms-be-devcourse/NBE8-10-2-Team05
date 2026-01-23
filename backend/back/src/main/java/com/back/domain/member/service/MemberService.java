@@ -20,6 +20,8 @@ import com.back.domain.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.security.jwt.JwtProvider;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -70,6 +72,9 @@ public class MemberService {
 
         return JoinResponse.from(savedMember);
     }
+
+    // 로그인 결과(바디 + Set-Cookie 2개)
+    public record LoginResult(LoginResponse body, String accessSetCookieHeader, String refreshSetCookieHeader) {}
 
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletResponse response) {
@@ -175,6 +180,59 @@ public class MemberService {
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(Duration.ofDays(REFRESH_DAYS))
+                .build()
+                .toString();
+    }
+
+    public record LogoutCookieHeaders(String deleteAccessCookieHeader, String deleteRefreshCookieHeader) {}
+
+    @Transactional
+    public LogoutCookieHeaders logout(HttpServletRequest request) {
+
+        // 1) refreshToken 쿠키 원문 읽기
+        String rawRefreshToken = getCookieValue(request, "refreshToken");
+
+        // 2) refreshToken이 있으면 DB에서 찾아서 폐기(revoke)
+        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
+            String hash = TokenHasher.sha256Hex(rawRefreshToken);
+
+            refreshTokenRepository.findByTokenHash(hash).ifPresent(rt -> {
+                rt.revoke(); // revokedAt = now
+                // rt가 영속 상태면 save 없어도 되지만, 안전하게 save 해도 됨
+                refreshTokenRepository.save(rt);
+            });
+
+            // delete로 하고 싶으면 revoke 대신 이걸로 교체 가능
+            // refreshTokenRepository.findByTokenHash(hash).ifPresent(refreshTokenRepository::delete);
+        }
+
+        // access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
+        String deleteAccessCookie = buildDeleteCookieHeader("accessToken");
+        String deleteRefreshCookie = buildDeleteCookieHeader("refreshToken");
+
+        return new LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie);
+    }
+
+    // 요청에서 쿠키값 꺼내기
+    private String getCookieValue(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+    // 쿠키 삭제용 Max-Age=0
+    private String buildDeleteCookieHeader(String cookieName) {
+        return ResponseCookie.from(cookieName, "")
+                .httpOnly(true)
+                .secure(false) // dev
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ZERO)
                 .build()
                 .toString();
     }
