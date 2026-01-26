@@ -40,6 +40,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String nickname = properties != null ? (String) properties.get("nickname") : null;
         String profileImgUrl = properties != null ? (String) properties.get("profile_image") : null;
 
+        // 잘 받아와지는지 로그 체크
+        // log.info("kakaoId={}, nickname={}, profileImgUrl={}", kakaoId, nickname, profileImgUrl);
+
         // DB에서 회원 조회 or 생성
         Member member = memberService.getOrCreateKakaoMember(kakaoId, nickname, profileImgUrl);
 

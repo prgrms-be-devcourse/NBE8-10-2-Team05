@@ -90,6 +90,7 @@ public class Member {
         this.type = type;
         this.role = role;
         this.providerId = providerId;
+        this.profileImgUrl = profileImgUrl;
 
         // createdAt/modifiedAt을 현재 시각으로 초기화
         LocalDateTime now = LocalDateTime.now();
