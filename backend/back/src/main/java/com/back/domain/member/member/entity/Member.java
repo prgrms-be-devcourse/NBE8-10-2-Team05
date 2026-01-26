@@ -56,6 +56,10 @@ public class Member {
     @Column(name = "provider_id", nullable = true) // 단독 unique 제거 → (type, providerId)로 유니크 보장
     private String providerId;
 
+    // 프로필 이미지 URL 컬럼 추가
+    @Column(name = "profile_img_url", nullable = true)
+    private String profileImgUrl;
+
     public enum LoginType {
         EMAIL,
         NAVER,
@@ -76,7 +80,8 @@ public class Member {
             Integer rrnBackFirst,
             LoginType type,
             Role role,
-            String providerId) {
+            String providerId,
+            String profileImgUrl) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -98,11 +103,12 @@ public class Member {
     // - createdAt/modifiedAt 자동 세팅
     public static Member createEmailUser(
             String name, String email, String encodedPassword, Integer rrnFront, Integer rrnBackFirst) {
-        return new Member(name, email, encodedPassword, rrnFront, rrnBackFirst, LoginType.EMAIL, Role.USER, null);
+        return new Member(name, email, encodedPassword, rrnFront, rrnBackFirst, LoginType.EMAIL, Role.USER, null, null);
     }
 
     // 소셜 회원 생성 (password/rrn 없음)
-    public static Member createSocialUser(String name, String email, LoginType type, String providerId) {
+    public static Member createSocialUser(
+            String name, String email, LoginType type, String providerId, String profileImgUrl) {
         return new Member(
                 name,
                 email, // 없으면 null 가능
@@ -111,7 +117,29 @@ public class Member {
                 null, // rrn 없음
                 type,
                 Role.USER,
-                providerId);
+                providerId,
+                profileImgUrl);
+    }
+
+    // 소셜 로그인 시 프로필 동기화
+    public void updateSocialProfile(String nickname, String profileImgUrl) {
+        boolean changed = false;
+
+        if (nickname != null && !nickname.isBlank() && !nickname.equals(this.name)) {
+            this.name = nickname;
+            changed = true;
+        }
+
+        if (profileImgUrl != null
+                && !profileImgUrl.isBlank()
+                && (this.profileImgUrl == null || !profileImgUrl.equals(this.profileImgUrl))) {
+            this.profileImgUrl = profileImgUrl;
+            changed = true;
+        }
+
+        if (changed) {
+            touchModifiedAt();
+        }
     }
 
     // 나중에 정보 수정할 때 modifiedAt 갱신용
