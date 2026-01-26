@@ -23,7 +23,7 @@ public class RedisService {
     @Cacheable(value = "redis", key = "#redisId")
     public RedisEntity getUser(Integer redisId) {
         // Redis에 데이터가 없으면 이 로직이 실행되어 DB를 조회합니다.
-        return redisExampleCustomRepository.findById(redisId).orElseThrow();
+        return RedisEntity.from(redisExampleCustomRepository.findById(redisId).orElseThrow());
     }
 
     /**
@@ -34,12 +34,13 @@ public class RedisService {
     @CachePut(value = "redis", key = "#redisId")
     public RedisEntity updateUser(Integer redisId, String newApiKey) {
         // DB 데이터를 수정하고
-        RedisEntity redisEntity = redisExampleCustomRepository.findById(redisId).orElseThrow();
-        redisEntity.setApiKey(newApiKey);
+        RedisEntity redisEntity =
+                RedisEntity.from(redisExampleCustomRepository.findById(redisId).orElseThrow());
+        RedisEntity updated = redisEntity.toBuilder().apiKey(newApiKey).build();
         // redisEntity.update();
 
         // 수정된 객체를 반환하면 Redis의 기존 캐시가 이 값으로 교체됩니다.
-        return redisEntity;
+        return updated;
     }
 
     @Transactional

@@ -5,17 +5,10 @@ import org.springframework.data.redis.core.index.Indexed;
 import jakarta.persistence.Id;
 import lombok.*;
 
-@Getter
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-public class RedisEntity {
-    @Id
-    @Indexed
-    private String id;
-
-    private String nickname;
-
-    @Setter
-    private String apiKey;
+@Builder(toBuilder = true)
+public record RedisEntity(
+        @Id @Indexed String id, String nickname, @Setter String apiKey) {
+    public static RedisEntity from(RedisCustomEntity dto) {
+        return new RedisEntity(dto.id(), dto.nickname(), dto.apiKey());
+    }
 }

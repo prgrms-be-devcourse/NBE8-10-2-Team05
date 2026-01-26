@@ -5,10 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -36,11 +33,11 @@ class RedisServiceTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
-    private RedisEntity testEntity;
+    private RedisCustomEntity testEntity;
 
     @BeforeEach
     void setup() {
-        testEntity = RedisEntity.builder()
+        testEntity = RedisCustomEntity.builder()
                 .id("1")
                 .nickname("redis")
                 .apiKey("secret-key")
@@ -62,13 +59,13 @@ class RedisServiceTest {
     @DisplayName("Redis DB에 물리적으로 데이터가 저장되었는지 확인")
     void checkPhysicalRedis() {
         Integer redisId = 100;
-        testEntity = RedisEntity.builder().id("100").nickname("redis").build();
+        testEntity = RedisCustomEntity.builder().id("100").nickname("redis").build();
         when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
 
         // 스프링 캐시가 생성하는 규칙에 따른 실제 키값 생성 (value::key)
         String expectedKey = "redis::" + redisId;
 
-        redisTemplate.opsForValue().set(expectedKey, testEntity);
+        redisTemplate.opsForValue().set(expectedKey, RedisEntity.from(testEntity));
 
         Object actualValue = redisTemplate.opsForValue().get(expectedKey);
 
@@ -76,8 +73,8 @@ class RedisServiceTest {
         assertThat(actualValue).isInstanceOf(RedisEntity.class); // 직렬화가 잘 되어 객체로 복원되는지 확인
 
         RedisEntity cachedEntity = (RedisEntity) actualValue;
-        assertThat(cachedEntity.getId()).isEqualTo("100");
-        assertThat(cachedEntity.getNickname()).isEqualTo("redis");
+        assertThat(cachedEntity.id()).isEqualTo("100");
+        assertThat(cachedEntity.nickname()).isEqualTo("redis");
     }
 
     @Test
@@ -92,8 +89,8 @@ class RedisServiceTest {
         // 두 번째 호출 (Cache Hit -> DB 접근 안 함)
         RedisEntity result2 = redisService.getUser(redisId);
 
-        assertThat(result2.getId()).isEqualTo(testEntity.getId());
-        assertThat(result2.getNickname()).isEqualTo(testEntity.getNickname());
+        assertThat(result2.id()).isEqualTo(testEntity.id());
+        assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
         verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
 
         // cacheManager를 통해 redis를 사용하기 때문에
@@ -112,13 +109,13 @@ class RedisServiceTest {
         String expectedKey = "redis::" + redisId;
         Object actualValue = redisTemplate.opsForValue().get(expectedKey);
 
-        assertThat(result.getId()).isEqualTo(testEntity.getId());
-        assertThat(result.getApiKey()).isEqualTo("newApiKey");
+        assertThat(result.id()).isEqualTo(testEntity.id());
+        assertThat(result.apiKey()).isEqualTo("newApiKey");
 
         assertThat(actualValue).isNotNull();
         RedisEntity cachedEntity = (RedisEntity) actualValue;
-        assertThat(cachedEntity.getId()).isEqualTo("1");
-        assertThat(cachedEntity.getApiKey()).isEqualTo("newApiKey");
+        assertThat(cachedEntity.id()).isEqualTo("1");
+        assertThat(cachedEntity.apiKey()).isEqualTo("newApiKey");
     }
 
     @Test
@@ -127,15 +124,15 @@ class RedisServiceTest {
         Integer redisId = 1;
         when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
 
-        redisService.getUser(redisId);
-        String expectedKey = "redis::" + redisId;
+        // service호출 대신 실제 cache사용
+        // service에 @Tramsactional 붙어있으면 테스트가 어렵기 때문
+        Cache cache = cacheManager.getCache("redis");
+        cache.put(redisId, RedisEntity.from(testEntity));
 
-        assertThat(redisTemplate.opsForValue().get(expectedKey)).isNotNull();
+        assertThat(cache.get(redisId)).isNotNull();
 
         redisService.deleteUser(redisId);
 
-        Object actualValue = redisTemplate.opsForValue().get(expectedKey);
-
-        assertThat(actualValue).isNull();
+        assertThat(cache.get(redisId)).isNull();
     }
 }
