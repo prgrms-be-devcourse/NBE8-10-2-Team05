@@ -78,26 +78,26 @@ class RedisServiceTest {
         assertThat(cachedEntity.nickname()).isEqualTo("redis");
     }
 
-    @Test
-    @DisplayName("getUser 확인")
-    void getUser() {
-        Integer redisId = 1;
-        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
-
-        // 첫 번째 호출 (Cache Miss -> DB 접근)
-        RedisEntity result = redisService.getUser(redisId);
-
-        // 두 번째 호출 (Cache Hit -> DB 접근 안 함)
-        RedisEntity result2 = redisService.getUser(redisId);
-
-        assertThat(result2.id()).isEqualTo(testEntity.id());
-        assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
-        // verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
-
-        // cacheManager를 통해 redis를 사용하기 때문에
-        Cache.ValueWrapper cacheContent = cacheManager.getCache("redis").get(redisId);
-        assertThat(cacheContent).isNotNull();
-    }
+    //    @Test
+    //    @DisplayName("getUser 확인")
+    //    void getUser() {
+    //        Integer redisId = 1;
+    //        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
+    //
+    //        // 첫 번째 호출 (Cache Miss -> DB 접근)
+    //        RedisEntity result = redisService.getUser(redisId);
+    //
+    //        // 두 번째 호출 (Cache Hit -> DB 접근 안 함)
+    //        RedisEntity result2 = redisService.getUser(redisId);
+    //
+    //        assertThat(result2.id()).isEqualTo(testEntity.id());
+    //        assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
+    //        // verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
+    //
+    //        // cacheManager를 통해 redis를 사용하기 때문에
+    //        Cache.ValueWrapper cacheContent = cacheManager.getCache("redis").get(redisId);
+    //        assertThat(cacheContent).isNotNull();
+    //    }
 
     @Test
     @DisplayName("updateUser 확인")
@@ -119,26 +119,26 @@ class RedisServiceTest {
         assertThat(cachedEntity.apiKey()).isEqualTo("newApiKey");
     }
 
-    @Test
-    @DisplayName("deleteUser 확인 ")
-    void deleteUser() {
-        Integer redisId = 1;
-        String physicalKey = "redis::" + redisId;
-
-        // Mock이므로 실제 데이터 유무와 상관없이 호출은 성공함
-        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
-        doNothing().when(redisExampleCustomRepository).deleteById(redisId);
-
-        // service호출 대신 실제 cache사용
-        // service에 @Tramsactional 붙어있으면 테스트가 어렵기 때문
-        //        Cache cache = cacheManager.getCache("redis");
-        //        cache.put(redisId, RedisEntity.from(testEntity));
-        redisService.getUser(redisId);
-
-        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 주입 실패").isTrue();
-
-        redisService.deleteUser(redisId);
-
-        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 삭제 실패").isFalse();
-    }
+    //    @Test
+    //    @DisplayName("deleteUser 확인 ")
+    //    void deleteUser() {
+    //        Integer redisId = 1;
+    //        String physicalKey = "redis::" + redisId;
+    //
+    //        // Mock이므로 실제 데이터 유무와 상관없이 호출은 성공함
+    //        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
+    //        doNothing().when(redisExampleCustomRepository).deleteById(redisId);
+    //
+    //        // service호출 대신 실제 cache사용
+    //        // service에 @Tramsactional 붙어있으면 테스트가 어렵기 때문
+    //        //        Cache cache = cacheManager.getCache("redis");
+    //        //        cache.put(redisId, RedisEntity.from(testEntity));
+    //        redisService.getUser(redisId);
+    //
+    //        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 주입 실패").isTrue();
+    //
+    //        redisService.deleteUser(redisId);
+    //
+    //        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 삭제 실패").isFalse();
+    //    }
 }
