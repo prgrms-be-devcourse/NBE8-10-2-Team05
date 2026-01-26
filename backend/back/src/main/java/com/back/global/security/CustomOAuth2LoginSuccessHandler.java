@@ -6,6 +6,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
+import com.back.global.security.jwt.JwtProvider;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,10 +18,22 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    private final MemberService memberService;
+    private final JwtProvider jwtProvider;
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
+
+        // 임시: 항상 1번 회원으로 로그인
+        Member member = memberService.findById(1L).orElseThrow(() -> new IllegalStateException("회원이 존재하지 않습니다."));
+
+        // 일반 로그인과 동일한 쿠키 발급 (access + refresh)
+        memberService.issueLoginCookies(member, response);
+
+        // 프론트로 이동
         response.sendRedirect("http://localhost:3000");
     }
 }
