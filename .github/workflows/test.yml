@@ -35,6 +35,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           build-root-directory: ./backend/back
+          cache-encryption-key: "force-refresh-v1"
 
       - name: Test with Gradle6
         run: ./gradlew test --build-cache

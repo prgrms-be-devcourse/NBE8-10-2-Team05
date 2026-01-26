@@ -22,6 +22,6 @@ jobs:
                 build-root-directory: ./backend/back
 
             - name: Run Gradle Checkstyle
-              run: ./gradlew checkstyleMain checkstyleTest --build-cache --no-daemon
+              run: ./gradlew checkstyleMain checkstyleTest --build-cache
               working-directory: backend/back
 
