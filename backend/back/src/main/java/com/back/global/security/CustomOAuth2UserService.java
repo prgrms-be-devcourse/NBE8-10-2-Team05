@@ -1,5 +1,6 @@
 package com.back.global.security;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 카카오 id (yml에서 user-name-attribute: id 설정했으니 name = id)
         String kakaoId = oAuth2User.getName(); // 예: "47121"
 
-        Map<String, Object> attributes = oAuth2User.getAttributes();
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
 
         String nickname = properties != null ? (String) properties.get("nickname") : null;
