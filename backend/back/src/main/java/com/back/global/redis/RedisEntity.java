@@ -7,7 +7,7 @@ import lombok.*;
 
 @Builder(toBuilder = true)
 public record RedisEntity(
-        @Id @Indexed String id, String nickname, @Setter String apiKey) {
+        @Id @Indexed Integer id, String nickname, @Setter String apiKey) {
     public static RedisEntity from(RedisCustomEntity dto) {
         return new RedisEntity(dto.id(), dto.nickname(), dto.apiKey());
     }

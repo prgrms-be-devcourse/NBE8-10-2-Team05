@@ -6,4 +6,4 @@ import lombok.*;
 
 @Builder
 @RedisHash("example")
-public record RedisCustomEntity(String id, String nickname, String apiKey) {}
+public record RedisCustomEntity(Integer id, String nickname, String apiKey) {}

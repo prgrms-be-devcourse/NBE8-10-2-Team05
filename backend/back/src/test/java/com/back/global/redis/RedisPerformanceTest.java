@@ -28,7 +28,7 @@ public class RedisPerformanceTest {
     @DisplayName("DB 조회와 Redis 캐시 조회 속도 비교")
     void comparePerformance() {
         Integer redisId = 1;
-        realRedisExampleCustomRepository.save(new RedisCustomEntity("1", "nick", "key"));
+        realRedisExampleCustomRepository.save(new RedisCustomEntity(1, "nick", "key"));
 
         // 1. 첫 번째 조회 (Cache Miss - DB 접근)
         long startTime = System.currentTimeMillis();
