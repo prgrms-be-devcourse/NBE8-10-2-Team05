@@ -91,7 +91,7 @@ class RedisServiceTest {
     //        RedisEntity result2 = redisService.getUser(redisId);
     //
     //        assertThat(result2.id()).isEqualTo(testEntity.id());
-    //        assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
+    //         assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
     //              // verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
     //
     //        // cacheManager를 통해 redis를 사용하기 때문에
