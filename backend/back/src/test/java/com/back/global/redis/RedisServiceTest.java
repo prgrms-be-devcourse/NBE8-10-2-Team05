@@ -122,7 +122,8 @@ class RedisServiceTest {
     @DisplayName("deleteUser 확인 ")
     void deleteUser() {
         Integer redisId = 1;
-        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
+        // Mock이므로 실제 데이터 유무와 상관없이 호출은 성공함
+        doNothing().when(redisExampleCustomRepository).deleteById(redisId);
 
         // service호출 대신 실제 cache사용
         // service에 @Tramsactional 붙어있으면 테스트가 어렵기 때문

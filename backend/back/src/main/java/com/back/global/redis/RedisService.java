@@ -4,7 +4,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +18,6 @@ public class RedisService {
      * Redis에 값이 없으면 메서드를 실행하고, 그 결과를 Redis에 저장합니다.
      * key와 parameter가 일치해야함. key = "#redisId" == getUser(Integer redisId)
      */
-    @Transactional(readOnly = true)
     @Cacheable(value = "redis", key = "#redisId")
     public RedisEntity getUser(Integer redisId) {
         // Redis에 데이터가 없으면 이 로직이 실행되어 DB를 조회합니다.
@@ -30,7 +28,6 @@ public class RedisService {
      * @Cacheable과 달리 메서드를 항상 실행하며, 실행 결과를 Redis에 덮어씁니다.
      *
      */
-    @Transactional
     @CachePut(value = "redis", key = "#redisId")
     public RedisEntity updateUser(Integer redisId, String newApiKey) {
         // DB 데이터를 수정하고
@@ -43,7 +40,6 @@ public class RedisService {
         return updated;
     }
 
-    @Transactional
     @CacheEvict(value = "redis", key = "#redisId")
     public void deleteUser(Integer redisId) {
         // DB에서 삭제
