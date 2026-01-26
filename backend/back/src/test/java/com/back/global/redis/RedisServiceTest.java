@@ -45,6 +45,7 @@ class RedisServiceTest {
 
         Cache cache = cacheManager.getCache("redis");
         if (cache != null) cache.clear();
+        reset(redisExampleCustomRepository);
     }
 
     @AfterAll
