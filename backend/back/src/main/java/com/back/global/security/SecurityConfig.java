@@ -45,13 +45,6 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/auth/member/reissue")
                         .permitAll()
-
-                        // 테스트하기 위해 허용
-                        .requestMatchers("/session")
-                        .permitAll()
-                        .requestMatchers("/")
-                        .permitAll()
-
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
