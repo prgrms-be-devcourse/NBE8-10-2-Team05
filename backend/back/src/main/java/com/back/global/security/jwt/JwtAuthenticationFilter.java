@@ -38,6 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/api/v1/member/member/login")
                 || path.equals("/api/v1/member/member/logout")
                 || path.equals("/api/v1/auth/reissue")
+
+                // 테스트하기 위해 허용
+                || path.equals("/session")
+                || path.equals("/")
                 || path.equals("/favicon.ico");
     }
 
