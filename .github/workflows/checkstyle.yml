@@ -20,6 +20,6 @@ jobs:
 
 
             - name: Run Gradle Checkstyle
-              run: ./gradlew checkstyleMain checkstyleTest --build-cache --parallel --no-daemon
+              run: ./gradlew checkstyleMain checkstyleTest --build-cache --no-daemon
               working-directory: backend/back
 

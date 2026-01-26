@@ -38,7 +38,7 @@ jobs:
         working-directory: ./backend/back
 
       - name: Test with Gradle6
-        run: ./gradlew test --no-daemon --build-cache --parallel
+        run: ./gradlew test --no-daemon --build-cache
         working-directory: ./backend/back
         env:
           SPRING_APPLICATION_JSON: >
