@@ -46,6 +46,7 @@ public class SecurityConfig {
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
+                .oauth2Login(oauth2 -> {})
 
                 // 토큰 없거나 인증 실패 → 401로 통일
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(
