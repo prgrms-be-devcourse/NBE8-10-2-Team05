@@ -290,15 +290,21 @@ public class MemberService {
 
         return memberRepository
                 .findByTypeAndProviderId(Member.LoginType.KAKAO, kakaoId)
+                .map(member -> {
+                    // 로그인 때마다 최신 프로필 동기화
+                    member.updateSocialProfile(nickname, profileImgUrl);
+                    return member;
+                })
                 .orElseGet(() -> {
                     // 최초 소셜 로그인 = 회원가입 처리
                     // email은 카카오에서 scope에 email을 안 받았으니 null 가능
                     // name은 nickname으로 일단 저장
                     Member member = Member.createSocialUser(
-                            nickname != null ? nickname : "카카오사용자", null, Member.LoginType.KAKAO, kakaoId);
-
-                    // profileImgUrl을 멤버에 저장할 필드가 있다면 여기서 세팅
-                    // member.setProfileImgUrl(profileImgUrl);  // 세터가 있거나 update 메서드가 있다면
+                            nickname != null ? nickname : "카카오사용자",
+                            null,
+                            Member.LoginType.KAKAO,
+                            kakaoId,
+                            profileImgUrl);
 
                     return memberRepository.save(member);
                 });
