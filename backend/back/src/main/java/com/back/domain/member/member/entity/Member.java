@@ -7,7 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "member")
+@Table(
+        name = "member",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_member_provider_providerId",
+                    columnNames = {"type", "provider_id"})
+        })
 @Getter
 @NoArgsConstructor
 public class Member {
@@ -38,14 +44,16 @@ public class Member {
     private Integer rrnBackFirst;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LoginType type;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     // 소셜 계정 식별자 (ex. 카카오 user id)
     // EMAIL 회원은 null
-    @Column(nullable = true) // 단독 unique 제거 → (type, providerId)로 유니크 보장
+    @Column(name = "provider_id", nullable = true) // 단독 unique 제거 → (type, providerId)로 유니크 보장
     private String providerId;
 
     public enum LoginType {
