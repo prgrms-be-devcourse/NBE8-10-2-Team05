@@ -1,6 +1,6 @@
 package com.back.global.security;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -49,8 +49,11 @@ public class SecurityConfig {
                         .anyRequest()
                         .authenticated())
 
-                // 세션 사용 X
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))
+                // OAuth2 로그인은 인가 요청(state)을 여러 요청에 걸쳐 검증해야 하므로
+                // 기본 구현은 HttpSession을 사용함.
+                // STATELESS로 설정하면 OAuth2 인증 과정이 깨지므로,
+                // 로그인 과정에서만 세션을 허용하는 IF_REQUIRED로 설정.
+                .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
                 .oauth2Login(oauth2 -> {})
 
                 // 토큰 없거나 인증 실패 → 401로 통일
