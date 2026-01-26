@@ -1,8 +1,11 @@
 package com.back.domain.member.member.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
@@ -22,9 +25,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.entity.MemberDetail;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.global.security.SecurityUser;
 import com.back.global.security.jwt.JwtProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -43,6 +50,9 @@ public class MemberControllerTest {
 
     @Autowired
     private JwtProvider jwtProvider;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("로그인 성공 - 200 반환 + memberId/name + accessToken 반환")
@@ -254,5 +264,81 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.id").value(saved.getId()))
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.email").value("me_test@example.com"));
+    }
+
+    @Test
+    @DisplayName("내 상세 정보 조회")
+    void getDetail() throws Exception {
+        // given: 테스트용 회원 1명 저장(회원가입 API 호출 대신 repo로 직접 저장)
+        Member member =
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+        Member saved = memberRepository.save(member);
+
+        SecurityUser testUser =
+                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+
+        mvc.perform(get("/api/v1/member/member/detail").with(user(testUser))) // 인증된 사용자 주입
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.email").value("me_test@example.com"));
+    }
+
+    @Test
+    @DisplayName("내 상세 정보 수정")
+    void modifyDetail() throws Exception {
+        // 1. Given: 회원 생성 및 시큐리티 유저 준비
+        Member member =
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+        Member saved = memberRepository.save(member);
+        SecurityUser testUser =
+                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+
+        // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
+        MemberDetailReq request = new MemberDetailReq(
+                "54321",
+                MemberDetail.MarriageStatus.MARRIED,
+                5000,
+                MemberDetail.EmploymentStatus.EMPLOYED,
+                MemberDetail.EducationLevel.GRADUATE,
+                "수정된 특이사항");
+
+        // 3. When & Then: PUT 요청 수행 및 결과 검증
+        mvc.perform(put("/api/v1/member/member/detail")
+                        .with(user(testUser)) // 인증 주입
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))) // JSON 변환
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.regionCode").value("54321"))
+                .andExpect(jsonPath("$.income").value(5000));
+    }
+
+    @Test
+    @DisplayName("상세 정보 없는 멤버 정보 조회 -> MemberDetail 자동 생성 & null 값인지 확인")
+    void autoCreateDetail() throws Exception {
+        // 1. Given: 상세 정보가 없는 신규 회원 생성
+        Member newMember = Member.createEmailUser("신규회원", "new@email.com", passwordEncoder.encode("pass"), 000101, 1);
+        Member savedNewMember = memberRepository.save(newMember);
+
+        // 2. 신규 회원을 위한 SecurityUser 생성
+        SecurityUser newUser = new SecurityUser(
+                savedNewMember.getId().intValue(),
+                savedNewMember.getEmail(),
+                "",
+                savedNewMember.getName(),
+                java.util.List.of());
+
+        // 3. When & Then: GET 요청 수행 (URL에서 ID 제거 및 인증 주입)
+        mvc.perform(get("/api/v1/member/member/detail").with(user(newUser))) // 신규 유저로 인증
+                .andDo(print())
+                .andExpect(status().isOk())
+                // Member 기본 정보 확인
+                .andExpect(jsonPath("$.name").value("신규회원"))
+                .andExpect(jsonPath("$.email").value("new@email.com"))
+                // 상세 정보 필드들이 최초 생성 시 null인지 확인 (org.hamcrest.Matchers.nullValue() 사용)
+                .andExpect(jsonPath("$.regionCode").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.income").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.marriageStatus").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.employmentStatus").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.educationLevel").value(org.hamcrest.Matchers.nullValue()));
     }
 }
