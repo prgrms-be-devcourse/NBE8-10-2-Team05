@@ -27,6 +27,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationSuccessHandler customOAuth2LoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,7 +57,9 @@ public class SecurityConfig {
                 // STATELESS로 설정하면 OAuth2 인증 과정이 깨지므로,
                 // 로그인 과정에서만 세션을 허용하는 IF_REQUIRED로 설정.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
-                .oauth2Login(oauth2Login -> oauth2Login.successHandler(customOAuth2LoginSuccessHandler))
+                .oauth2Login(
+                        oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .successHandler(customOAuth2LoginSuccessHandler))
 
                 // 토큰 없거나 인증 실패 → 401로 통일
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(
