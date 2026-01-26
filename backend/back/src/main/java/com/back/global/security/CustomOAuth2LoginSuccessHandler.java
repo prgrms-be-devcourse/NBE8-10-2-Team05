@@ -3,6 +3,7 @@ package com.back.global.security;
 import java.io.IOException;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +28,10 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
             HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
-        // 임시: 항상 1번 회원으로 로그인
-        Member member = memberService.findById(1L).orElseThrow(() -> new IllegalStateException("회원이 존재하지 않습니다."));
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Long memberId = oAuth2User.getAttribute("memberId");
+
+        Member member = memberService.findById(memberId).orElseThrow(() -> new IllegalStateException("회원이 존재하지 않습니다."));
 
         // 일반 로그인과 동일한 쿠키 발급 (access + refresh)
         memberService.issueLoginCookies(member, response);
