@@ -15,9 +15,11 @@ jobs:
               with:
                   java-version: '21' # 프로젝트 JDK 버전
                   distribution: 'temurin'
-                  cache: 'gradle'
-                  cache-dependency-path: './backend/back/*.gradle*'
 
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v3
+              with:
+                build-root-directory: ./backend/back
 
             - name: Run Gradle Checkstyle
               run: ./gradlew checkstyleMain checkstyleTest --build-cache --no-daemon
