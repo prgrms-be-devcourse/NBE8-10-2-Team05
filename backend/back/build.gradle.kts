@@ -109,9 +109,24 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+    implementation("org.jsoup:jsoup:1.17.2") // 웹 크롤링을 위해 Jsoup 라이브러리 추가
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
+    // Elasticsearch (Java API Client + Low Level Rest Client)
+    // 버전은 반드시 맞춰서 사용하세요.
+    implementation("co.elastic.clients:elasticsearch-java:8.11.3")
+    implementation("org.elasticsearch.client:elasticsearch-rest-client:8.11.3")
+    implementation ("org.apache.httpcomponents.client5:httpclient5")
+
+}
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+    // CI 환경(보통 2코어)과 로컬 환경에 맞춰 동적으로 코어 할당
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
+
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }

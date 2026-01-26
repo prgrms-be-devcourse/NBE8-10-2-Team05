@@ -32,3 +32,10 @@ logging:
 custom:
   accessToken:
     expirationSeconds: 20
+  elasticsearch:
+    enabled: ${ELASTICSEARCH_ENABLED:true}
+    host: ${ELASTICSEARCH_HOST:localhost}
+    port: ${ELASTICSEARCH_PORT:9200}
+    scheme: ${ELASTICSEARCH_SCHEME:http}
+    connection-timeout: ${ELASTICSEARCH_CONNECTION_TIMEOUT:5000}
+    socket-timeout: ${ELASTICSEARCH_SOCKET_TIMEOUT:60000}

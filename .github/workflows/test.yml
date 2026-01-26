@@ -31,13 +31,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'gradle'
+          cache-dependency-path: './backend/back/*.gradle*'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: ./backend/back
 
       - name: Test with Gradle6
-        run: ./gradlew test
+        run: ./gradlew test --no-daemon --build-cache --parallel
         working-directory: ./backend/back
         env:
           SPRING_APPLICATION_JSON: >
