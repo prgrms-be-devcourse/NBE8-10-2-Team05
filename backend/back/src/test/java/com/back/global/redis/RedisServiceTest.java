@@ -123,6 +123,8 @@ class RedisServiceTest {
     @DisplayName("deleteUser 확인 ")
     void deleteUser() {
         Integer redisId = 1;
+        String physicalKey = "redis::" + redisId;
+
         // Mock이므로 실제 데이터 유무와 상관없이 호출은 성공함
         when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
         doNothing().when(redisExampleCustomRepository).deleteById(redisId);
@@ -133,10 +135,10 @@ class RedisServiceTest {
         //        cache.put(redisId, RedisEntity.from(testEntity));
         redisService.getUser(redisId);
 
-        assertThat(cacheManager.getCache("redis").get(redisId)).isNotNull();
+        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 주입 실패").isTrue();
 
         redisService.deleteUser(redisId);
 
-        assertThat(cacheManager.getCache("redis").get(redisId)).isNull();
+        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 삭제 실패").isFalse();
     }
 }
