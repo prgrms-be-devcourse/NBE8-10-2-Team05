@@ -70,6 +70,9 @@ sourceSets {
 
 dependencies {
 
+    // Social Login
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
