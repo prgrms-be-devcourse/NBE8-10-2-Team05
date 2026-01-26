@@ -36,6 +36,17 @@ jobs:
         with:
           build-root-directory: ./backend/back
           cache-encryption-key: "force-refresh-v2"
+          cache-disabled: true
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-v3-${{ hashFiles('backend/back/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('backend/back/**/*.gradle*', 'backend/back/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-v3-
 
       - name: Test with Gradle6
         run: ./gradlew test --build-cache
