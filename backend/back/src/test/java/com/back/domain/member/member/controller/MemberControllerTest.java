@@ -32,7 +32,6 @@ import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.security.SecurityUser;
 import com.back.global.security.jwt.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -52,7 +51,8 @@ public class MemberControllerTest {
     @Autowired
     private JwtProvider jwtProvider;
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("로그인 성공 - 200 반환 + memberId/name + accessToken 반환")
