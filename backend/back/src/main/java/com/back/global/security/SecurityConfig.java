@@ -1,5 +1,7 @@
 package com.back.global.security;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +48,9 @@ public class SecurityConfig {
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
+
+                // 세션 사용 X
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))
                 .oauth2Login(oauth2 -> {})
 
                 // 토큰 없거나 인증 실패 → 401로 통일
