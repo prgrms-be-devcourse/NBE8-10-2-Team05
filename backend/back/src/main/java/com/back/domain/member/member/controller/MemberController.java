@@ -1,13 +1,17 @@
 package com.back.domain.member.member.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.back.domain.member.member.dto.*;
+import com.back.domain.member.member.service.MemberDetailService;
 import com.back.domain.member.member.service.MemberService;
+import com.back.global.security.SecurityUser;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -16,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberDetailService memberDetailService;
 
     // 회원가입
     @PostMapping("/join")
@@ -46,5 +51,24 @@ public class MemberController {
         response.addHeader("Set-Cookie", headers.deleteRefreshCookieHeader());
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<MemberDetailRes> getMemberDetail(@AuthenticationPrincipal SecurityUser securityUser) {
+        Long memberId = (long) securityUser.getId();
+
+        MemberDetailRes response = memberDetailService.getDetail(memberId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/detail")
+    public ResponseEntity<MemberDetailRes> modifyMemberDetail(
+            @AuthenticationPrincipal SecurityUser securityUser, @Valid @RequestBody MemberDetailReq reqBody) {
+
+        Long memberId = (long) securityUser.getId();
+
+        memberDetailService.modify(memberId, reqBody);
+        MemberDetailRes response = memberDetailService.getDetail(memberId);
+        return ResponseEntity.ok(response);
     }
 }
