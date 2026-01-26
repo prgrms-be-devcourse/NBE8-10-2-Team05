@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.back.global.security.jwt.JwtAuthenticationFilter;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationSuccessHandler customOAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,7 +56,7 @@ public class SecurityConfig {
                 // STATELESS로 설정하면 OAuth2 인증 과정이 깨지므로,
                 // 로그인 과정에서만 세션을 허용하는 IF_REQUIRED로 설정.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
-                .oauth2Login(oauth2 -> {})
+                .oauth2Login(oauth2Login -> oauth2Login.successHandler(customOAuth2LoginSuccessHandler))
 
                 // 토큰 없거나 인증 실패 → 401로 통일
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(
