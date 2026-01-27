@@ -50,6 +50,43 @@ export interface LoginResponse {
   accessToken: string;
 }
 
+// ===== 주소 업데이트 =====
+// PUT /api/v1/member/member/detail/address
+
+// 카카오 우편번호 API에서 가져온 데이터 (프론트 → 백엔드)
+export interface AddressDto {
+  postcode: string | null; // 우편번호
+  addressName: string | null; // 전체 주소
+  sigunguCode: string | null; // 시/군/구 코드
+  bCode: string | null; // 법정동/법정리 코드
+  roadAddress: string | null; // 도로명 주소
+  hCode: string | null; // 행정동 코드 (백엔드에서 채움)
+  latitude: number | null; // 위도 (백엔드에서 채움)
+  longitude: number | null; // 경도 (백엔드에서 채움)
+}
+
+// 회원 상세 정보 응답 (주소 업데이트 후 반환)
+export interface MemberDetailRes {
+  createdAt: string;
+  modifiedAt: string;
+  name: string;
+  email: string;
+  rrnFront: number;
+  rrnBackFirst: number;
+  type: LoginType;
+  role: Role;
+  regionCode: string | null;
+  marriageStatus: string | null; // enum 값 (추후 정의)
+  income: number | null;
+  employmentStatus: string | null; // enum 값 (추후 정의)
+  educationLevel: string | null; // enum 값 (추후 정의)
+  postcode: string | null;
+  roadAddress: string | null;
+  hCode: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 // ===== 에러 응답 =====
 export interface ApiErrorResponse {
   resultCode: string;
