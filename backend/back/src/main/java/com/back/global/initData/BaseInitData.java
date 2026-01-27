@@ -19,6 +19,8 @@ import com.back.domain.member.member.service.MemberService;
 import com.back.domain.welfare.center.center.dto.CenterResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
 import com.back.domain.welfare.center.center.repository.CenterRepository;
+import com.back.domain.welfare.center.lawyer.repository.LawyerRepository;
+import com.back.domain.welfare.center.lawyer.service.LawyerCrawlerService;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.repository.EstateRepository;
@@ -42,6 +44,8 @@ public class BaseInitData {
     private final PolicyRepository policyRepository;
     private final EstateRepository estateRepository;
     private final CenterRepository centerRepository;
+    private final LawyerRepository lawyerRepository;
+    private final LawyerCrawlerService lawyerCrawlerService;
 
     private final ObjectMapper objectMapper;
 
@@ -98,7 +102,7 @@ public class BaseInitData {
             return;
         }
 
-        try (InputStream is = getClass().getResourceAsStream("/estate_example.json")) {
+        try (InputStream is = getClass().getResourceAsStream("/json/youth_policy_example.json")) {
             PolicyFetchResponseDto response = objectMapper.readValue(is, PolicyFetchResponseDto.class);
 
             List<Policy> policyList = response.result().youthPolicyList().stream()
@@ -108,16 +112,17 @@ public class BaseInitData {
             policyRepository.saveAll(policyList);
 
         } catch (IOException e) {
-            throw new ServiceException("500", "estate 초기 데이터 로드 실패", e);
+            throw new ServiceException("500", "policy 초기 데이터 로드 실패", e);
         }
     }
 
-    private void initEstate() {
+    @Transactional
+    public void initEstate() {
         if (estateRepository.count() >= 50) {
             return;
         }
 
-        try (InputStream is = getClass().getResourceAsStream("/youth_policy_example.json")) {
+        try (InputStream is = getClass().getResourceAsStream("/json/estate_example.json")) {
             EstateFetchResponseDto response = objectMapper.readValue(is, EstateFetchResponseDto.class);
 
             List<Estate> estateList =
@@ -130,12 +135,13 @@ public class BaseInitData {
         }
     }
 
-    private void initCenter() {
+    @Transactional
+    public void initCenter() {
         if (centerRepository.count() >= 50) {
             return;
         }
 
-        try (InputStream is = getClass().getResourceAsStream("/center_example.json")) {
+        try (InputStream is = getClass().getResourceAsStream("/json/center_example.json")) {
             CenterResponseDto response = objectMapper.readValue(is, CenterResponseDto.class);
 
             List<Center> centerList =
@@ -144,9 +150,20 @@ public class BaseInitData {
             centerRepository.saveAll(centerList);
 
         } catch (IOException e) {
-            throw new ServiceException("500", "estate 초기 데이터 로드 실패", e);
+            throw new ServiceException("500", "center 초기 데이터 로드 실패", e);
         }
     }
 
-    private void initLawyer() {}
+    @Transactional
+    public void initLawyer() {
+        if (lawyerRepository.count() >= 1) {
+            return;
+        }
+
+        lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
+
+        if (lawyerRepository.count() < 1) {
+            throw new ServiceException("500", "InitData lawyer 초기 데이터 로드 실패");
+        }
+    }
 }
