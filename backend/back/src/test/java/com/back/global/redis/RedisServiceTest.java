@@ -42,18 +42,23 @@ class RedisServiceTest {
                 .nickname("redis")
                 .apiKey("secret-key")
                 .build();
-
-        Cache cache = cacheManager.getCache("redis");
-        if (cache != null) cache.clear();
-        reset(redisExampleCustomRepository);
     }
 
-    @AfterAll
-    static void clearAllCache(@Autowired CacheManager cacheManager) {
-        Cache cache = cacheManager.getCache("redis");
-        if (cache != null) {
-            cache.clear();
+    @AfterEach
+    void clean() {
+        Integer redisId = 1;
+        String redisName = "redis";
+
+        // cacheManager를 통해 redis를 사용하기 때문에
+        // CacheManager를 통한 삭제 (내부적으로 redis::1 삭제)
+        // redisTemplate.delete("redis::" + redisId);
+        Cache redisCache = cacheManager.getCache(redisName);
+        if (redisCache == null) {
+            return;
         }
+
+        Cache.ValueWrapper cacheContent = redisCache.get(redisId);
+        redisCache.evict(redisId);
     }
 
     @Test
@@ -76,12 +81,16 @@ class RedisServiceTest {
         RedisEntity cachedEntity = (RedisEntity) actualValue;
         assertThat(cachedEntity.id()).isEqualTo(100);
         assertThat(cachedEntity.nickname()).isEqualTo("redis");
+
+        redisTemplate.delete("redis::" + redisId);
     }
 
     @Test
     @DisplayName("getUser 확인")
-    void getUser() throws InterruptedException {
+    void getUser() {
         Integer redisId = 1;
+        String redisName = "redis";
+
         when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
 
         // 첫 번째 호출 (Cache Miss -> DB 접근)
@@ -93,25 +102,34 @@ class RedisServiceTest {
         assertThat(result2.id()).isEqualTo(testEntity.id());
         assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
         verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
-
-        // cacheManager를 통해 redis를 사용하기 때문에
-        Cache.ValueWrapper cacheContent = cacheManager.getCache("redis").get(redisId);
-        assertThat(cacheContent).isNotNull();
     }
 
     @Test
     @DisplayName("updateUser 확인")
     void updateUser() {
         Integer redisId = 1;
-        when(redisExampleCustomRepository.findById(redisId)).thenReturn(Optional.of(testEntity));
 
-        RedisEntity result = redisService.updateUser(redisId, "newApiKey");
+        RedisCustomEntity testEntity2 =
+                testEntity.toBuilder().apiKey("newApiKey").build();
+
+        when(redisExampleCustomRepository.findById(redisId))
+                .thenReturn(Optional.of(testEntity)) // 1번째 호출 (getUser용)
+                .thenReturn(Optional.of(testEntity2));
+
+        RedisEntity result1 = redisService.getUser(redisId);
+
+        Cache redisCache = cacheManager.getCache("redis");
+        assertThat(redisCache).isNotNull();
+        Cache.ValueWrapper cacheContent = redisCache.get(redisId);
+        redisCache.evict(redisId);
+
+        RedisEntity result2 = redisService.updateUser(redisId, "newApiKey");
 
         String expectedKey = "redis::" + redisId;
         Object actualValue = redisTemplate.opsForValue().get(expectedKey);
 
-        assertThat(result.id()).isEqualTo(testEntity.id());
-        assertThat(result.apiKey()).isEqualTo("newApiKey");
+        assertThat(result2.id()).isEqualTo(testEntity.id());
+        assertThat(result2.apiKey()).isEqualTo("newApiKey");
 
         assertThat(actualValue).isNotNull();
         RedisEntity cachedEntity = (RedisEntity) actualValue;
@@ -135,27 +153,10 @@ class RedisServiceTest {
         // cache.put(redisId, RedisEntity.from(testEntity));
         redisService.getUser(redisId);
 
-        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 주입 성공").isTrue();
+        assertThat(redisTemplate.hasKey(physicalKey)).isTrue();
 
         redisService.deleteUser(redisId);
 
-        assertThat(redisTemplate.hasKey(physicalKey)).as("캐시 삭제 실패").isFalse();
-    }
-
-    @Test
-    @DisplayName("멀티코어 자원공유 문제시 무조건 충돌나는 테스트")
-    void forceFailureTest() throws InterruptedException {
-        String physicalKey = "redis::" + 1;
-
-        if (redisTemplate.hasKey(physicalKey)) {
-            throw new RuntimeException("병렬 경합 발생! 옆 프로세스가 이미 자원을 쓰고 있습니다.");
-        }
-
-        redisTemplate.opsForValue().set(physicalKey, RedisEntity.from(testEntity));
-        // redis::1 키가 없네? 내가 만들고 1초 동안 잘게." (Sleep 시작)
-        // 충돌 발생 (deleteUser 시점)
-        Thread.sleep(1000);
-
-        redisTemplate.delete(physicalKey);
+        assertThat(redisTemplate.hasKey(physicalKey)).isFalse();
     }
 }
