@@ -1,3 +1,111 @@
 package com.back.global.initData;
 
-public class BaseInitData {}
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.back.domain.member.member.dto.JoinRequest;
+import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.member.member.service.MemberService;
+import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
+import com.back.domain.welfare.policy.entity.Policy;
+import com.back.domain.welfare.policy.repository.PolicyRepository;
+
+import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
+
+@Configuration
+@RequiredArgsConstructor
+public class BaseInitData {
+    @Autowired
+    @Lazy
+    private BaseInitData self;
+
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final PolicyRepository policyRepository;
+    private final ObjectMapper objectMapper;
+
+    @Bean
+    ApplicationRunner baseInitDataApplicationRunner() {
+        return args -> {
+            self.initMember();
+            self.initPolicy();
+            self.initEstate();
+            self.initCenter();
+            self.initLawyer();
+        };
+    }
+
+    @Transactional
+    public void initMember() {
+        if (memberRepository.count() >= 50) {
+            return;
+        }
+
+        Random random = new Random();
+
+        for (int i = 0; i < 50; i++) {
+            memberService.join(new JoinRequest(
+                    "name" + i,
+                    "email" + i + "@gmail.com",
+                    "1234",
+                    getRandomDate(),
+                    String.valueOf(random.nextInt(2))));
+        }
+    }
+
+    private String getRandomDate() {
+        Random random = new Random();
+        long start = LocalDate.of(1920, 1, 1).toEpochDay();
+        long end = LocalDate.of(2025, 12, 31).toEpochDay();
+
+        long range = end - start;
+        long randomDay = start + (long) (random.nextDouble() * range);
+
+        LocalDate birthDate = LocalDate.ofEpochDay(randomDay);
+
+        // 4. yyMMdd 형식으로 만들기
+        int year = birthDate.getYear() % 100; // 뒤의 2자리만
+        int month = birthDate.getMonthValue();
+        int day = birthDate.getDayOfMonth();
+
+        return String.format("%02d%02d%02d", year, month, day);
+    }
+
+    @Transactional
+    public void initPolicy() {
+        if (policyRepository.count() >= 50) {
+            return;
+        }
+
+        try (InputStream is = getClass().getResourceAsStream("/youth_policy_example.json")) {
+            // 전체 구조를 한 번에 읽어서 필요한 리스트만 반환
+            PolicyFetchResponseDto response = objectMapper.readValue(is, PolicyFetchResponseDto.class);
+
+            List<Policy> policyList = response.result().youthPolicyList().stream()
+                    .map(policyItem -> Policy.from(policyItem, ""))
+                    .toList();
+
+            policyRepository.saveAll(policyList);
+
+        } catch (IOException e) {
+            throw new RuntimeException("초기 데이터 로드 실패", e);
+        }
+    }
+
+    private void initEstate() {}
+
+    private void initCenter() {}
+
+    private void initLawyer() {}
+}
