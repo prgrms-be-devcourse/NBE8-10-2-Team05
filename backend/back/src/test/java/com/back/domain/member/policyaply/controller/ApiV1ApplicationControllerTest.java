@@ -64,7 +64,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 추가 - 200 + AddApplicationResponseDto 반환")
     void addApplicationSuccessTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
@@ -90,7 +90,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 추가 실패 - 존재하지 않는 Policy ID로 추가 시도 404 + AddApplicationResponseDto 반환")
     void addApplicationFailInvalidPolicyIdTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: 존재하지 않는 Policy ID
@@ -157,7 +157,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 조회 성공 - 신청 내역이 있는 경우 200 + ApplicationList 반환")
     void getApplicationsSuccessTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
@@ -193,7 +193,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 조회 성공 - 신청 내역이 없는 경우 200 + 빈 리스트 반환")
     void getApplicationsEmptyListTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: JWT 토큰 생성
@@ -215,7 +215,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 삭제 성공 - 본인의 신청 내역 삭제 200 + DeleteApplicationResponseDto 반환")
     void deleteApplicationSuccessTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
@@ -247,7 +247,7 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 삭제 실패 - 존재하지 않는 신청 내역 삭제 404 + DeleteApplicationResponseDto 반환")
     void deleteApplicationNotFoundTest() throws Exception {
         // given: Member 생성 및 저장
-        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", 991231, 1);
+        Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
         Member savedMember = memberRepository.save(member);
 
         // given: 존재하지 않는 Application ID
@@ -272,10 +272,10 @@ public class ApiV1ApplicationControllerTest {
     @DisplayName("신청내역 삭제 실패 - 다른 사용자의 신청 내역 삭제 시도 401 + DeleteApplicationResponseDto 반환")
     void deleteApplicationUnauthorizedTest() throws Exception {
         // given: Member 2명 생성 및 저장
-        Member member1 = Member.createEmailUser("홍길동", "test1@example.com", "encodedPassword123", 991231, 1);
+        Member member1 = Member.createEmailUser("홍길동", "test1@example.com", "encodedPassword123", "991231", "1");
         Member savedMember1 = memberRepository.save(member1);
 
-        Member member2 = Member.createEmailUser("김철수", "test2@example.com", "encodedPassword123", 990101, 1);
+        Member member2 = Member.createEmailUser("김철수", "test2@example.com", "encodedPassword123", "991231", "1");
         Member savedMember2 = memberRepository.save(member2);
 
         // given: Policy 생성 및 저장

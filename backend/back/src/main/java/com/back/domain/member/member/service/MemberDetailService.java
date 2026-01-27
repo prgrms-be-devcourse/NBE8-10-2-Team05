@@ -74,8 +74,8 @@ public class MemberDetailService {
         // reqBody의 멤버 정보값이 null이다? -> 기존 멤버 엔티티의 값 유지
         String newName = (req.name() != null ? req.name() : member.getName());
         String newEmail = (req.email() != null ? req.email() : member.getEmail());
-        Integer newRrnFront = (req.rrnFront() != null ? req.rrnFront() : member.getRrnFront());
-        Integer newRrnBackFirst = (req.rrnBackFirst() != null ? req.rrnBackFirst() : member.getRrnBackFirst());
+        String newRrnFront = (req.rrnFront() != null ? req.rrnFront() : member.getRrnFront());
+        String newRrnBackFirst = (req.rrnBackFirst() != null ? req.rrnBackFirst() : member.getRrnBackFirst());
 
         // 이메일이 변경되는 경우, 중복 체크 수행
         if (!member.getEmail().equals(newEmail)) {

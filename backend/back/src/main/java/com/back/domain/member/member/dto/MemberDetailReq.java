@@ -9,8 +9,8 @@ public record MemberDetailReq(
         // Member 정보
         String name,
         String email,
-        Integer rrnFront,
-        Integer rrnBackFirst,
+        String rrnFront,
+        String rrnBackFirst,
         Member.LoginType type,
         Member.Role role,
 
