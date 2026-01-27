@@ -33,8 +33,10 @@ import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.entity.MemberDetail;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 import com.back.global.security.SecurityUser;
 import com.back.global.security.jwt.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -305,10 +307,10 @@ public class MemberControllerTest {
         // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
         MemberDetailReq request = new MemberDetailReq(
                 "54321",
-                MemberDetail.MarriageStatus.MARRIED,
+                MarriageStatus.MARRIED,
                 5000,
-                MemberDetail.EmploymentStatus.EMPLOYED,
-                MemberDetail.EducationLevel.GRADUATE,
+                EmploymentStatus.EMPLOYED,
+                EducationLevel.UNIVERSITY_GRADUATED,
                 "수정된 특이사항");
 
         // 3. When & Then: PUT 요청 수행 및 결과 검증

@@ -1,8 +1,8 @@
 package com.back.domain.member.member.dto;
 
-import com.back.domain.member.member.entity.MemberDetail.EducationLevel;
-import com.back.domain.member.member.entity.MemberDetail.EmploymentStatus;
-import com.back.domain.member.member.entity.MemberDetail.MarriageStatus;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 
 public record MemberDetailReq(
         String regionCode,

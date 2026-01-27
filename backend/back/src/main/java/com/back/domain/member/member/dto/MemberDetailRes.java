@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import com.back.domain.member.member.entity.Member.LoginType;
 import com.back.domain.member.member.entity.Member.Role;
 import com.back.domain.member.member.entity.MemberDetail;
-import com.back.domain.member.member.entity.MemberDetail.EducationLevel;
-import com.back.domain.member.member.entity.MemberDetail.EmploymentStatus;
-import com.back.domain.member.member.entity.MemberDetail.MarriageStatus;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 
 public record MemberDetailRes(
         LocalDateTime createdAt,
@@ -23,6 +23,7 @@ public record MemberDetailRes(
         Integer income,
         EmploymentStatus employmentStatus,
         EducationLevel educationLevel,
+        String specialStatus,
         String postcode,
         String roadAddress,
         String hCode,
@@ -43,6 +44,7 @@ public record MemberDetailRes(
                 memberDetail.getIncome(),
                 memberDetail.getEmploymentStatus(),
                 memberDetail.getEducationLevel(),
+                memberDetail.getSpecialStatus(),
                 memberDetail.getAddress() != null ? memberDetail.getAddress().getPostcode() : null,
                 memberDetail.getAddress() != null ? memberDetail.getAddress().getRoadAddress() : null,
                 memberDetail.getAddress() != null ? memberDetail.getAddress().getHCode() : null,
