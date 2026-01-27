@@ -7,12 +7,17 @@ import java.util.List;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
+import com.back.global.security.SecurityUser;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -28,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final Environment env;
+    private final MemberService memberService;
 
     // 토큰 없이도 허용할 경로들 (SecurityConfig의 permitAll과 맞춰주는 게 중요)
     @Override
@@ -81,12 +87,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = String.valueOf(claims.get("role")); // 예: USER
 
             // 5) Spring Security 인증 객체 생성
-            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            // 5) ✅ DB에서 Member를 조회해서 SecurityUser를 "완성"시킨다
+            //    - 그래야 username을 buildUsername(member) 규칙으로 통일 가능
+            Member member = memberService
+                    .findById(memberId)
+                    .orElseThrow(() -> new ServiceException("AUTH-401", "존재하지 않는 회원입니다."));
 
-            var authentication = new UsernamePasswordAuthenticationToken(
-                    memberId, // principal (간단히 memberId 넣음)
-                    null,
+            // 6) ✅ 권한(authorities) 구성
+            //    member.role(USER/ADMIN) → "ROLE_USER" 형태로 변환
+            List<GrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+
+            // 7) ✅ principal을 SecurityUser로 통일 (강사님 요구 핵심)
+            //    - username: "로그인 식별자" 규칙으로 통일
+            //    - name: 화면용 이름
+            SecurityUser user = new SecurityUser(
+                    member.getId(),
+                    buildUsername(member),
+                    "", // JWT 인증에서는 credentials 의미 없음 (빈값/NULL 가능)
+                    member.getName(),
                     authorities);
+
+            // 8) ✅ Authentication 생성 후 SecurityContext에 저장
+            //    이 시점부터 Spring Security는 "인증된 사용자 요청"으로 인식함
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
 
             // 6) SecurityContext에 저장 → 이후 컨트롤러에서 인증된 사용자로 인식됨
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -97,6 +122,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 위조되었거나, 만료되었거나, 파싱 실패한 경우
             throw new ServiceException("AUTH-401", "유효하지 않은 토큰입니다.");
         }
+    }
+
+    /**
+     * ✅ username을 “로그인 식별자”로 통일
+     * - EMAIL: email
+     * - 소셜: {type}__{providerId} (ex. KAKAO__123456)
+     *
+     * 이렇게 해두면 OAuth2에서도 강사님이 쓰던 "KAKAO__{oauthUserId}"와 완전히 같은 철학으로 맞춰짐.
+     */
+    private String buildUsername(Member member) {
+        if (member.getType() == Member.LoginType.EMAIL) {
+            // 이메일 회원은 email이 로그인 식별자
+            return member.getEmail();
+        }
+
+        // 소셜 회원은 (type, providerId)가 식별자
+        // providerId는 null이면 안 됨 (DB 설계상 소셜은 providerId 있어야 함)
+        return member.getType().name() + "__" + member.getProviderId();
     }
 
     // Authorization: Bearer 토큰이 있으면 그걸 사용하고, 없으면 HttpOnly 쿠키(accessToken)에서 읽는다.

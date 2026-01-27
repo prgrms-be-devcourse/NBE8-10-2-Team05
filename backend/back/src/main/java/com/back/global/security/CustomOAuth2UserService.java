@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,16 +50,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // attributes에 우리 memberId를 넣어둔다.
         attributes.put("memberId", member.getId());
 
-        // 권한은 최소 USER로 넣어도 되고, 비워도 되는데
-        // 일반적으로는 ROLE_USER 넣는 게 디버깅에 편함
-        return new DefaultOAuth2User(
-                List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                attributes,
-                userRequest
-                        .getClientRegistration()
-                        .getProviderDetails()
-                        .getUserInfoEndpoint()
-                        .getUserNameAttributeName() // "id"
-                );
+        List<GrantedAuthority> authorities =
+                List.of(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
+
+        // username은 "로그인 식별자" 규칙으로: KAKAO__{providerId}
+        // (여기서는 카카오니까 고정으로 KAKAO__{kakaoId}도 OK)
+        return new SecurityUser(
+                member.getId(),
+                buildUsername(member), // EMAIL이면 email / 소셜이면 TYPE__providerId
+                "", // 소셜은 password 없음
+                member.getName(), // 닉네임이 member.name에 들어가 있을 거라 그대로 사용
+                authorities);
+    }
+
+    /**
+     * username을 “로그인 식별자”로 통일
+     * - EMAIL: email
+     * - 소셜: {type}__{providerId} (ex. KAKAO__47121)
+     */
+    private String buildUsername(Member member) {
+        if (member.getType() == Member.LoginType.EMAIL) {
+            return member.getEmail();
+        }
+        return member.getType().name() + "__" + member.getProviderId();
     }
 }

@@ -286,7 +286,7 @@ public class MemberControllerTest {
         Member saved = memberRepository.save(member);
 
         SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+                new SecurityUser(saved.getId(), saved.getEmail(), "", saved.getName(), java.util.List.of());
 
         mvc.perform(get("/api/v1/member/member/detail").with(user(testUser))) // 인증된 사용자 주입
                 .andExpect(status().isOk())
@@ -302,7 +302,7 @@ public class MemberControllerTest {
                 Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
         Member saved = memberRepository.save(member);
         SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+                new SecurityUser(saved.getId(), saved.getEmail(), "", saved.getName(), java.util.List.of());
 
         // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
         MemberDetailReq request = new MemberDetailReq(
@@ -340,11 +340,7 @@ public class MemberControllerTest {
 
         // 2. 신규 회원을 위한 SecurityUser 생성
         SecurityUser newUser = new SecurityUser(
-                savedNewMember.getId().intValue(),
-                savedNewMember.getEmail(),
-                "",
-                savedNewMember.getName(),
-                java.util.List.of());
+                savedNewMember.getId(), savedNewMember.getEmail(), "", savedNewMember.getName(), java.util.List.of());
 
         // 3. When & Then: GET 요청 수행 (URL에서 ID 제거 및 인증 주입)
         mvc.perform(get("/api/v1/member/member/detail").with(user(newUser))) // 신규 유저로 인증
@@ -384,7 +380,7 @@ public class MemberControllerTest {
         given(geoService.getGeoCode(any(AddressDto.class))).willReturn(enrichedDto);
 
         SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+                new SecurityUser(saved.getId(), saved.getEmail(), "", saved.getName(), java.util.List.of());
 
         mvc.perform(put("/api/v1/member/member/detail/address")
                         .contentType(MediaType.APPLICATION_JSON)

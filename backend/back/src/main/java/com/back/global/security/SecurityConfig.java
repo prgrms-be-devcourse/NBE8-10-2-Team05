@@ -1,7 +1,5 @@
 package com.back.global.security;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -56,7 +55,8 @@ public class SecurityConfig {
                 // 기본 구현은 HttpSession을 사용함.
                 // STATELESS로 설정하면 OAuth2 인증 과정이 깨지므로,
                 // 로그인 과정에서만 세션을 허용하는 IF_REQUIRED로 설정.
-                .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
+                // .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(
                         oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                                 .successHandler(customOAuth2LoginSuccessHandler))

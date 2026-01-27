@@ -3,7 +3,6 @@ package com.back.global.security;
 import java.io.IOException;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +27,8 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
             HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        Long memberId = oAuth2User.getAttribute("memberId");
+        SecurityUser principal = (SecurityUser) authentication.getPrincipal();
+        Long memberId = principal.getId();
 
         Member member = memberService.findById(memberId).orElseThrow(() -> new IllegalStateException("회원이 존재하지 않습니다."));
 
