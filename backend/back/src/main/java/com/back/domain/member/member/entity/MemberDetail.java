@@ -1,5 +1,7 @@
 package com.back.domain.member.member.entity;
 
+import com.back.domain.member.geo.entity.AddressDto;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +34,9 @@ public class MemberDetail {
     private EducationLevel educationLevel;
 
     private String specialStatus;
+
+    @Embedded
+    private Address address;
 
     @OneToOne
     @MapsId
@@ -68,5 +73,32 @@ public class MemberDetail {
         COLLEGE,
         UNIVERSITY,
         GRADUATE
+    }
+
+    @Embeddable
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Address {
+        private String postcode; // 우편번호
+        private String roadAddress; // 도로명 주소
+        private String hCode; // 행정동 코드
+        private Double latitude; // 위도
+        private Double longitude; // 경도
+
+        public static Address from(AddressDto dto) {
+            return Address.builder()
+                    .postcode(dto.postcode())
+                    .roadAddress(dto.roadAddress())
+                    .hCode(dto.hCode())
+                    .latitude(dto.latitude())
+                    .longitude(dto.longitude())
+                    .build();
+        }
+    }
+
+    public void updateAddress(AddressDto dto) {
+        this.address = Address.from(dto);
     }
 }

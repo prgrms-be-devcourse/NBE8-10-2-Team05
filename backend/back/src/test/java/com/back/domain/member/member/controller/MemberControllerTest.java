@@ -1,6 +1,9 @@
 package com.back.domain.member.member.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,9 +25,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.entity.MemberDetail;
@@ -53,6 +59,9 @@ public class MemberControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private GeoService geoService;
 
     @Test
     @DisplayName("로그인 성공 - 200 반환 + memberId/name + accessToken 반환")
@@ -340,5 +349,42 @@ public class MemberControllerTest {
                 .andExpect(jsonPath("$.marriageStatus").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.employmentStatus").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.educationLevel").value(org.hamcrest.Matchers.nullValue()));
+    }
+
+    @Test
+    @DisplayName("주소 업데이트 성공 테스트")
+    void updateAddress_Success() throws Exception {
+
+        Member member = Member.createEmailUser("테스트", "test@test.com", passwordEncoder.encode("pass"), 991231, 1);
+        Member saved = memberRepository.save(member);
+
+        AddressDto requestDto = AddressDto.builder()
+                .postcode("12345")
+                .addressName("서울특별시 강남구 테헤란로 427")
+                .build();
+
+        AddressDto enrichedDto = AddressDto.builder()
+                .postcode("12345")
+                .addressName("서울특별시 강남구 테헤란로 427")
+                .hCode("4514069000")
+                .latitude(37.503)
+                .longitude(127.044)
+                .build();
+
+        given(geoService.getGeoCode(any(AddressDto.class))).willReturn(enrichedDto);
+
+        SecurityUser testUser =
+                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+
+        mvc.perform(put("/api/v1/member/member/detail/address")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf())
+                        .with(user(testUser)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hCode").value("4514069000"))
+                .andExpect(jsonPath("$.latitude").value(37.503))
+                .andExpect(jsonPath("$.longitude").value(127.044));
     }
 }

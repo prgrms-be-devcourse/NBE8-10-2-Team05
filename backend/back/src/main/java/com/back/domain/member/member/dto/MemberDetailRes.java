@@ -22,7 +22,12 @@ public record MemberDetailRes(
         MarriageStatus marriageStatus,
         Integer income,
         EmploymentStatus employmentStatus,
-        EducationLevel educationLevel) {
+        EducationLevel educationLevel,
+        String postcode,
+        String roadAddress,
+        String hCode,
+        Double latitude,
+        Double longitude) {
     public MemberDetailRes(MemberDetail memberDetail) {
         this(
                 memberDetail.getMember().getCreatedAt(),
@@ -37,6 +42,11 @@ public record MemberDetailRes(
                 memberDetail.getMarriageStatus(),
                 memberDetail.getIncome(),
                 memberDetail.getEmploymentStatus(),
-                memberDetail.getEducationLevel());
+                memberDetail.getEducationLevel(),
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getPostcode() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getRoadAddress() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getHCode() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getLatitude() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getLongitude() : null);
     }
 }
