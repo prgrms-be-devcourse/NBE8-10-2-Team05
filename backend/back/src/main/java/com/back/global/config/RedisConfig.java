@@ -36,10 +36,12 @@ public class RedisConfig {
                         RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
                         // Jackson2JsonRedisSerializer은 (Spring Data Redis 3.x 방식)
-                        RedisSerializer.json()));
+                        RedisSerializer.json()))
+                .disableCachingNullValues();
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(cacheConfig)
+                .transactionAware()
                 .build();
     }
 
