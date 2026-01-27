@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.member.dto.*;
 import com.back.domain.member.member.service.MemberDetailService;
 import com.back.domain.member.member.service.MemberService;
@@ -69,6 +70,18 @@ public class MemberController {
 
         memberDetailService.modify(memberId, reqBody);
         MemberDetailRes response = memberDetailService.getDetail(memberId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/detail/address")
+    public ResponseEntity<MemberDetailRes> updateAddress(
+            @AuthenticationPrincipal SecurityUser securityUser, @Valid @RequestBody AddressDto addressDto) {
+
+        Long memberId = (long) securityUser.getId();
+
+        memberDetailService.updateAddress(memberId, addressDto);
+        MemberDetailRes response = memberDetailService.getDetail(memberId);
+
         return ResponseEntity.ok(response);
     }
 }

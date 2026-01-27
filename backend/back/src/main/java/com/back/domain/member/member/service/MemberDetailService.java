@@ -3,6 +3,8 @@ package com.back.domain.member.member.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.dto.MemberDetailRes;
 import com.back.domain.member.member.entity.Member;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberDetailService {
     private final MemberDetailRepository memberDetailRepository;
     private final MemberRepository memberRepository;
+    private final GeoService geoService;
 
     @Transactional
     public MemberDetailRes getDetail(Long memberId) {
@@ -53,5 +56,14 @@ public class MemberDetailService {
                 reqBody.employmentStatus(),
                 reqBody.educationLevel(),
                 reqBody.specialStatus());
+    }
+
+    @Transactional
+    public void updateAddress(Long memberId, AddressDto addressDto) {
+        MemberDetail memberDetail = findByMemberId(memberId);
+
+        AddressDto enrichedAddressDto = geoService.getGeoCode(addressDto);
+        // 입력된 불완전한 addressDto -> geoService 이용, 엄밀한 주소 데이터로 보충해줌
+        memberDetail.updateAddress(enrichedAddressDto);
     }
 }
