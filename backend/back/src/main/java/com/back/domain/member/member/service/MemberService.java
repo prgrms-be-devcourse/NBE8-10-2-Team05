@@ -132,9 +132,9 @@ public class MemberService {
         //        response.addHeader("Set-Cookie", buildRefreshCookieHeader(rawRefreshToken));
 
         // 공통 발급 로직 호출 (access + refresh 쿠키 세팅 + DB 저장)
-        issueLoginCookies(member, response);
+        String accessToken = issueLoginCookies(member, response);
 
-        return new LoginResponse(member.getId(), member.getName(), null);
+        return new LoginResponse(member.getId(), member.getName(), accessToken);
     }
 
     @Transactional(readOnly = true)
@@ -248,7 +248,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void issueLoginCookies(Member member, HttpServletResponse response) {
+    public String issueLoginCookies(Member member, HttpServletResponse response) {
 
         // 1) AccessToken 발급
         String accessToken = jwtProvider.issueAccessToken(
@@ -283,6 +283,7 @@ public class MemberService {
 
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
+        return accessToken;
     }
 
     @Transactional
