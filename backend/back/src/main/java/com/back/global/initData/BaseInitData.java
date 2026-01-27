@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.back.domain.member.member.dto.JoinRequest;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.member.member.service.MemberService;
+import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.entity.Center;
+import com.back.domain.welfare.center.center.repository.CenterRepository;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.repository.EstateRepository;
@@ -38,6 +41,7 @@ public class BaseInitData {
     private final MemberRepository memberRepository;
     private final PolicyRepository policyRepository;
     private final EstateRepository estateRepository;
+    private final CenterRepository centerRepository;
 
     private final ObjectMapper objectMapper;
 
@@ -126,7 +130,23 @@ public class BaseInitData {
         }
     }
 
-    private void initCenter() {}
+    private void initCenter() {
+        if (centerRepository.count() >= 50) {
+            return;
+        }
+
+        try (InputStream is = getClass().getResourceAsStream("/center_example.json")) {
+            CenterResponseDto response = objectMapper.readValue(is, CenterResponseDto.class);
+
+            List<Center> centerList =
+                    response.data().stream().map(Center::dtoToEntity).toList();
+
+            centerRepository.saveAll(centerList);
+
+        } catch (IOException e) {
+            throw new ServiceException("500", "estate 초기 데이터 로드 실패", e);
+        }
+    }
 
     private void initLawyer() {}
 }
