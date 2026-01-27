@@ -306,7 +306,13 @@ public class MemberControllerTest {
 
         // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
         MemberDetailReq request = new MemberDetailReq(
-                "54321",
+                "홍길동 수정", // 1. name
+                "me_test@example.com", // 2. email
+                991231, // 3. rrnFront
+                1, // 4. rrnBackFirst
+                Member.LoginType.EMAIL, // 5. type
+                Member.Role.USER, // 6. role
+                "54321", // 7. regionCode
                 MarriageStatus.MARRIED,
                 5000,
                 EmploymentStatus.EMPLOYED,
@@ -319,6 +325,7 @@ public class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))) // JSON 변환
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("홍길동 수정"))
                 .andExpect(jsonPath("$.regionCode").value("54321"))
                 .andExpect(jsonPath("$.income").value(5000));
     }
