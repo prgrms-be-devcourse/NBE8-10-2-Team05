@@ -54,6 +54,13 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
+    // MemberController에 추가
+    @PatchMapping("/complete-social")
+    public ResponseEntity<Void> completeSocial(@RequestBody CompleteSocialSignupRequest req) {
+        memberService.completeSocialSignup(req);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/detail")
     public ResponseEntity<MemberDetailRes> getMemberDetail(@AuthenticationPrincipal SecurityUser securityUser) {
         Long memberId = (long) securityUser.getId();

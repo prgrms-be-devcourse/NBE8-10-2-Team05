@@ -25,7 +25,7 @@ public class Member {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
-    @Column(nullable = false, length = 6)
+    @Column(nullable = false, length = 20)
     private String name;
 
     // 소셜은 email이 없을 수도 있어서 nullable 권장
@@ -60,6 +60,11 @@ public class Member {
     @Column(name = "profile_img_url", nullable = true)
     private String profileImgUrl;
 
+    // 회원상태
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberStatus status;
+
     public enum LoginType {
         EMAIL,
         NAVER,
@@ -69,6 +74,11 @@ public class Member {
     public enum Role {
         ADMIN,
         USER
+    }
+
+    public enum MemberStatus {
+        PRE_REGISTERED, // 소셜 로그인만 완료(추가정보 미입력)
+        ACTIVE // 필수 정보 입력 완료
     }
 
     // 외부에서 new 못 하게 막고, 생성 규칙을 한 곳에 모으는 생성자
@@ -81,7 +91,8 @@ public class Member {
             LoginType type,
             Role role,
             String providerId,
-            String profileImgUrl) {
+            String profileImgUrl,
+            MemberStatus status) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -91,6 +102,7 @@ public class Member {
         this.role = role;
         this.providerId = providerId;
         this.profileImgUrl = profileImgUrl;
+        this.status = status;
 
         // createdAt/modifiedAt을 현재 시각으로 초기화
         LocalDateTime now = LocalDateTime.now();
@@ -104,7 +116,17 @@ public class Member {
     // - createdAt/modifiedAt 자동 세팅
     public static Member createEmailUser(
             String name, String email, String encodedPassword, Integer rrnFront, Integer rrnBackFirst) {
-        return new Member(name, email, encodedPassword, rrnFront, rrnBackFirst, LoginType.EMAIL, Role.USER, null, null);
+        return new Member(
+                name,
+                email,
+                encodedPassword,
+                rrnFront,
+                rrnBackFirst,
+                LoginType.EMAIL,
+                Role.USER,
+                null,
+                null,
+                MemberStatus.ACTIVE);
     }
 
     // 소셜 회원 생성 (password/rrn 없음)
@@ -119,7 +141,8 @@ public class Member {
                 type,
                 Role.USER,
                 providerId,
-                profileImgUrl);
+                profileImgUrl,
+                MemberStatus.PRE_REGISTERED);
     }
 
     // 소셜 로그인 시 프로필 동기화
@@ -141,6 +164,16 @@ public class Member {
         if (changed) {
             touchModifiedAt();
         }
+    }
+
+    // 추가정보 입력 완료 처리 (소셜 PRE → ACTIVE)
+    public void completeSocialSignup(Integer rrnFront, Integer rrnBackFirst) {
+        // 필요한 값 검증은 서비스에서 해도 되고 여기서 해도 됨
+        this.rrnFront = rrnFront;
+        this.rrnBackFirst = rrnBackFirst;
+
+        this.status = MemberStatus.ACTIVE;
+        touchModifiedAt();
     }
 
     // 나중에 정보 수정할 때 modifiedAt 갱신용
