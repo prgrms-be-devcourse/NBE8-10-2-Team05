@@ -1,4 +1,4 @@
-package com.back.domain.member.geo.entity;
+package com.back.domain.member.geo.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

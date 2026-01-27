@@ -1,4 +1,4 @@
-package com.back.domain.member.geo.entity;
+package com.back.domain.member.geo.dto;
 
 import java.util.List;
 

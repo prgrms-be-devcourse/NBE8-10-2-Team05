@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.back.domain.member.geo.config.GeoApiProperties;
+import com.back.domain.member.geo.dto.GeoApiResponseDto;
 import com.back.domain.member.geo.entity.AddressDto;
-import com.back.domain.member.geo.entity.GeoApiResponseDto;
+import com.back.domain.member.geo.properties.GeoApiProperties;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;

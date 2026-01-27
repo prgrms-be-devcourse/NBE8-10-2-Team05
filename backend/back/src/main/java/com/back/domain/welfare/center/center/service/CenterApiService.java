@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.back.domain.welfare.center.center.config.CenterApiProperties;
 import com.back.domain.welfare.center.center.dto.CenterRequestDto;
 import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.properties.CenterApiProperties;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
