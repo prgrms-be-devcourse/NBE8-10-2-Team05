@@ -1,4 +1,4 @@
-package com.back.domain.welfare.estate.config;
+package com.back.domain.welfare.estate.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

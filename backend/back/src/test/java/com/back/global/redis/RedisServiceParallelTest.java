@@ -1,10 +1,7 @@
 package com.back.global.redis;
 
-import static org.mockito.Mockito.*;
-
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
@@ -13,7 +10,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @AutoConfigureMockMvc
 @EnableCaching
 @Execution(ExecutionMode.CONCURRENT) // ✅ 멀티코어 병렬 실행
-class RedisServiceMultiCoreTest {
+class RedisServiceParallelTest {
 
     @Autowired
     private CacheManager cacheManager;
@@ -59,25 +55,6 @@ class RedisServiceMultiCoreTest {
 
     private Integer generateUniqueId() {
         return Math.abs(UUID.randomUUID().hashCode());
-    }
-
-    private void cleanCache(Integer redisId) {
-        Cache redisCache = cacheManager.getCache(redisName);
-        if (redisCache == null) {
-            return;
-        }
-        redisCache.evict(redisId);
-    }
-
-    private void waitForCondition(BooleanSupplier condition, long timeoutMs, long pollIntervalMs)
-            throws InterruptedException {
-        long startTime = System.currentTimeMillis();
-        while (!condition.getAsBoolean()) {
-            if (System.currentTimeMillis() - startTime > timeoutMs) {
-                throw new AssertionError("조건이 시간 내에 충족되지 않았습니다.");
-            }
-            Thread.sleep(pollIntervalMs);
-        }
     }
 
     // ============================================

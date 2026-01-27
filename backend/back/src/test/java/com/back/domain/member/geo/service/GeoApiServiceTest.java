@@ -1,4 +1,4 @@
-package com.back.global.geo.service;
+package com.back.domain.member.geo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,9 +11,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.GeoApiResponseDto;
 import com.back.domain.member.geo.entity.AddressDto;
-import com.back.domain.member.geo.entity.GeoApiResponseDto;
-import com.back.domain.member.geo.service.GeoApiService;
 
 @ActiveProfiles("test")
 @SpringBootTest

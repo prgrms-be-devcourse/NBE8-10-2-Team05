@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.back.domain.welfare.estate.config.EstateConfigProperties;
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.domain.welfare.estate.properties.EstateConfigProperties;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,8 @@ public class EstateApiClient {
 
         String requestUrl = estateConfigProperties.url()
                 + "?serviceKey=" + estateConfigProperties.key()
-                + "&numOfRows=" + String.valueOf(pageSize)
-                + "&pageNo=" + String.valueOf(pageNo);
+                + "&numOfRows=" + pageSize
+                + "&pageNo=" + pageNo;
 
         EstateFetchResponseDto responseDto = Optional.ofNullable(webClient
                         .get()

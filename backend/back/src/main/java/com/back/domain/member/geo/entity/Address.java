@@ -5,7 +5,7 @@ import com.back.domain.member.geo.dto.GeoApiResponseDto;
 import lombok.Builder;
 
 @Builder
-public record AddressDto(
+public record Address(
         // 카카오 우편번호 검색 API 제공
         String postcode, // 우편번호
         String addressName, // 전체 주소
@@ -19,8 +19,8 @@ public record AddressDto(
         Double latitude, // 위도
         Double longitude // 경도
         ) {
-    public static AddressDto of(AddressDto base, GeoApiResponseDto.Address geo) {
-        return new AddressDto(
+    public static Address of(AddressDto base, GeoApiResponseDto.Address geo) {
+        return new Address(
                 base.postcode(),
                 base.addressName(),
                 base.sigunguCode(),
