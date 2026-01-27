@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.domain.welfare.center.lawyer.dto.LawyerRes;
 import com.back.domain.welfare.center.lawyer.repository.LawyerRepository;
 
@@ -18,10 +18,10 @@ public class LawyerService {
     private final LawyerRepository lawyerRepository;
 
     @Transactional(readOnly = true)
-    public List<LawyerRes> getFilteredLawyers(AddressDto addressDto) {
-        String address = addressDto.roadAddress(); // 도로명주소 받아옴
+    public List<LawyerRes> getFilteredLawyers(Address address) {
+        String strAddress = address.roadAddress(); // 도로명주소 받아옴
 
-        String[] addressList = address.split(" ");
+        String[] addressList = strAddress.split(" ");
 
         String area1 = normalizeArea1(addressList[0]); // 시/도
         String area2 = addressList[1]; // 군/구
