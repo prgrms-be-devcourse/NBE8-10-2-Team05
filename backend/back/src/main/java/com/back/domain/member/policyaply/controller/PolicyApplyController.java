@@ -13,7 +13,7 @@ import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.member.policyaply.dto.AddApplicationResponseDto;
 import com.back.domain.member.policyaply.dto.DeleteApplicationResponseDto;
 import com.back.domain.member.policyaply.entity.Application;
-import com.back.domain.member.policyaply.service.ApplicationService;
+import com.back.domain.member.policyaply.service.PolicyApplyService;
 import com.back.standard.util.Ut;
 
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/member/policy-aply")
 @RequiredArgsConstructor
-public class ApplicationController {
+public class PolicyApplyController {
 
-    private final ApplicationService applicationService;
+    private final PolicyApplyService policyApplyService;
     private final MemberRepository memberRepository;
 
     @Value("${custom.jwt.secretKey}")
@@ -82,7 +82,7 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseDto);
         }
 
-        List<Application> applications = applicationService.getApplicationList(member);
+        List<Application> applications = policyApplyService.getApplicationList(member);
         return ResponseEntity.ok(applications);
     }
 
@@ -98,7 +98,7 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(addApplicationResponseDto);
         }
 
-        Application application = applicationService.addApplication(member, policyId);
+        Application application = policyApplyService.addApplication(member, policyId);
 
         if (application != null) {
             AddApplicationResponseDto addApplicationResponseDto =
@@ -123,8 +123,8 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(deleteApplicationResponseDto);
         }
 
-        DeleteApplicationResponseDto deleteApplicationResponseDto = applicationService.deleteApplication(member, id);
+        DeleteApplicationResponseDto deleteApplicationResponseDto = policyApplyService.deleteApplication(member, id);
 
-        return ResponseEntity.status(deleteApplicationResponseDto.getCode()).body(deleteApplicationResponseDto);
+        return ResponseEntity.status(deleteApplicationResponseDto.code()).body(deleteApplicationResponseDto);
     }
 }
