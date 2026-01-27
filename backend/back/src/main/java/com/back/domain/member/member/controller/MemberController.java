@@ -54,8 +54,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    // MemberController에 추가
-    @PatchMapping("/complete-social")
+    @PostMapping("/complete-social")
     public ResponseEntity<Void> completeSocial(@RequestBody CompleteSocialSignupRequest req) {
         memberService.completeSocialSignup(req);
         return ResponseEntity.ok().build();
