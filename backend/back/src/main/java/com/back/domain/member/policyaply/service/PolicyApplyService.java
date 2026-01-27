@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicationService {
+public class PolicyApplyService {
 
     private final ApplicationRepository applicationRepository;
 

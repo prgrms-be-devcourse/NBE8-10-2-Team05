@@ -34,13 +34,13 @@ import com.back.standard.util.Ut;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class ApiV1ApplicationControllerTest {
+public class ApiV1PolicyApplyControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ApplicationController applicationController;
+    private PolicyApplyController policyApplyController;
 
     @Autowired
     private MemberRepository memberRepository;
