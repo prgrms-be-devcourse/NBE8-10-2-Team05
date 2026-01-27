@@ -1,5 +1,7 @@
 package com.back.domain.welfare.policy.entity;
 
+import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,4 +71,35 @@ public class Policy {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String rawJson;
+
+    public static Policy from(PolicyFetchResponseDto.PolicyItem item, String rawJson) {
+        return Policy.builder()
+                .plcyNo(item.plcyNo())
+                .plcyNm(item.plcyNm())
+                .plcyKywdNm(item.plcyKywdNm())
+                .plcyExplnCn(item.plcyExplnCn())
+                .plcySprtCn(item.plcySprtCn())
+                .sprvsnInstCdNm(item.sprvsnInstCdNm())
+                .operInstCdNm(item.operInstCdNm())
+                .aplyPrdSeCd(item.aplyPrdSeCd())
+                .bizPrdBgngYmd(item.bizPrdBgngYmd())
+                .bizPrdEndYmd(item.bizPrdEndYmd())
+                .plcyAplyMthdCn(item.plcyAplyMthdCn())
+                .aplyUrlAddr(item.aplyUrlAddr())
+                .sbmsnDcmntCn(item.sbmsnDcmntCn())
+                .sprtTrgtMinAge(item.sprtTrgtMinAge())
+                .sprtTrgtMaxAge(item.sprtTrgtMaxAge())
+                .sprtTrgtAgeLmtYn(item.sprtTrgtAgeLmtYn())
+                .mrgSttsCd(item.mrgSttsCd())
+                .earnCndSeCd(item.earnCndSeCd())
+                .earnMinAmt(item.earnMinAmt())
+                .earnMaxAmt(item.earnMaxAmt())
+                .zipCd(item.zipCd())
+                .jobCd(item.jobCd())
+                .schoolCd(item.schoolCd())
+                .aplyYmd(item.aplyYmd())
+                .sBizCd(item.sbizCd()) // record의 sbizCd -> Entity의 sBizCd 매핑
+                .rawJson(rawJson) // 원본 JSON 문자열 저장
+                .build();
+    }
 }
