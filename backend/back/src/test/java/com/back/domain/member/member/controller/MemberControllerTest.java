@@ -33,8 +33,10 @@ import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.member.entity.MemberDetail;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 import com.back.global.security.SecurityUser;
 import com.back.global.security.jwt.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -304,11 +306,17 @@ public class MemberControllerTest {
 
         // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
         MemberDetailReq request = new MemberDetailReq(
-                "54321",
-                MemberDetail.MarriageStatus.MARRIED,
+                "홍길동 수정", // 1. name
+                "me_test@example.com", // 2. email
+                991231, // 3. rrnFront
+                1, // 4. rrnBackFirst
+                Member.LoginType.EMAIL, // 5. type
+                Member.Role.USER, // 6. role
+                "54321", // 7. regionCode
+                MarriageStatus.MARRIED,
                 5000,
-                MemberDetail.EmploymentStatus.EMPLOYED,
-                MemberDetail.EducationLevel.GRADUATE,
+                EmploymentStatus.EMPLOYED,
+                EducationLevel.UNIVERSITY_GRADUATED,
                 "수정된 특이사항");
 
         // 3. When & Then: PUT 요청 수행 및 결과 검증
@@ -317,6 +325,7 @@ public class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))) // JSON 변환
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("홍길동 수정"))
                 .andExpect(jsonPath("$.regionCode").value("54321"))
                 .andExpect(jsonPath("$.income").value(5000));
     }

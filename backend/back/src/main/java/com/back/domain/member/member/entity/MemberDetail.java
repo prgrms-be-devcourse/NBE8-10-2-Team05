@@ -1,6 +1,9 @@
 package com.back.domain.member.member.entity;
 
 import com.back.domain.member.geo.entity.AddressDto;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -56,23 +59,6 @@ public class MemberDetail {
         this.employmentStatus = employmentStatus; // 취업 상태
         this.educationLevel = educationLevel; // 학력 요건
         this.specialStatus = specialStatus; // 특화 요건(특이사항)
-    }
-
-    public enum MarriageStatus {
-        SINGLE,
-        MARRIED
-    }
-
-    public enum EmploymentStatus {
-        EMPLOYED,
-        UNEMPLOYED
-    }
-
-    public enum EducationLevel {
-        HIGH_SCHOOL,
-        COLLEGE,
-        UNIVERSITY,
-        GRADUATE
     }
 
     @Embeddable
