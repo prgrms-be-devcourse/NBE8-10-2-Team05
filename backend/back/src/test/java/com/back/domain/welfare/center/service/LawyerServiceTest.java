@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.domain.welfare.center.lawyer.dto.LawyerRes;
 import com.back.domain.welfare.center.lawyer.service.LawyerCrawlerService;
 import com.back.domain.welfare.center.lawyer.service.LawyerService;
@@ -29,11 +29,10 @@ public class LawyerServiceTest {
     @Test
     @DisplayName("제주도의 서귀포시가 관할 구역인 노무사 검색 및 특정 인물 확인")
     void t1() throws Exception {
-        AddressDto addressDto =
-                AddressDto.builder().roadAddress("제주특별자치도 서귀포시 부평대로 168").build();
+        Address address = Address.builder().roadAddress("제주특별자치도 서귀포시 부평대로 168").build();
 
         lawyerCrawlerService.crawlMultiPages("제주", 1, 1);
-        List<LawyerRes> result = lawyerService.getFilteredLawyers(addressDto);
+        List<LawyerRes> result = lawyerService.getFilteredLawyers(address);
 
         assertThat(result).isNotEmpty();
         assertThat(result)
@@ -48,11 +47,10 @@ public class LawyerServiceTest {
     @Test
     @DisplayName("충청남도의 노무사 검색 및 특정 인물 확인")
     void t2() throws Exception {
-        AddressDto addressDto =
-                AddressDto.builder().roadAddress("충청남도 공주시 서북구 번영로 156").build();
+        Address address = Address.builder().roadAddress("충청남도 공주시 서북구 번영로 156").build();
 
         lawyerCrawlerService.crawlMultiPages("충남", 1, 1);
-        List<LawyerRes> result = lawyerService.getFilteredLawyers(addressDto);
+        List<LawyerRes> result = lawyerService.getFilteredLawyers(address);
 
         assertThat(result).isNotEmpty();
 
