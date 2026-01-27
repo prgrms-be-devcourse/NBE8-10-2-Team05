@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import com.back.domain.member.member.entity.Member.LoginType;
 import com.back.domain.member.member.entity.Member.Role;
 import com.back.domain.member.member.entity.MemberDetail;
-import com.back.domain.member.member.entity.MemberDetail.EducationLevel;
-import com.back.domain.member.member.entity.MemberDetail.EmploymentStatus;
-import com.back.domain.member.member.entity.MemberDetail.MarriageStatus;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
 
 public record MemberDetailRes(
         LocalDateTime createdAt,
@@ -22,7 +22,13 @@ public record MemberDetailRes(
         MarriageStatus marriageStatus,
         Integer income,
         EmploymentStatus employmentStatus,
-        EducationLevel educationLevel) {
+        EducationLevel educationLevel,
+        String specialStatus,
+        String postcode,
+        String roadAddress,
+        String hCode,
+        Double latitude,
+        Double longitude) {
     public MemberDetailRes(MemberDetail memberDetail) {
         this(
                 memberDetail.getMember().getCreatedAt(),
@@ -37,6 +43,12 @@ public record MemberDetailRes(
                 memberDetail.getMarriageStatus(),
                 memberDetail.getIncome(),
                 memberDetail.getEmploymentStatus(),
-                memberDetail.getEducationLevel());
+                memberDetail.getEducationLevel(),
+                memberDetail.getSpecialStatus(),
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getPostcode() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getRoadAddress() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getHCode() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getLatitude() : null,
+                memberDetail.getAddress() != null ? memberDetail.getAddress().getLongitude() : null);
     }
 }

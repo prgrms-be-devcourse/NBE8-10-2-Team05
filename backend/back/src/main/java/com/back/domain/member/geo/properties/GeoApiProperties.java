@@ -1,4 +1,4 @@
-package com.back.domain.member.geo.config;
+package com.back.domain.member.geo.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

@@ -1,5 +1,10 @@
 package com.back.domain.member.member.entity;
 
+import com.back.domain.member.geo.entity.AddressDto;
+import com.back.global.enumtype.EducationLevel;
+import com.back.global.enumtype.EmploymentStatus;
+import com.back.global.enumtype.MarriageStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +38,9 @@ public class MemberDetail {
 
     private String specialStatus;
 
+    @Embedded
+    private Address address;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "member_id")
@@ -53,20 +61,30 @@ public class MemberDetail {
         this.specialStatus = specialStatus; // 특화 요건(특이사항)
     }
 
-    public enum MarriageStatus {
-        SINGLE,
-        MARRIED
+    @Embeddable
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Address {
+        private String postcode; // 우편번호
+        private String roadAddress; // 도로명 주소
+        private String hCode; // 행정동 코드
+        private Double latitude; // 위도
+        private Double longitude; // 경도
+
+        public static Address from(AddressDto dto) {
+            return Address.builder()
+                    .postcode(dto.postcode())
+                    .roadAddress(dto.roadAddress())
+                    .hCode(dto.hCode())
+                    .latitude(dto.latitude())
+                    .longitude(dto.longitude())
+                    .build();
+        }
     }
 
-    public enum EmploymentStatus {
-        EMPLOYED,
-        UNEMPLOYED
-    }
-
-    public enum EducationLevel {
-        HIGH_SCHOOL,
-        COLLEGE,
-        UNIVERSITY,
-        GRADUATE
+    public void updateAddress(AddressDto dto) {
+        this.address = Address.from(dto);
     }
 }

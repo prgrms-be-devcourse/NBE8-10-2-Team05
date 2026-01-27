@@ -4,11 +4,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RedisService {
     private final RedisExampleCustomRepository redisExampleCustomRepository;
 
@@ -30,14 +32,16 @@ public class RedisService {
      */
     @CachePut(value = "redis", key = "#redisId")
     public RedisEntity updateUser(Integer redisId, String newApiKey) {
-        // DB 데이터를 수정하고
-        RedisEntity redisEntity =
-                RedisEntity.from(redisExampleCustomRepository.findById(redisId).orElseThrow());
-        RedisEntity updated = redisEntity.toBuilder().apiKey(newApiKey).build();
+        // 캐시가 이미 존재한다면 여기서 repository에서 가져오는게 아니라
+        // 캐시에서 값을 꺼내온다.
+        RedisCustomEntity redisEntity =
+                redisExampleCustomRepository.findById(redisId).orElseThrow();
+        RedisCustomEntity updated = redisEntity.toBuilder().apiKey(newApiKey).build();
         // redisEntity.update();
+        redisExampleCustomRepository.save(updated);
 
         // 수정된 객체를 반환하면 Redis의 기존 캐시가 이 값으로 교체됩니다.
-        return updated;
+        return RedisEntity.from(updated);
     }
 
     @CacheEvict(value = "redis", key = "#redisId")

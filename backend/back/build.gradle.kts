@@ -70,6 +70,9 @@ sourceSets {
 
 dependencies {
 
+    // Social Login
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
@@ -124,7 +127,7 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
     // CI 환경(보통 2코어)과 로컬 환경에 맞춰 동적으로 코어 할당
-    maxParallelForks = 1
+    maxParallelForks = 2
 
     testLogging {
         events("passed", "skipped", "failed")
