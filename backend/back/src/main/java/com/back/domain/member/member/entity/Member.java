@@ -38,10 +38,10 @@ public class Member {
 
     // 소셜은 rrn 없음
     @Column(nullable = true, length = 6)
-    private Integer rrnFront;
+    private String rrnFront;
 
     @Column(nullable = true, length = 1)
-    private Integer rrnBackFirst;
+    private String rrnBackFirst;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -86,8 +86,8 @@ public class Member {
             String name,
             String email,
             String password,
-            Integer rrnFront,
-            Integer rrnBackFirst,
+            String rrnFront,
+            String rrnBackFirst,
             LoginType type,
             Role role,
             String providerId,
@@ -115,7 +115,7 @@ public class Member {
     // - role은 USER
     // - createdAt/modifiedAt 자동 세팅
     public static Member createEmailUser(
-            String name, String email, String encodedPassword, Integer rrnFront, Integer rrnBackFirst) {
+            String name, String email, String encodedPassword, String rrnFront, String rrnBackFirst) {
         return new Member(
                 name,
                 email,
@@ -167,7 +167,7 @@ public class Member {
     }
 
     // 추가정보 입력 완료 처리 (소셜 PRE → ACTIVE)
-    public void completeSocialSignup(Integer rrnFront, Integer rrnBackFirst) {
+    public void completeSocialSignup(String rrnFront, String rrnBackFirst) {
         // 필요한 값 검증은 서비스에서 해도 되고 여기서 해도 됨
         this.rrnFront = rrnFront;
         this.rrnBackFirst = rrnBackFirst;
@@ -181,7 +181,7 @@ public class Member {
         this.modifiedAt = LocalDateTime.now();
     }
 
-    public void updateInfo(String name, String email, Integer rrnFront, Integer rrnBackFirst) {
+    public void updateInfo(String name, String email, String rrnFront, String rrnBackFirst) {
         this.name = name;
         this.email = email;
         this.rrnFront = rrnFront;

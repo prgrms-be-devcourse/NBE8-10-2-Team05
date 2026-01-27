@@ -252,7 +252,7 @@ public class MemberControllerTest {
     void me_success_with_token() throws Exception {
         // given: 테스트용 회원 1명 저장(회원가입 API 호출 대신 repo로 직접 저장)
         Member member =
-                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
         Member saved = memberRepository.save(member);
 
         //        // 토큰 발급
@@ -282,7 +282,7 @@ public class MemberControllerTest {
     void getDetail() throws Exception {
         // given: 테스트용 회원 1명 저장(회원가입 API 호출 대신 repo로 직접 저장)
         Member member =
-                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
         Member saved = memberRepository.save(member);
 
         SecurityUser testUser =
@@ -299,7 +299,7 @@ public class MemberControllerTest {
     void modifyDetail() throws Exception {
         // 1. Given: 회원 생성 및 시큐리티 유저 준비
         Member member =
-                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), 991231, 1);
+                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
         Member saved = memberRepository.save(member);
         SecurityUser testUser =
                 new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
@@ -308,8 +308,8 @@ public class MemberControllerTest {
         MemberDetailReq request = new MemberDetailReq(
                 "홍길동 수정", // 1. name
                 "me_test@example.com", // 2. email
-                991231, // 3. rrnFront
-                1, // 4. rrnBackFirst
+                "991231", // 3. rrnFront
+                "1", // 4. rrnBackFirst
                 Member.LoginType.EMAIL, // 5. type
                 Member.Role.USER, // 6. role
                 "54321", // 7. regionCode
@@ -334,7 +334,8 @@ public class MemberControllerTest {
     @DisplayName("상세 정보 없는 멤버 정보 조회 -> MemberDetail 자동 생성 & null 값인지 확인")
     void autoCreateDetail() throws Exception {
         // 1. Given: 상세 정보가 없는 신규 회원 생성
-        Member newMember = Member.createEmailUser("신규회원", "new@email.com", passwordEncoder.encode("pass"), 000101, 1);
+        Member newMember =
+                Member.createEmailUser("신규회원", "new@email.com", passwordEncoder.encode("pass"), "991231", "1");
         Member savedNewMember = memberRepository.save(newMember);
 
         // 2. 신규 회원을 위한 SecurityUser 생성
@@ -364,7 +365,7 @@ public class MemberControllerTest {
     @DisplayName("주소 업데이트 성공 테스트")
     void updateAddress_Success() throws Exception {
 
-        Member member = Member.createEmailUser("테스트", "test@test.com", passwordEncoder.encode("pass"), 991231, 1);
+        Member member = Member.createEmailUser("테스트", "test@test.com", passwordEncoder.encode("pass"), "991231", "1");
         Member saved = memberRepository.save(member);
 
         AddressDto requestDto = AddressDto.builder()
