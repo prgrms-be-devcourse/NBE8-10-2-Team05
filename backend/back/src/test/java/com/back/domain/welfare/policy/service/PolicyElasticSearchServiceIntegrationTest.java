@@ -24,6 +24,7 @@ import com.back.domain.welfare.policy.repository.PolicyRepository;
 import com.back.domain.welfare.policy.search.PolicySearchCondition;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.CountRequest;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 
 @SpringBootTest
@@ -32,8 +33,9 @@ import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 class PolicyElasticSearchServiceIntegrationTest {
 
     private static final String INDEX = "policy";
-    // Elasticsearch refresh 대기 시간 (밀리초)
-    private static final long REFRESH_WAIT_MS = 1000;
+    // Elasticsearch 동기화 대기 설정
+    private static final int MAX_WAIT_ATTEMPTS = 30; // 최대 30번 시도
+    private static final long WAIT_INTERVAL_MS = 200; // 200ms 간격
 
     @Autowired
     private PolicyElasticSearchService policyElasticSearchService;
@@ -70,16 +72,16 @@ class PolicyElasticSearchServiceIntegrationTest {
         try {
             if (elasticsearchClient.indices().exists(e -> e.index(INDEX)).value()) {
                 elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(INDEX)));
-                // 인덱스 삭제 후 대기
-                Thread.sleep(500);
+                // 인덱스 삭제 완료 대기
+                waitForIndexDeletion();
             }
         } catch (Exception e) {
             // 인덱스가 없으면 무시
         }
 
-        // 테스트 전 DB 데이터 정리 (plcyNo가 unique이므로 중복 방지)
+        // 테스트 전 DB 데이터 정리
         policyRepository.deleteAll();
-        policyRepository.flush(); // 명시적으로 DB에 반영
+        policyRepository.flush();
     }
 
     @AfterEach
@@ -92,7 +94,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         try {
             if (elasticsearchClient.indices().exists(e -> e.index(INDEX)).value()) {
                 elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(INDEX)));
-                Thread.sleep(500);
+                waitForIndexDeletion();
             }
         } catch (Exception e) {
             // 정리 실패는 무시
@@ -100,11 +102,80 @@ class PolicyElasticSearchServiceIntegrationTest {
     }
 
     /**
-     * Elasticsearch 인덱스를 refresh하고 충분한 시간을 대기합니다.
+     * 인덱스 삭제가 완료될 때까지 대기
      */
-    private void refreshAndWait() throws IOException, InterruptedException {
+    private void waitForIndexDeletion() throws IOException, InterruptedException {
+        for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+            try {
+                boolean exists = elasticsearchClient
+                        .indices()
+                        .exists(e -> e.index(INDEX))
+                        .value();
+                if (!exists) {
+                    return; // 삭제 완료
+                }
+            } catch (Exception e) {
+                // 인덱스가 없으면 성공
+                return;
+            }
+            Thread.sleep(WAIT_INTERVAL_MS);
+        }
+    }
+
+    /**
+     * Elasticsearch에 예상 문서 수가 인덱싱될 때까지 대기
+     */
+    private void waitForDocumentCount(long expectedCount) throws IOException, InterruptedException {
         elasticsearchClient.indices().refresh(r -> r.index(INDEX));
-        Thread.sleep(REFRESH_WAIT_MS);
+
+        for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+            try {
+                long actualCount = elasticsearchClient
+                        .count(CountRequest.of(c -> c.index(INDEX)))
+                        .count();
+
+                if (actualCount >= expectedCount) {
+                    System.out.println("✅ 문서 인덱싱 완료: " + actualCount + " / " + expectedCount);
+                    // 추가 안정화 대기
+                    Thread.sleep(500);
+                    return;
+                }
+
+                System.out.println("⏳ 대기 중... (" + actualCount + " / " + expectedCount + ")");
+            } catch (Exception e) {
+                // 인덱스가 아직 준비되지 않았을 수 있음
+            }
+            Thread.sleep(WAIT_INTERVAL_MS);
+        }
+
+        // 타임아웃
+        System.err.println("⚠️ 타임아웃: 예상 문서 수 " + expectedCount + "개가 인덱싱되지 않았습니다.");
+    }
+
+    /**
+     * Elasticsearch 인덱스를 refresh하고 문서가 검색 가능할 때까지 대기
+     */
+    private void refreshAndWaitForSearch(long expectedMinCount) throws IOException, InterruptedException {
+        elasticsearchClient.indices().refresh(r -> r.index(INDEX));
+
+        for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+            try {
+                var searchResponse = elasticsearchClient.search(
+                        s -> s.index(INDEX).query(q -> q.matchAll(m -> m)), PolicyDocument.class);
+
+                long actualCount = searchResponse.hits().total().value();
+                if (actualCount >= expectedMinCount) {
+                    System.out.println("✅ 검색 가능 확인: " + actualCount + " 건");
+                    Thread.sleep(300); // 추가 안정화
+                    return;
+                }
+            } catch (Exception e) {
+                // 아직 준비되지 않음
+            }
+            Thread.sleep(WAIT_INTERVAL_MS);
+        }
+
+        System.err.println("⚠️ 검색 타임아웃");
     }
 
     @Nested
@@ -120,7 +191,22 @@ class PolicyElasticSearchServiceIntegrationTest {
 
             // When
             policyElasticSearchService.ensureIndex();
-            Thread.sleep(500); // 인덱스 생성 대기
+
+            // 인덱스 생성 대기
+            for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+                try {
+                    boolean exists = elasticsearchClient
+                            .indices()
+                            .exists(e -> e.index(INDEX))
+                            .value();
+                    if (exists) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // 계속 시도
+                }
+                Thread.sleep(WAIT_INTERVAL_MS);
+            }
 
             // Then: 인덱스가 생성되었는지 확인
             boolean exists =
@@ -135,7 +221,23 @@ class PolicyElasticSearchServiceIntegrationTest {
 
             // Given: 인덱스 생성
             policyElasticSearchService.ensureIndex();
-            Thread.sleep(500);
+
+            // 인덱스 생성 대기
+            for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+                try {
+                    boolean exists = elasticsearchClient
+                            .indices()
+                            .exists(e -> e.index(INDEX))
+                            .value();
+                    if (exists) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    // 계속 시도
+                }
+                Thread.sleep(WAIT_INTERVAL_MS);
+            }
+
             boolean firstExists =
                     elasticsearchClient.indices().exists(e -> e.index(INDEX)).value();
             assertThat(firstExists).isTrue();
@@ -161,7 +263,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         void reindexAllFromDb_indexesAllPolicies() throws IOException, InterruptedException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: DB에 Policy 데이터 생성 (고유한 plcyNo 사용)
+            // Given: DB에 Policy 데이터 생성
             String uniqueId1 = UUID.randomUUID().toString().substring(0, 8);
             String uniqueId2 = UUID.randomUUID().toString().substring(0, 8);
             Policy policy1 = Policy.builder()
@@ -196,13 +298,13 @@ class PolicyElasticSearchServiceIntegrationTest {
 
             policyRepository.save(policy1);
             policyRepository.save(policy2);
-            policyRepository.flush(); // 명시적으로 DB에 저장
+            policyRepository.flush();
 
             // When: reindexAllFromDb 실행
             long indexedCount = policyElasticSearchService.reindexAllFromDb();
 
-            // CRITICAL: Elasticsearch refresh 및 대기
-            refreshAndWait();
+            // CRITICAL: 문서가 검색 가능해질 때까지 대기
+            waitForDocumentCount(2);
 
             // Then: 인덱싱된 문서 수 확인
             assertThat(indexedCount).isGreaterThanOrEqualTo(2);
@@ -220,7 +322,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         void reindexAllFromDb_returnsZeroWhenNoData() throws IOException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: DB에 Policy 데이터가 없는 상태 (명시적으로 정리)
+            // Given: DB에 Policy 데이터가 없는 상태
             policyRepository.deleteAll();
             policyRepository.flush();
 
@@ -245,7 +347,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             policyRepository.deleteAll();
             policyRepository.flush();
 
-            // 테스트 데이터 준비 (고유한 plcyNo 사용)
+            // 테스트 데이터 준비
             String uniqueId1 = UUID.randomUUID().toString().substring(0, 8);
             String uniqueId2 = UUID.randomUUID().toString().substring(0, 8);
             String uniqueId3 = UUID.randomUUID().toString().substring(0, 8);
@@ -298,9 +400,9 @@ class PolicyElasticSearchServiceIntegrationTest {
             policyRepository.save(policy3);
             policyRepository.flush();
 
-            // Elasticsearch 재인덱싱 및 refresh
+            // Elasticsearch 재인덱싱 및 검색 가능 대기
             policyElasticSearchService.reindexAllFromDb();
-            refreshAndWait();
+            waitForDocumentCount(3);
         }
 
         @Test
@@ -315,7 +417,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: "청년" 키워드가 포함된 정책만 반환
+            // Then
             assertThat(results).isNotEmpty();
             results.forEach(doc -> {
                 String content = (doc.getPlcyNm() + " " + doc.getKeywords()).toLowerCase();
@@ -328,14 +430,14 @@ class PolicyElasticSearchServiceIntegrationTest {
         void search_byAge() throws IOException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: 25세 조건
+            // Given
             PolicySearchCondition condition =
                     PolicySearchCondition.builder().age(25).build();
 
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 25세가 포함되는 나이 범위의 정책만 반환
+            // Then
             assertThat(results).isNotEmpty();
             results.forEach(doc -> {
                 if (doc.getMinAge() != null && doc.getMaxAge() != null) {
@@ -350,14 +452,14 @@ class PolicyElasticSearchServiceIntegrationTest {
         void search_byEarn() throws IOException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: 3000만원 소득 조건
+            // Given
             PolicySearchCondition condition =
                     PolicySearchCondition.builder().earn(3000).build();
 
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 소득 조건에 맞는 정책만 반환
+            // Then
             assertThat(results).isNotEmpty();
             results.forEach(doc -> {
                 if (doc.getEarnMin() != null && doc.getEarnMax() != null) {
@@ -379,7 +481,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 지역 코드가 "11"인 정책만 반환
+            // Then
             assertThat(results).isNotEmpty();
             results.forEach(doc -> {
                 if (doc.getRegionCode() != null) {
@@ -443,7 +545,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 키워드가 포함된 정책 반환
+            // Then
             assertThat(results).isNotEmpty();
         }
 
@@ -452,7 +554,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         void search_byMultipleConditions() throws IOException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: 여러 조건 조합
+            // Given
             PolicySearchCondition condition = PolicySearchCondition.builder()
                     .keyword("청년")
                     .age(25)
@@ -466,7 +568,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 모든 조건을 만족하는 정책만 반환
+            // Then
             assertThat(results).isNotEmpty();
         }
 
@@ -481,7 +583,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             // When
             List<PolicyDocument> results = policyElasticSearchService.search(condition, 0, 10);
 
-            // Then: 전체 문서 반환
+            // Then
             assertThat(results).isNotEmpty();
         }
     }
@@ -499,7 +601,7 @@ class PolicyElasticSearchServiceIntegrationTest {
             policyRepository.deleteAll();
             policyRepository.flush();
 
-            // 테스트 데이터 준비 (고유한 plcyNo 사용)
+            // 테스트 데이터 준비
             for (int i = 1; i <= 5; i++) {
                 String uniqueId = UUID.randomUUID().toString().substring(0, 8);
                 Policy policy = Policy.builder()
@@ -514,8 +616,8 @@ class PolicyElasticSearchServiceIntegrationTest {
 
             policyElasticSearchService.reindexAllFromDb();
 
-            // CRITICAL: Elasticsearch refresh 및 대기
-            refreshAndWait();
+            // CRITICAL: 5개 문서가 모두 검색 가능해질 때까지 대기
+            waitForDocumentCount(5);
         }
 
         @Test
@@ -547,13 +649,11 @@ class PolicyElasticSearchServiceIntegrationTest {
             PolicySearchCondition condition =
                     PolicySearchCondition.builder().keyword("테스트").build();
 
-            // When: 첫 페이지
+            // When
             PolicyElasticSearchService.SearchResult page1 = policyElasticSearchService.searchWithTotal(condition, 0, 2);
-
-            // When: 두 번째 페이지
             PolicyElasticSearchService.SearchResult page2 = policyElasticSearchService.searchWithTotal(condition, 2, 2);
 
-            // Then: 총 개수는 동일해야 함
+            // Then
             assertThat(page1.getTotal()).isEqualTo(page2.getTotal());
             assertThat(page1.getTotal()).isGreaterThanOrEqualTo(5);
         }
@@ -563,7 +663,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         void searchWithTotal_returnsZeroWhenNoResults() throws IOException {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-            // Given: 존재하지 않는 키워드
+            // Given
             PolicySearchCondition condition =
                     PolicySearchCondition.builder().keyword("존재하지않는키워드12345").build();
 
