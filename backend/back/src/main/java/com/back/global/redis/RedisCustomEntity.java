@@ -4,6 +4,6 @@ import org.springframework.data.redis.core.RedisHash;
 
 import lombok.*;
 
-@Builder
+@Builder(toBuilder = true)
 @RedisHash("example")
 public record RedisCustomEntity(Integer id, String nickname, String apiKey) {}
