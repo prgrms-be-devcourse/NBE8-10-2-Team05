@@ -9,8 +9,6 @@ import type {
   ApiErrorResponse,
 } from "@/types/member";
 
-const API_BASE_URL = "http://localhost:8080";
-
 export class ApiError extends Error {
   constructor(
     public resultCode: string,
@@ -24,7 +22,7 @@ export class ApiError extends Error {
 // accessToken 재발급 요청
 // POST /api/v1/auth/reissue
 async function reissue(): Promise<boolean> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/auth/reissue`, {
+  const response = await fetch(`/api/v1/auth/reissue`, {
     method: "POST",
     credentials: "include",
   });
@@ -64,7 +62,7 @@ async function fetchWithAuth(
 
 // ===== 회원가입 (인증 불필요) =====
 export async function join(request: JoinRequest): Promise<JoinResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/member/member/join`, {
+  const response = await fetch(`/api/v1/member/member/join`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +81,7 @@ export async function join(request: JoinRequest): Promise<JoinResponse> {
 
 // ===== 로그인 (인증 불필요) =====
 export async function login(request: LoginRequest): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/member/member/login`, {
+  const response = await fetch(`/api/v1/member/member/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -106,7 +104,7 @@ export async function updateAddress(
   addressDto: AddressDto
 ): Promise<MemberDetailRes> {
   const response = await fetchWithAuth(
-    `${API_BASE_URL}/api/v1/member/member/detail/address`,
+    `/api/v1/member/member/detail/address`,
     {
       method: "PUT",
       headers: {
@@ -128,7 +126,7 @@ export async function updateAddress(
 // ===== 로그아웃 (인증 필요) =====
 export async function logout(): Promise<void> {
   const response = await fetchWithAuth(
-    `${API_BASE_URL}/api/v1/member/member/logout`,
+    `/api/v1/member/member/logout`,
     {
       method: "POST",
     }
