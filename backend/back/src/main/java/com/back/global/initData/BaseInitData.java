@@ -16,9 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.back.domain.member.member.dto.JoinRequest;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.domain.member.member.service.MemberService;
+import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.domain.welfare.estate.entity.Estate;
+import com.back.domain.welfare.estate.repository.EstateRepository;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.back.domain.welfare.policy.entity.Policy;
 import com.back.domain.welfare.policy.repository.PolicyRepository;
+import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
@@ -33,6 +37,8 @@ public class BaseInitData {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final PolicyRepository policyRepository;
+    private final EstateRepository estateRepository;
+
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -88,8 +94,7 @@ public class BaseInitData {
             return;
         }
 
-        try (InputStream is = getClass().getResourceAsStream("/youth_policy_example.json")) {
-            // 전체 구조를 한 번에 읽어서 필요한 리스트만 반환
+        try (InputStream is = getClass().getResourceAsStream("/estate_example.json")) {
             PolicyFetchResponseDto response = objectMapper.readValue(is, PolicyFetchResponseDto.class);
 
             List<Policy> policyList = response.result().youthPolicyList().stream()
@@ -99,11 +104,27 @@ public class BaseInitData {
             policyRepository.saveAll(policyList);
 
         } catch (IOException e) {
-            throw new RuntimeException("초기 데이터 로드 실패", e);
+            throw new ServiceException("500", "estate 초기 데이터 로드 실패", e);
         }
     }
 
-    private void initEstate() {}
+    private void initEstate() {
+        if (estateRepository.count() >= 50) {
+            return;
+        }
+
+        try (InputStream is = getClass().getResourceAsStream("/youth_policy_example.json")) {
+            EstateFetchResponseDto response = objectMapper.readValue(is, EstateFetchResponseDto.class);
+
+            List<Estate> estateList =
+                    response.response().body().items().stream().map(Estate::new).toList();
+
+            estateRepository.saveAll(estateList);
+
+        } catch (IOException e) {
+            throw new ServiceException("500", "estate 초기 데이터 로드 실패", e);
+        }
+    }
 
     private void initCenter() {}
 
