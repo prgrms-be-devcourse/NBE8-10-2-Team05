@@ -33,8 +33,8 @@ import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 class PolicyElasticSearchServiceIntegrationTest {
 
     private static final String INDEX = "policy";
-    private static final int MAX_WAIT_ATTEMPTS = 50;
-    private static final long WAIT_INTERVAL_MS = 200;
+    private static final int MAX_WAIT_ATTEMPTS = 60;
+    private static final long WAIT_INTERVAL_MS = 300;
 
     @Autowired
     private PolicyElasticSearchService policyElasticSearchService;
@@ -51,90 +51,104 @@ class PolicyElasticSearchServiceIntegrationTest {
     private boolean elasticsearchAvailable = false;
 
     @BeforeEach
-    void setUp() throws IOException, InterruptedException {
+    void setUp() throws Exception {
         try {
-            boolean pingResult = elasticsearchClient.ping().value();
-            elasticsearchAvailable = pingResult;
+            elasticsearchAvailable = elasticsearchClient.ping().value();
             if (!elasticsearchAvailable) {
-                System.out.println("⚠️ Elasticsearch 서버가 실행 중이지 않습니다. 테스트를 건너뜁니다.");
+                System.out.println("⚠️ Elasticsearch 서버가 실행 중이지 않습니다.");
                 return;
             }
         } catch (Exception e) {
-            System.out.println("⚠️ Elasticsearch 서버 연결 실패: " + e.getMessage());
+            System.out.println("⚠️ Elasticsearch 연결 실패: " + e.getMessage());
             elasticsearchAvailable = false;
             return;
         }
 
-        try {
-            if (elasticsearchClient.indices().exists(e -> e.index(INDEX)).value()) {
-                elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(INDEX)));
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            // 인덱스가 없으면 무시
-        }
-
+        cleanupElasticsearch();
         policyRepository.deleteAll();
         policyRepository.flush();
     }
 
     @AfterEach
-    void tearDown() throws IOException, InterruptedException {
-        if (!elasticsearchAvailable) {
-            return;
+    void tearDown() throws Exception {
+        if (elasticsearchAvailable) {
+            cleanupElasticsearch();
         }
+    }
 
+    private void cleanupElasticsearch() throws Exception {
         try {
             if (elasticsearchClient.indices().exists(e -> e.index(INDEX)).value()) {
                 elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(INDEX)));
-                Thread.sleep(500);
+
+                // 인덱스 삭제 완료 대기
+                for (int i = 0; i < 20; i++) {
+                    try {
+                        if (!elasticsearchClient
+                                .indices()
+                                .exists(e -> e.index(INDEX))
+                                .value()) {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        break;
+                    }
+                    Thread.sleep(200);
+                }
             }
         } catch (Exception e) {
-            // 정리 실패는 무시
+            // 인덱스가 없으면 무시
         }
     }
 
     /**
-     * Elasticsearch에 문서가 완전히 인덱싱되고 검색 가능해질 때까지 대기
+     * Elasticsearch 인덱싱 완료 대기
      */
-    private void waitForIndexing(long expectedCount) throws IOException, InterruptedException {
-        // 1단계: refresh
-        try {
-            elasticsearchClient.indices().refresh(r -> r.index(INDEX));
-        } catch (Exception e) {
-            // 인덱스가 아직 없을 수 있음
-        }
+    private void waitForIndexing(long expectedCount) throws Exception {
+        System.out.println("🔍 인덱싱 대기 시작: 예상 문서 수 = " + expectedCount);
 
-        // 2단계: count API로 실제 문서 수 확인
-        for (int i = 0; i < MAX_WAIT_ATTEMPTS; i++) {
+        // 먼저 refresh
+        elasticsearchClient.indices().refresh(r -> r.index(INDEX));
+
+        long lastCount = 0;
+        for (int attempt = 0; attempt < MAX_WAIT_ATTEMPTS; attempt++) {
             try {
+                // Count API로 문서 수 확인
                 long count = elasticsearchClient
                         .count(CountRequest.of(c -> c.index(INDEX)))
                         .count();
 
-                if (count >= expectedCount) {
-                    // 3단계: 실제 검색 테스트
-                    var searchResponse = elasticsearchClient.search(
-                            s -> s.index(INDEX).query(q -> q.matchAll(m -> m)), PolicyDocument.class);
+                lastCount = count;
 
-                    if (searchResponse.hits().total().value() >= expectedCount) {
-                        System.out.println("✅ 인덱싱 완료: " + count + "건");
+                if (count >= expectedCount) {
+                    // 한 번 더 검증: 실제 검색 가능한지
+                    var searchResponse = elasticsearchClient.search(
+                            s -> s.index(INDEX).query(q -> q.matchAll(m -> m)).size((int) expectedCount),
+                            PolicyDocument.class);
+
+                    long searchCount = searchResponse.hits().total().value();
+                    if (searchCount >= expectedCount) {
+                        System.out.println("✅ 인덱싱 완료: " + searchCount + "건 (시도: " + (attempt + 1) + ")");
                         Thread.sleep(500); // 최종 안정화
                         return;
                     }
                 }
 
-                if (i % 10 == 0) {
-                    System.out.println("⏳ 대기 중... " + count + " / " + expectedCount);
+                if (attempt % 10 == 0 && attempt > 0) {
+                    System.out.println("⏳ 대기 중... " + count + " / " + expectedCount + " (시도: " + (attempt + 1) + ")");
+                    // 중간에 한 번 더 refresh
+                    elasticsearchClient.indices().refresh(r -> r.index(INDEX));
                 }
             } catch (Exception e) {
-                // 인덱스가 준비 중일 수 있음
+                if (attempt % 10 == 0 && attempt > 0) {
+                    System.out.println("⚠️ 검색 실패 (시도: " + (attempt + 1) + "): " + e.getMessage());
+                }
             }
 
             Thread.sleep(WAIT_INTERVAL_MS);
         }
 
-        System.err.println("⚠️ 타임아웃: " + expectedCount + "건 인덱싱 대기 실패");
+        throw new AssertionError("⚠️ 타임아웃: " + expectedCount + "건 인덱싱 대기 실패 (마지막 확인: " + lastCount + "건)");
     }
 
     @Nested
@@ -143,7 +157,7 @@ class PolicyElasticSearchServiceIntegrationTest {
 
         @Test
         @DisplayName("ensureIndex: 인덱스가 없으면 생성")
-        void ensureIndex_createsIndexWhenNotExists() throws IOException, InterruptedException {
+        void ensureIndex_createsIndexWhenNotExists() throws Exception {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
             policyElasticSearchService.ensureIndex();
@@ -156,7 +170,7 @@ class PolicyElasticSearchServiceIntegrationTest {
 
         @Test
         @DisplayName("ensureIndex: 인덱스가 이미 있으면 재생성하지 않음")
-        void ensureIndex_doesNotRecreateWhenExists() throws IOException, InterruptedException {
+        void ensureIndex_doesNotRecreateWhenExists() throws Exception {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
             policyElasticSearchService.ensureIndex();
@@ -182,7 +196,7 @@ class PolicyElasticSearchServiceIntegrationTest {
         @Test
         @Transactional
         @DisplayName("reindexAllFromDb: DB의 Policy를 ES에 인덱싱")
-        void reindexAllFromDb_indexesAllPolicies() throws IOException, InterruptedException {
+        void reindexAllFromDb_indexesAllPolicies() throws Exception {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
             String uniqueId1 = UUID.randomUUID().toString().substring(0, 8);
@@ -222,6 +236,9 @@ class PolicyElasticSearchServiceIntegrationTest {
             policyRepository.save(policy2);
             policyRepository.flush();
 
+            policyElasticSearchService.ensureIndex();
+            Thread.sleep(500);
+
             long indexedCount = policyElasticSearchService.reindexAllFromDb();
             waitForIndexing(2);
 
@@ -254,7 +271,7 @@ class PolicyElasticSearchServiceIntegrationTest {
 
         @BeforeEach
         @Transactional
-        void setUp() throws IOException, InterruptedException {
+        void setUp() throws Exception {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
             policyRepository.deleteAll();
@@ -314,6 +331,9 @@ class PolicyElasticSearchServiceIntegrationTest {
             policyRepository.save(policy2);
             policyRepository.save(policy3);
             policyRepository.flush();
+
+            policyElasticSearchService.ensureIndex();
+            Thread.sleep(500);
 
             policyElasticSearchService.reindexAllFromDb();
             waitForIndexing(3);
@@ -479,7 +499,7 @@ class PolicyElasticSearchServiceIntegrationTest {
 
         @BeforeEach
         @Transactional
-        void setUp() throws IOException, InterruptedException {
+        void setUp() throws Exception {
             assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
             policyRepository.deleteAll();
@@ -496,6 +516,9 @@ class PolicyElasticSearchServiceIntegrationTest {
                 policyRepository.save(policy);
             }
             policyRepository.flush();
+
+            policyElasticSearchService.ensureIndex();
+            Thread.sleep(500);
 
             policyElasticSearchService.reindexAllFromDb();
             waitForIndexing(5);
