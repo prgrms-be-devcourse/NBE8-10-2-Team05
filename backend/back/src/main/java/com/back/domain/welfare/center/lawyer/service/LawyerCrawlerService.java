@@ -43,41 +43,55 @@ public class LawyerCrawlerService {
             // 테이블 내부 각각 행의 정보을 받아옴
 
             for (Element row : rows) {
-                // 받아온 행들을 순회, td에서 데이터 추출
-                Elements cols = row.select("td");
+                // 열 별로 순회하면서 파싱
+                Lawyer lawyer = parseRowToLawyer(row, area1);
 
-                // 데이터가 3개 다 있는 행인지 확인하고 출력
-                if (cols.size() >= 3) {
-                    String region = cols.get(0).text();
-                    String name = cols.get(1).text();
-                    String company = cols.get(2).text();
-
-                    Lawyer lawyer = Lawyer.builder()
-                            .name(name)
-                            .corporation(company)
-                            .districtArea1(area1) // 검색어에서 가져온 시/도
-                            .districtArea2(region) // 검색어에서 가져온 군/구
-                            .build();
-
+                if (lawyer != null) {
                     lawyerList.add(lawyer);
                 }
-                // 100건마다 즉시 저장
+
+                // 설정한 배치 사이즈 기준마다 저장
                 if (lawyerList.size() >= BATCH_SIZE) {
                     lawyerSaveService.saveList(lawyerList);
                     lawyerList.clear();
                 }
             }
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            applyDelay(300);
         }
 
         // 마지막 남은 데이터 저장
         if (!lawyerList.isEmpty()) {
             lawyerSaveService.saveList(lawyerList);
             lawyerList.clear();
+        }
+    }
+
+    // 해당 열의 요소를 분해해서 데이터를 Lawyer로 저장
+    private Lawyer parseRowToLawyer(Element row, String area1) {
+        Elements cols = row.select("td");
+
+        if (cols.size() < 3) {
+            return null;
+        }
+
+        String name = cols.get(1).text();
+        String corporation = cols.get(2).text();
+        String area2 = cols.get(0).text();
+
+        return Lawyer.builder()
+                .name(name)
+                .corporation(corporation)
+                .districtArea1(area1)
+                .districtArea2(area2)
+                .build();
+    }
+
+    // 딜레이 주는 기능 메서드로 따로 분리
+    private void applyDelay(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

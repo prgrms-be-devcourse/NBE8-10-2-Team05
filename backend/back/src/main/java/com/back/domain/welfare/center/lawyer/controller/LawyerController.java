@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.domain.welfare.center.lawyer.dto.LawyerRes;
 import com.back.domain.welfare.center.lawyer.service.LawyerService;
 
@@ -21,8 +21,8 @@ public class LawyerController {
     private final LawyerService lawyerService;
 
     @GetMapping
-    public ResponseEntity<List<LawyerRes>> searchLawyersByDistrict(@Valid AddressDto addressDto) {
-        List<LawyerRes> lawyers = lawyerService.getFilteredLawyers(addressDto);
+    public ResponseEntity<List<LawyerRes>> searchLawyersByDistrict(@Valid Address address) {
+        List<LawyerRes> lawyers = lawyerService.getFilteredLawyers(address);
 
         return ResponseEntity.ok(lawyers);
     }
