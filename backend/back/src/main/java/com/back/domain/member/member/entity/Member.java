@@ -180,4 +180,12 @@ public class Member {
     public void touchModifiedAt() {
         this.modifiedAt = LocalDateTime.now();
     }
+
+    public void updateInfo(String name, String email, Integer rrnFront, Integer rrnBackFirst) {
+        this.name = name;
+        this.email = email;
+        this.rrnFront = rrnFront;
+        this.rrnBackFirst = rrnBackFirst;
+        this.touchModifiedAt();
+    }
 }

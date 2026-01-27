@@ -11,6 +11,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.entity.MemberDetail;
 import com.back.domain.member.member.repository.MemberDetailRepository;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,18 +38,20 @@ public class MemberDetailService {
                     // 유저 자체가 없다? 예외처리
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
             // 유저는 있는데 상세 정보가 없다? 빈 상세 정보 만들어 저장
-            return CreateDetail(member);
+            return createDetail(member);
         });
     }
 
     @Transactional
-    public MemberDetail CreateDetail(Member member) {
+    public MemberDetail createDetail(Member member) {
         return memberDetailRepository.save(MemberDetail.builder().member(member).build());
     }
 
     @Transactional
     public void modify(Long memberId, MemberDetailReq reqBody) {
         MemberDetail memberDetail = findByMemberId(memberId);
+        Member member = memberDetail.getMember();
+        updateMemberInfo(member, reqBody);
         memberDetail.update(
                 reqBody.regionCode(),
                 reqBody.marriageStatus(),
@@ -65,5 +68,21 @@ public class MemberDetailService {
         AddressDto enrichedAddressDto = geoService.getGeoCode(addressDto);
         // 입력된 불완전한 addressDto -> geoService 이용, 엄밀한 주소 데이터로 보충해줌
         memberDetail.updateAddress(enrichedAddressDto);
+    }
+
+    public void updateMemberInfo(Member member, MemberDetailReq req) {
+        // reqBody의 멤버 정보값이 null이다? -> 기존 멤버 엔티티의 값 유지
+        String newName = (req.name() != null ? req.name() : member.getName());
+        String newEmail = (req.email() != null ? req.email() : member.getEmail());
+        Integer newRrnFront = (req.rrnFront() != null ? req.rrnFront() : member.getRrnFront());
+        Integer newRrnBackFirst = (req.rrnBackFirst() != null ? req.rrnBackFirst() : member.getRrnBackFirst());
+
+        // 이메일이 변경되는 경우, 중복 체크 수행
+        if (!member.getEmail().equals(newEmail)) {
+            if (memberRepository.existsByEmail(newEmail)) {
+                throw new ServiceException("MEMBER_409", "이미 존재하는 이메일입니다");
+            }
+        }
+        member.updateInfo(newName, newEmail, newRrnFront, newRrnBackFirst);
     }
 }
