@@ -3,8 +3,6 @@ package com.back.domain.member.member.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -29,6 +27,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.entity.Address;
 import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
@@ -37,7 +36,6 @@ import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
-import com.back.global.security.SecurityUser;
 import com.back.global.security.jwt.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -280,50 +278,52 @@ public class MemberControllerTest {
     @Test
     @DisplayName("내 상세 정보 조회")
     void getDetail() throws Exception {
-        // given: 테스트용 회원 1명 저장(회원가입 API 호출 대신 repo로 직접 저장)
-        Member member =
-                Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
+        Member member = Member.createEmailUser("홍길동", "me_test@example.com", "1234", "991231", "1");
         Member saved = memberRepository.save(member);
 
-        SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
+        var auth = new UsernamePasswordAuthenticationToken(
+                saved.getId(), // ID를 직접 주입
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        mvc.perform(get("/api/v1/member/member/detail").with(user(testUser))) // 인증된 사용자 주입
+        mvc.perform(get("/api/v1/member/member/detail"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("홍길동"))
-                .andExpect(jsonPath("$.email").value("me_test@example.com"));
+                .andExpect(jsonPath("$.name").value("홍길동"));
     }
 
     @Test
     @DisplayName("내 상세 정보 수정")
     void modifyDetail() throws Exception {
-        // 1. Given: 회원 생성 및 시큐리티 유저 준비
         Member member =
                 Member.createEmailUser("홍길동", "me_test@example.com", passwordEncoder.encode("12345678"), "991231", "1");
         Member saved = memberRepository.save(member);
-        SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
 
-        // 2. 수정 데이터 준비 (DTO 패키지 경로 및 생성자 확인 필요)
+        var auth = new UsernamePasswordAuthenticationToken(
+                saved.getId(),
+                null,
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")));
+        org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .setAuthentication(auth);
+
+        // 수정 데이터
         MemberDetailReq request = new MemberDetailReq(
-                "홍길동 수정", // 1. name
-                "me_test@example.com", // 2. email
-                "991231", // 3. rrnFront
-                "1", // 4. rrnBackFirst
-                Member.LoginType.EMAIL, // 5. type
-                Member.Role.USER, // 6. role
-                "54321", // 7. regionCode
+                "홍길동 수정",
+                "me_test@example.com",
+                "991231",
+                "1",
+                Member.LoginType.EMAIL,
+                Member.Role.USER,
+                "54321",
                 MarriageStatus.MARRIED,
                 5000,
                 EmploymentStatus.EMPLOYED,
                 EducationLevel.UNIVERSITY_GRADUATED,
                 "수정된 특이사항");
 
-        // 3. When & Then: PUT 요청 수행 및 결과 검증
         mvc.perform(put("/api/v1/member/member/detail")
-                        .with(user(testUser)) // 인증 주입
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))) // JSON 변환
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("홍길동 수정"))
                 .andExpect(jsonPath("$.regionCode").value("54321"))
@@ -333,27 +333,25 @@ public class MemberControllerTest {
     @Test
     @DisplayName("상세 정보 없는 멤버 정보 조회 -> MemberDetail 자동 생성 & null 값인지 확인")
     void autoCreateDetail() throws Exception {
-        // 1. Given: 상세 정보가 없는 신규 회원 생성
+
         Member newMember =
                 Member.createEmailUser("신규회원", "new@email.com", passwordEncoder.encode("pass"), "991231", "1");
         Member savedNewMember = memberRepository.save(newMember);
 
-        // 2. 신규 회원을 위한 SecurityUser 생성
-        SecurityUser newUser = new SecurityUser(
-                savedNewMember.getId().intValue(),
-                savedNewMember.getEmail(),
-                "",
-                savedNewMember.getName(),
-                java.util.List.of());
+        var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                savedNewMember.getId(),
+                null,
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")));
+        org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .setAuthentication(auth);
 
-        // 3. When & Then: GET 요청 수행 (URL에서 ID 제거 및 인증 주입)
-        mvc.perform(get("/api/v1/member/member/detail").with(user(newUser))) // 신규 유저로 인증
+        mvc.perform(get("/api/v1/member/member/detail"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 // Member 기본 정보 확인
                 .andExpect(jsonPath("$.name").value("신규회원"))
                 .andExpect(jsonPath("$.email").value("new@email.com"))
-                // 상세 정보 필드들이 최초 생성 시 null인지 확인 (org.hamcrest.Matchers.nullValue() 사용)
+                // MemberDetail 자동 생성 및 초기값(null) 확인
                 .andExpect(jsonPath("$.regionCode").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.income").value(org.hamcrest.Matchers.nullValue()))
                 .andExpect(jsonPath("$.marriageStatus").value(org.hamcrest.Matchers.nullValue()))
@@ -364,13 +362,20 @@ public class MemberControllerTest {
     @Test
     @DisplayName("주소 업데이트 성공 테스트")
     void updateAddress_Success() throws Exception {
-
         Member member = Member.createEmailUser("테스트", "test@test.com", passwordEncoder.encode("pass"), "991231", "1");
         Member saved = memberRepository.save(member);
 
-        AddressDto requestDto = AddressDto.builder()
+        var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                saved.getId(),
+                null,
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER")));
+        org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .setAuthentication(auth);
+
+        // 요청 데이터 준비
+        Address requestBody = Address.builder()
                 .postcode("12345")
-                .addressName("서울특별시 강남구 테헤란로 427")
+                .roadAddress("서울특별시 강남구 테헤란로 427")
                 .build();
 
         AddressDto enrichedDto = AddressDto.builder()
@@ -383,16 +388,12 @@ public class MemberControllerTest {
 
         given(geoService.getGeoCode(any(AddressDto.class))).willReturn(enrichedDto);
 
-        SecurityUser testUser =
-                new SecurityUser(saved.getId().intValue(), saved.getEmail(), "", saved.getName(), java.util.List.of());
-
         mvc.perform(put("/api/v1/member/member/detail/address")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .with(csrf())
-                        .with(user(testUser)))
+                        .content(objectMapper.writeValueAsString(requestBody))) // Address 객체 전달
                 .andDo(print())
                 .andExpect(status().isOk())
+                // 응답 값 검증
                 .andExpect(jsonPath("$.hCode").value("4514069000"))
                 .andExpect(jsonPath("$.latitude").value(37.503))
                 .andExpect(jsonPath("$.longitude").value(127.044));

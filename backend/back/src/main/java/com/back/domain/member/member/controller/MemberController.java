@@ -1,14 +1,14 @@
 package com.back.domain.member.member.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.domain.member.member.dto.*;
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberDetailService;
 import com.back.domain.member.member.service.MemberService;
-import com.back.global.security.SecurityUser;
+import com.back.standard.util.ActorProvider;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +22,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final MemberDetailService memberDetailService;
+    private final ActorProvider actorProvider;
 
     // 회원가입
     @PostMapping("/join")
@@ -61,32 +62,30 @@ public class MemberController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<MemberDetailRes> getMemberDetail(@AuthenticationPrincipal SecurityUser securityUser) {
-        Long memberId = (long) securityUser.getId();
+    public ResponseEntity<MemberDetailRes> getMemberDetail() {
+        Member actor = actorProvider.getActor();
 
-        MemberDetailRes response = memberDetailService.getDetail(memberId);
+        MemberDetailRes response = memberDetailService.getDetail(actor.getId());
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/detail")
-    public ResponseEntity<MemberDetailRes> modifyMemberDetail(
-            @AuthenticationPrincipal SecurityUser securityUser, @Valid @RequestBody MemberDetailReq reqBody) {
+    public ResponseEntity<MemberDetailRes> modifyMemberDetail(@Valid @RequestBody MemberDetailReq reqBody) {
 
-        Long memberId = (long) securityUser.getId();
+        Member actor = actorProvider.getActor();
 
-        memberDetailService.modify(memberId, reqBody);
-        MemberDetailRes response = memberDetailService.getDetail(memberId);
+        memberDetailService.modify(actor.getId(), reqBody);
+        MemberDetailRes response = memberDetailService.getDetail(actor.getId());
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/detail/address")
-    public ResponseEntity<MemberDetailRes> updateAddress(
-            @AuthenticationPrincipal SecurityUser securityUser, @Valid @RequestBody AddressDto addressDto) {
+    public ResponseEntity<MemberDetailRes> updateAddress(@Valid @RequestBody Address address) {
 
-        Long memberId = (long) securityUser.getId();
+        Member actor = actorProvider.getActor();
 
-        memberDetailService.updateAddress(memberId, addressDto);
-        MemberDetailRes response = memberDetailService.getDetail(memberId);
+        memberDetailService.updateAddress(actor.getId(), address);
+        MemberDetailRes response = memberDetailService.getDetail(actor.getId());
 
         return ResponseEntity.ok(response);
     }
