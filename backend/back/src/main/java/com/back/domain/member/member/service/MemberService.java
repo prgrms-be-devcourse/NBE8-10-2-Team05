@@ -2,6 +2,7 @@ package com.back.domain.member.member.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -73,6 +74,41 @@ public class MemberService {
         return JoinResponse.from(savedMember);
     }
 
+    @Transactional
+    public void completeSocialSignup(CompleteSocialSignupRequest req) {
+        if (req == null) throw new ServiceException("MEMBER-400", "요청 바디가 비었습니다.");
+
+        if (req.rrnFront() == null) throw new ServiceException("MEMBER-400", "rrnFront는 필수입니다.");
+        if (req.rrnBackFirst() == null) throw new ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.");
+
+        // 현재 로그인 사용자 조회 (기존 me() 로직 재사용 가능)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null
+                || !auth.isAuthenticated()
+                || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
+        }
+
+        Long memberId;
+        try {
+            memberId = (Long) auth.getPrincipal();
+        } catch (ClassCastException e) {
+            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
+        }
+
+        Member member = memberRepository
+                .findById(memberId)
+                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+
+        // 소셜 미완성 유저만 완료 처리
+        if (member.getStatus() != Member.MemberStatus.PRE_REGISTERED) {
+            throw new ServiceException("MEMBER-400", "이미 가입 완료된 회원입니다.");
+        }
+
+        member.completeSocialSignup(req.rrnFront(), req.rrnBackFirst());
+    }
+
     // 로그인 결과(바디 + Set-Cookie 2개)
     public record LoginResult(LoginResponse body, String accessSetCookieHeader, String refreshSetCookieHeader) {}
 
@@ -97,39 +133,10 @@ public class MemberService {
             throw new ServiceException("AUTH-401", "비밀번호가 일치하지 않습니다.");
         }
 
-        // AccesToken (JWT)발급
-        String token =
-                jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
+        // 공통 발급 로직 호출 (access + refresh 쿠키 세팅 + DB 저장)
+        String accessToken = issueLoginCookies(member, response);
 
-        // RefreshToken(UUID) 생성 + DB 저장 (추가)
-        // 클라이언트에게 줄 refresh token "원문" 생성 (UUID)
-        String rawRefreshToken = RefreshTokenGenerator.generate();
-
-        // DB 저장용 hash 생성 (보안상 원문 저장 X)
-        String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
-
-        // 만료 시각 계산 14일 뒤
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_DAYS);
-
-        // 엔티티 생성 후 DB 저장
-        RefreshToken refreshToken = RefreshToken.create(member, refreshTokenHash, expiresAt);
-        refreshTokenRepository.save(refreshToken);
-
-        // Access Token을 HttpOnly 쿠키로 내려준다
-        // 브라우저가 자동으로 저장하고 이후 요청에 자동 포함
-        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
-                .httpOnly(true) // JS에서 접근 불가 (XSS 방어)
-                .secure(false) // dev 환경(http) → false / prod(https) → true
-                .path("/") // 모든 경로에서 쿠키 전송
-                .sameSite("Lax") // 로컬 개발에서 가장 무난
-                .maxAge(Duration.ofMinutes(20)) // Access Token 유효시간
-                .build();
-
-        // Set-Cookie 헤더에 추가
-        response.addHeader("Set-Cookie", cookie.toString());
-        response.addHeader("Set-Cookie", buildRefreshCookieHeader(rawRefreshToken));
-
-        return new LoginResponse(member.getId(), member.getName(), token);
+        return new LoginResponse(member.getId(), member.getName(), accessToken);
     }
 
     @Transactional(readOnly = true)
@@ -235,5 +242,74 @@ public class MemberService {
                 .maxAge(Duration.ZERO)
                 .build()
                 .toString();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Member> findById(Long id) {
+        return memberRepository.findById(id);
+    }
+
+    @Transactional
+    public String issueLoginCookies(Member member, HttpServletResponse response) {
+
+        // 1) AccessToken 발급
+        String accessToken = jwtProvider.issueAccessToken(
+                member.getId(), member.getEmail() == null ? "" : member.getEmail(), String.valueOf(member.getRole()));
+
+        // 2) RefreshToken 생성
+        String rawRefreshToken = RefreshTokenGenerator.generate();
+        String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
+
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(14);
+
+        RefreshToken refreshToken = RefreshToken.create(member, refreshTokenHash, expiresAt);
+        refreshTokenRepository.save(refreshToken);
+
+        // 3) AccessToken 쿠키
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(false) // dev
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ofMinutes(20))
+                .build();
+
+        // 4) RefreshToken 쿠키
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", rawRefreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ofDays(14))
+                .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+        return accessToken;
+    }
+
+    @Transactional
+    public Member getOrCreateKakaoMember(String kakaoId, String nickname, String profileImgUrl) {
+
+        return memberRepository
+                .findByTypeAndProviderId(Member.LoginType.KAKAO, kakaoId)
+                .map(member -> {
+                    // 로그인 때마다 최신 프로필 동기화
+                    member.updateSocialProfile(nickname, profileImgUrl);
+                    return member;
+                })
+                .orElseGet(() -> {
+                    // 최초 소셜 로그인 = 회원가입 처리
+                    // email은 카카오에서 scope에 email을 안 받았으니 null 가능
+                    // name은 nickname으로 일단 저장
+                    Member member = Member.createSocialUser(
+                            nickname != null ? nickname : "카카오사용자",
+                            null,
+                            Member.LoginType.KAKAO,
+                            kakaoId,
+                            profileImgUrl);
+
+                    return memberRepository.save(member);
+                });
     }
 }
