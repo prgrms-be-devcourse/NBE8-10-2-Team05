@@ -11,9 +11,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,8 @@ import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Order(1) // 이 테스트를 가장 먼저 실행
 @DisplayName("PolicyElasticSearchService 통합 테스트")
 class PolicyElasticSearchServiceIntegrationTest {
 
@@ -64,15 +68,64 @@ class PolicyElasticSearchServiceIntegrationTest {
             return;
         }
 
-        cleanupElasticsearch();
+        System.out.println("🧹 전체 Elasticsearch 정리 시작");
+
+        // 1단계: 모든 policy* 인덱스 삭제
+        try {
+            var response = elasticsearchClient.cat().indices();
+            int deletedCount = 0;
+            for (var index : response.valueBody()) {
+                String indexName = index.index();
+                if (indexName != null && indexName.startsWith("policy")) {
+                    try {
+                        elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(indexName)));
+                        deletedCount++;
+                        System.out.println("  - 삭제: " + indexName);
+                    } catch (Exception e) {
+                        System.out.println("  - 삭제 실패 (무시): " + indexName);
+                    }
+                }
+            }
+            System.out.println("  - 총 " + deletedCount + "개 인덱스 삭제");
+
+            // 삭제 완료 대기
+            if (deletedCount > 0) {
+                Thread.sleep(2000);
+            }
+        } catch (Exception e) {
+            System.out.println("  - 인덱스 목록 조회 실패: " + e.getMessage());
+        }
+
+        // 2단계: DB 정리
+        System.out.println("🧹 DB 정리");
         policyRepository.deleteAll();
         policyRepository.flush();
+
+        System.out.println("✅ 정리 완료\n");
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        if (elasticsearchAvailable) {
-            cleanupElasticsearch();
+        if (!elasticsearchAvailable) {
+            return;
+        }
+
+        // 모든 policy* 인덱스 정리
+        try {
+            var response = elasticsearchClient.cat().indices();
+            response.valueBody().forEach(index -> {
+                String indexName = index.index();
+                if (indexName != null && indexName.startsWith("policy")) {
+                    try {
+                        elasticsearchClient.indices().delete(DeleteIndexRequest.of(d -> d.index(indexName)));
+                    } catch (Exception e) {
+                        // 무시
+                    }
+                }
+            });
+            Thread.sleep(500);
+        } catch (Exception e) {
+            // 무시
         }
     }
 
