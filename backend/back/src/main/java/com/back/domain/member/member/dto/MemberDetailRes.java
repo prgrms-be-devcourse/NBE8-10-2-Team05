@@ -8,6 +8,7 @@ import com.back.domain.member.member.entity.MemberDetail;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
+import com.back.global.enumtype.SpecialStatus;
 
 public record MemberDetailRes(
         LocalDateTime createdAt,
@@ -23,7 +24,7 @@ public record MemberDetailRes(
         Integer income,
         EmploymentStatus employmentStatus,
         EducationLevel educationLevel,
-        String specialStatus,
+        SpecialStatus specialStatus,
         String postcode,
         String roadAddress,
         String hCode,

@@ -36,6 +36,7 @@ import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
+import com.back.global.enumtype.SpecialStatus;
 import com.back.global.security.jwt.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -319,7 +320,7 @@ public class MemberControllerTest {
                 5000,
                 EmploymentStatus.EMPLOYED,
                 EducationLevel.UNIVERSITY_GRADUATED,
-                "수정된 특이사항");
+                SpecialStatus.BASIC_LIVELIHOOD);
 
         mvc.perform(put("/api/v1/member/member/detail")
                         .contentType(MediaType.APPLICATION_JSON)

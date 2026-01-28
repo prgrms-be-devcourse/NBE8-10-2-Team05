@@ -4,6 +4,7 @@ import com.back.domain.member.geo.entity.Address;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
+import com.back.global.enumtype.SpecialStatus;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,7 @@ public class MemberDetail {
     @Enumerated(EnumType.STRING)
     private EducationLevel educationLevel;
 
-    private String specialStatus;
+    private SpecialStatus specialStatus;
 
     @Embedded
     private Address address;
@@ -52,7 +53,7 @@ public class MemberDetail {
             Integer income,
             EmploymentStatus employmentStatus,
             EducationLevel educationLevel,
-            String specialStatus) {
+            SpecialStatus specialStatus) {
         this.regionCode = regionCode; // 법정동/시군구 코드
         this.marriageStatus = marriageStatus; // 결혼 여부
         this.income = income; // 소득
