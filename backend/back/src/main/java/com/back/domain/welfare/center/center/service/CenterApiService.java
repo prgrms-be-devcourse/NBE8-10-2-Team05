@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.back.domain.welfare.center.center.dto.CenterRequestDto;
-import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.properties.CenterApiProperties;
 import com.back.global.exception.ServiceException;
 
@@ -20,18 +20,18 @@ public class CenterApiService {
     private final CenterApiProperties centerApiProperties;
 
     // 보건복지부_사회복지관 시도별 주소 현황 공공 API
-    public CenterResponseDto fetchCenter(CenterRequestDto centerRequestDto) {
+    public CenterApiResponseDto fetchCenter(CenterApiRequestDto centerApiRequestDto) {
 
         String requestUrl = centerApiProperties.url()
-                + "?page=" + centerRequestDto.page()
-                + "&perPage=" + centerRequestDto.perPage()
+                + "?page=" + centerApiRequestDto.page()
+                + "&perPage=" + centerApiRequestDto.perPage()
                 + "&serviceKey=" + centerApiProperties.key();
 
-        CenterResponseDto responseDto = Optional.ofNullable(webClient
+        CenterApiResponseDto responseDto = Optional.ofNullable(webClient
                         .get()
                         .uri(URI.create(requestUrl))
                         .retrieve()
-                        .bodyToMono(CenterResponseDto.class)
+                        .bodyToMono(CenterApiResponseDto.class)
                         .block())
                 .orElseThrow(() -> new ServiceException("501", "center api 데이터를 가져오는데 실패하였습니다."));
 

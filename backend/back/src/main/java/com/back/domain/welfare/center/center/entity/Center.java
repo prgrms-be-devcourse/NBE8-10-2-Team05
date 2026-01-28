@@ -1,6 +1,6 @@
 package com.back.domain.welfare.center.center.entity;
 
-import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class Center {
         this.corpType = corpType;
     }
 
-    public static Center dtoToEntity(CenterResponseDto.CenterDto centerDto) {
+    public static Center dtoToEntity(CenterApiResponseDto.CenterDto centerDto) {
         return new Center(
                 centerDto.city(), // location
                 centerDto.facilityName(), // name
