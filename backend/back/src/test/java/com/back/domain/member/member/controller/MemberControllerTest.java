@@ -218,7 +218,7 @@ public class MemberControllerTest {
         result.andExpect(status().isConflict())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.resultCode").value("MEMBER_409"))
-                .andExpect(jsonPath("$.msg").value("이미 존재하는 이메일입니다"));
+                .andExpect(jsonPath("$.msg").value("이미 사용 중인 이메일입니다"));
     }
 
     @Test
