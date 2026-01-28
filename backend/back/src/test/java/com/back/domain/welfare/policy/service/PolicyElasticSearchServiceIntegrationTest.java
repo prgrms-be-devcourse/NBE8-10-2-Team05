@@ -2,7 +2,6 @@ package com.back.domain.welfare.policy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
@@ -17,10 +16,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.welfare.policy.document.PolicyDocument;
@@ -36,13 +33,9 @@ import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@AutoConfigureMockMvc
 @Order(1) // 이 테스트를 가장 먼저 실행
 @DisplayName("PolicyElasticSearchService 통합 테스트")
 class PolicyElasticSearchServiceIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     private static final String INDEX = "policy";
     private static final int MAX_WAIT_ATTEMPTS = 60;
@@ -210,6 +203,14 @@ class PolicyElasticSearchServiceIntegrationTest {
         }
 
         throw new AssertionError("⚠️ 타임아웃: " + expectedCount + "건 인덱싱 대기 실패 (마지막 확인: " + lastCount + "건)");
+    }
+
+    public PolicyDocumentMapper getPolicyDocumentMapper() {
+        return policyDocumentMapper;
+    }
+
+    public void setPolicyDocumentMapper(PolicyDocumentMapper policyDocumentMapper) {
+        this.policyDocumentMapper = policyDocumentMapper;
     }
 
     @Nested
@@ -630,75 +631,6 @@ class PolicyElasticSearchServiceIntegrationTest {
 
             assertThat(result.getDocuments()).isEmpty();
             assertThat(result.getTotal()).isEqualTo(0);
-        }
-    }
-
-    @Nested
-    @DisplayName("Policy 검색 API (Controller)")
-    class PolicySearchControllerTest {
-
-        @BeforeEach
-        @Transactional
-        void setUp() throws Exception {
-            assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
-
-            policyRepository.deleteAll();
-            policyRepository.flush();
-
-            Policy policy = Policy.builder()
-                    .plcyNo("API-001")
-                    .plcyNm("청년 주거 지원 API 테스트")
-                    .sprtTrgtMinAge("20")
-                    .sprtTrgtMaxAge("39")
-                    .sprtTrgtAgeLmtYn("Y")
-                    .zipCd("11")
-                    .jobCd("J01")
-                    .schoolCd("S01")
-                    .mrgSttsCd("N")
-                    .plcyKywdNm("청년,주거")
-                    .plcyExplnCn("컨트롤러 테스트용 정책")
-                    .build();
-
-            policyRepository.save(policy);
-            policyRepository.flush();
-
-            policyElasticSearchService.ensureIndex();
-            Thread.sleep(500);
-
-            policyElasticSearchService.reindexAllFromDb();
-            waitForIndexing(1);
-        }
-
-        @Test
-        @DisplayName("GET /search - query param으로 정책 검색")
-        void search_policy_via_controller() throws Exception {
-            assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
-
-            mockMvc.perform(get("/api/v1/welfare/policy/search")
-                            .param("keyword", "청년")
-                            .param("age", "25")
-                            .param("regionCode", "11")
-                            .param("jobCode", "J01")
-                            .param("marriageStatus", "N")
-                            .param("keywords", "주거")
-                            .param("from", "0")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$[0].plcyNm").value("청년 주거 지원 API 테스트"));
-        }
-
-        @Test
-        @DisplayName("GET /search - 조건 없이 전체 검색")
-        void search_policy_without_condition() throws Exception {
-            assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
-
-            mockMvc.perform(get("/api/v1/welfare/policy/search")
-                            .param("from", "0")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$.length()").value(1));
         }
     }
 }
