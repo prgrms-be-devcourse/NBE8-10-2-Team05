@@ -23,5 +23,6 @@ public record EstateDto(
         @JsonProperty("rentGtn") Long rentGtn,
         @JsonProperty("mtRntchrg") Long mtRntchrg,
         @JsonProperty("beginDe") String beginDe, // "20260116"
-        @JsonProperty("endDe") String endDe // "20260116"
+        @JsonProperty("endDe") String endDe, // "20260116"
+        @JsonProperty("pnu") String pnu // 시군구 코드 추출을 위해 추가
         ) {}
