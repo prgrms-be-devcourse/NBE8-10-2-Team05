@@ -1,7 +1,7 @@
 plugins {
-	java
-	id("org.springframework.boot") version "4.0.1"
-	id("io.spring.dependency-management") version "1.1.7"
+    java
+    id("org.springframework.boot") version "4.0.1"
+    id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.1.0"
     id("checkstyle")
 }
@@ -12,9 +12,9 @@ description = "back"
 val querydslVersion = "6.10.1"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 spotless {
@@ -45,13 +45,13 @@ spotless {
 }
 
 configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 checkstyle {
@@ -120,12 +120,12 @@ dependencies {
     // 버전은 반드시 맞춰서 사용하세요.
     implementation("co.elastic.clients:elasticsearch-java:8.11.3")
     implementation("org.elasticsearch.client:elasticsearch-rest-client:8.11.3")
-    implementation ("org.apache.httpcomponents.client5:httpclient5")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
 
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
     // CI 환경(보통 2코어)과 로컬 환경에 맞춰 동적으로 코어 할당
     maxParallelForks = 2
 
