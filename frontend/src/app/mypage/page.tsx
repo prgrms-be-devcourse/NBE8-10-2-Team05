@@ -2,12 +2,42 @@
 
 import { useState, useEffect } from "react";
 import Script from "next/script";
-import { updateAddress, ApiError } from "@/api/member";
-import type { AddressDto, MemberDetailRes } from "@/types/member";
+import {
+  getMemberDetail,
+  updateMemberDetail,
+  updateAddress,
+  ApiError,
+} from "@/api/member";
+import type {
+  MemberDetailRes,
+  MemberDetailReq,
+  AddressDto,
+} from "@/types/member";
+import {
+  MarriageStatusLabel,
+  EmploymentStatusLabel,
+  EducationLevelLabel,
+  SpecialStatusLabel,
+} from "@/types/member";
 import type { DaumPostcodeData } from "@/types/daum-postcode";
 import Header from "@/components/Header";
 
 export default function MyPage() {
+  // 서버에서 불러온 기존 정보
+  const [detail, setDetail] = useState<MemberDetailRes | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(true);
+
+  // 기본 정보 수정 폼 상태
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
+  // 회원 상세 수정 폼 상태
+  const [marriageStatus, setMarriageStatus] = useState("");
+  const [income, setIncome] = useState("");
+  const [employmentStatus, setEmploymentStatus] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [specialStatus, setSpecialStatus] = useState("");
+
   // 주소 관련 상태
   const [postcode, setPostcode] = useState("");
   const [roadAddress, setRoadAddress] = useState("");
@@ -16,10 +46,107 @@ export default function MyPage() {
   const [addressName, setAddressName] = useState("");
 
   // UI 상태
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successData, setSuccessData] = useState<MemberDetailRes | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+
+  // 페이지 진입 시 회원 상세 정보 불러오기
+  useEffect(() => {
+    getMemberDetail()
+      .then((data) => {
+        setDetail(data);
+      })
+      .catch((err) => {
+        if (err instanceof ApiError) {
+          setError(`회원 정보 조회 실패: [${err.resultCode}] ${err.msg}`);
+        } else {
+          setError("회원 정보를 불러올 수 없습니다. 로그인이 필요합니다.");
+        }
+      })
+      .finally(() => setIsLoadingDetail(false));
+  }, []);
+
+  // 기본 정보 수정 제출
+  const handleBasicSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+    setIsSubmitting(true);
+
+    const req: MemberDetailReq = {
+      name: name || detail?.name || null,
+      email: email || detail?.email || null,
+    };
+
+    try {
+      const updated = await updateMemberDetail(req);
+      setDetail(updated);
+      setSuccessMsg("기본 정보가 수정되었습니다.");
+      setName("");
+      setEmail("");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(`[${err.resultCode}] ${err.msg}`);
+      } else {
+        setError("기본 정보 수정 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 현재 값의 한글 라벨 가져오기
+  const currentMarriageLabel = detail?.marriageStatus
+    ? MarriageStatusLabel[detail.marriageStatus] ?? detail.marriageStatus
+    : "선택하세요";
+  const currentEmploymentLabel = detail?.employmentStatus
+    ? EmploymentStatusLabel[detail.employmentStatus] ?? detail.employmentStatus
+    : "선택하세요";
+  const currentEducationLabel = detail?.educationLevel
+    ? EducationLevelLabel[detail.educationLevel] ?? detail.educationLevel
+    : "선택하세요";
+  const currentSpecialLabel = detail?.specialStatus
+    ? SpecialStatusLabel[detail.specialStatus as keyof typeof SpecialStatusLabel] ?? detail.specialStatus
+    : "선택하세요";
+
+  // 회원 상세 정보 수정 제출
+  const handleDetailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+    setIsSubmitting(true);
+
+    const req: MemberDetailReq = {
+      marriageStatus:
+        (marriageStatus || detail?.marriageStatus || null) as MemberDetailReq["marriageStatus"],
+      income: income ? Number(income) : detail?.income ?? null,
+      employmentStatus:
+        (employmentStatus || detail?.employmentStatus || null) as MemberDetailReq["employmentStatus"],
+      educationLevel:
+        (educationLevel || detail?.educationLevel || null) as MemberDetailReq["educationLevel"],
+      specialStatus: specialStatus || detail?.specialStatus || null,
+    };
+
+    try {
+      const updated = await updateMemberDetail(req);
+      setDetail(updated);
+      setSuccessMsg("회원 정보가 수정되었습니다.");
+      setMarriageStatus("");
+      setIncome("");
+      setEmploymentStatus("");
+      setEducationLevel("");
+      setSpecialStatus("");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(`[${err.resultCode}] ${err.msg}`);
+      } else {
+        setError("회원 정보 수정 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // 카카오 우편번호 검색 열기
   const openPostcodeSearch = () => {
@@ -41,7 +168,7 @@ export default function MyPage() {
   };
 
   // 주소 업데이트 제출
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddressSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!roadAddress) {
@@ -50,8 +177,8 @@ export default function MyPage() {
     }
 
     setError(null);
-    setSuccessData(null);
-    setIsLoading(true);
+    setSuccessMsg(null);
+    setIsSubmitting(true);
 
     const addressDto: AddressDto = {
       postcode,
@@ -59,24 +186,45 @@ export default function MyPage() {
       sigunguCode,
       bCode,
       roadAddress,
-      hCode: null, // 백엔드에서 채움
-      latitude: null, // 백엔드에서 채움
-      longitude: null, // 백엔드에서 채움
+      hCode: null,
+      latitude: null,
+      longitude: null,
     };
 
     try {
-      const response = await updateAddress(addressDto);
-      setSuccessData(response);
+      const updated = await updateAddress(addressDto);
+      setDetail(updated);
+      setSuccessMsg("주소가 수정되었습니다.");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(`[${err.resultCode}] ${err.msg}`);
       } else {
-        setError("알 수 없는 오류가 발생했습니다.");
+        setError("주소 수정 중 오류가 발생했습니다.");
       }
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
+
+  const inputStyle = { width: "100%", padding: "6px", boxSizing: "border-box" as const };
+  const fieldStyle = { marginBottom: "12px" };
+  const sectionStyle = {
+    border: "1px solid #ddd",
+    padding: "16px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+  };
+
+  if (isLoadingDetail) {
+    return (
+      <div>
+        <Header />
+        <main style={{ padding: "20px" }}>
+          <p>회원 정보를 불러오는 중...</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -85,57 +233,165 @@ export default function MyPage() {
         onLoad={() => setIsScriptLoaded(true)}
       />
       <Header />
-      <main style={{ padding: "20px" }}>
+      <main style={{ padding: "20px", maxWidth: "600px" }}>
         <h1>내 정보 수정</h1>
 
         {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
+        {successMsg && <div style={{ color: "green", marginBottom: "10px" }}>{successMsg}</div>}
 
-        {successData && (
-          <div style={{ color: "green", marginBottom: "10px" }}>
-            주소가 성공적으로 업데이트되었습니다.
-            <br />
-            - 도로명 주소: {successData.roadAddress}
-            <br />
-            - 행정동 코드: {successData.hCode}
-            <br />
-            - 위도: {successData.latitude}
-            <br />
-            - 경도: {successData.longitude}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <h2>주소 정보</h2>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button type="button" onClick={openPostcodeSearch}>
-              주소 검색
+        {/* 기본 정보 수정 */}
+        <form onSubmit={handleBasicSubmit}>
+          <div style={sectionStyle}>
+            <h2 style={{ marginTop: 0 }}>기본 정보</h2>
+            <div style={fieldStyle}>
+              <label>이름</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={detail?.name ?? ""}
+                style={inputStyle}
+              />
+            </div>
+            <div style={fieldStyle}>
+              <label>이메일</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={detail?.email ?? ""}
+                style={inputStyle}
+              />
+            </div>
+            <div style={fieldStyle}>
+              <label>가입 유형</label>
+              <input type="text" value={detail?.type ?? ""} readOnly style={inputStyle} />
+            </div>
+            <button type="submit" disabled={isSubmitting} style={{ padding: "8px 24px", cursor: "pointer" }}>
+              {isSubmitting ? "수정 중..." : "기본 정보 수정하기"}
             </button>
           </div>
+        </form>
 
-          <div style={{ marginBottom: "10px" }}>
-            <label>우편번호</label>
-            <input type="text" value={postcode} readOnly placeholder="주소 검색을 클릭하세요" />
+        {/* 회원 상세 정보 수정 */}
+        <form onSubmit={handleDetailSubmit}>
+          <div style={sectionStyle}>
+            <h2 style={{ marginTop: 0 }}>상세 정보 수정</h2>
+
+            <div style={fieldStyle}>
+              <label>결혼 상태</label>
+              <select
+                value={marriageStatus}
+                onChange={(e) => setMarriageStatus(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="">{currentMarriageLabel}</option>
+                {Object.entries(MarriageStatusLabel).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={fieldStyle}>
+              <label>소득 (만원)</label>
+              <input
+                type="number"
+                value={income}
+                onChange={(e) => setIncome(e.target.value)}
+                placeholder={detail?.income != null ? String(detail.income) : "소득을 입력하세요"}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={fieldStyle}>
+              <label>고용 상태</label>
+              <select
+                value={employmentStatus}
+                onChange={(e) => setEmploymentStatus(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="">{currentEmploymentLabel}</option>
+                {Object.entries(EmploymentStatusLabel).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={fieldStyle}>
+              <label>학력</label>
+              <select
+                value={educationLevel}
+                onChange={(e) => setEducationLevel(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="">{currentEducationLabel}</option>
+                {Object.entries(EducationLevelLabel).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={fieldStyle}>
+              <label>특수 상태</label>
+              <select
+                value={specialStatus}
+                onChange={(e) => setSpecialStatus(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="">{currentSpecialLabel}</option>
+                {Object.entries(SpecialStatusLabel).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <button type="submit" disabled={isSubmitting} style={{ padding: "8px 24px", cursor: "pointer" }}>
+              {isSubmitting ? "수정 중..." : "상세 정보 수정하기"}
+            </button>
           </div>
+        </form>
 
-          <div style={{ marginBottom: "10px" }}>
-            <label>도로명 주소</label>
-            <input type="text" value={roadAddress} readOnly placeholder="주소 검색을 클릭하세요" />
+        {/* 주소 정보 수정 */}
+        <form onSubmit={handleAddressSubmit}>
+          <div style={sectionStyle}>
+            <h2 style={{ marginTop: 0 }}>주소 정보 수정</h2>
+
+            {detail?.roadAddress && (
+              <div style={{ marginBottom: "12px", color: "#666" }}>
+                현재 주소: {detail.roadAddress}
+              </div>
+            )}
+
+            <div style={{ marginBottom: "10px" }}>
+              <button type="button" onClick={openPostcodeSearch} style={{ padding: "8px 16px", cursor: "pointer" }}>
+                주소 검색
+              </button>
+            </div>
+
+            <div style={fieldStyle}>
+              <label>우편번호</label>
+              <input type="text" value={postcode} readOnly placeholder="주소 검색을 클릭하세요" style={inputStyle} />
+            </div>
+
+            <div style={fieldStyle}>
+              <label>도로명 주소</label>
+              <input type="text" value={roadAddress} readOnly placeholder="주소 검색을 클릭하세요" style={inputStyle} />
+            </div>
+
+            <div style={fieldStyle}>
+              <label>시군구 코드</label>
+              <input type="text" value={sigunguCode} readOnly style={inputStyle} />
+            </div>
+
+            <div style={fieldStyle}>
+              <label>법정동 코드</label>
+              <input type="text" value={bCode} readOnly style={inputStyle} />
+            </div>
+
+            <button type="submit" disabled={isSubmitting || !roadAddress} style={{ padding: "8px 24px", cursor: "pointer" }}>
+              {isSubmitting ? "수정 중..." : "주소 수정하기"}
+            </button>
           </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <label>시군구 코드</label>
-            <input type="text" value={sigunguCode} readOnly />
-          </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <label>법정동 코드</label>
-            <input type="text" value={bCode} readOnly />
-          </div>
-
-          <button type="submit" disabled={isLoading || !roadAddress}>
-            {isLoading ? "수정 중..." : "수정하기"}
-          </button>
         </form>
       </main>
     </div>

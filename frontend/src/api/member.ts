@@ -6,6 +6,7 @@ import type {
   LoginResponse,
   AddressDto,
   MemberDetailRes,
+  MemberDetailReq,
   ApiErrorResponse,
 } from "@/types/member";
 
@@ -111,6 +112,30 @@ export async function updateAddress(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(addressDto),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData: ApiErrorResponse = await response.json();
+    throw new ApiError(errorData.resultCode, errorData.msg);
+  }
+
+  const data: MemberDetailRes = await response.json();
+  return data;
+}
+
+// ===== 회원 상세 정보 수정 (인증 필요) =====
+export async function updateMemberDetail(
+  req: MemberDetailReq
+): Promise<MemberDetailRes> {
+  const response = await fetchWithAuth(
+    `/api/v1/member/member/detail`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(req),
     }
   );
 
