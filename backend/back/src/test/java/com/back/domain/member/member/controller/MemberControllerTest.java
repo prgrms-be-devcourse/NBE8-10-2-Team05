@@ -27,8 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.entity.Address;
-import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;

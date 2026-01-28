@@ -1,6 +1,6 @@
 package com.back.domain.member.member.entity;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
