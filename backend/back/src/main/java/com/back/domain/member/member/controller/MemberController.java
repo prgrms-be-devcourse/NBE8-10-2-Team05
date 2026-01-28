@@ -89,4 +89,10 @@ public class MemberController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> withdraw(HttpServletResponse response) {
+        memberService.withdraw(response);
+        return ResponseEntity.noContent().build(); // 204
+    }
 }
