@@ -1,13 +1,13 @@
 package com.back.domain.welfare.center.lawyer.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.member.geo.entity.Address;
+import com.back.domain.welfare.center.lawyer.dto.LawyerReq;
 import com.back.domain.welfare.center.lawyer.dto.LawyerRes;
+import com.back.domain.welfare.center.lawyer.entity.Lawyer;
 import com.back.domain.welfare.center.lawyer.repository.LawyerRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,15 +18,20 @@ public class LawyerService {
     private final LawyerRepository lawyerRepository;
 
     @Transactional(readOnly = true)
-    public List<LawyerRes> getFilteredLawyers(Address address) {
-        String strAddress = address.roadAddress(); // 도로명주소 받아옴
+    public Page<LawyerRes> searchByDistrict(LawyerReq lawyerReq, Pageable pageable) {
 
-        String[] addressList = strAddress.split(" ");
+        String area1 = normalizeArea1(lawyerReq.area1());
+        // 서울특별시 -> 서울, 전라북도 -> 전북 으로 정규화 위함
+        String area2 = lawyerReq.area2();
 
-        String area1 = normalizeArea1(addressList[0]); // 시/도
-        String area2 = addressList[1]; // 군/구
+        Page<Lawyer> lawyerPage;
+        if (area2 != null && !area2.isBlank()) {
+            lawyerPage = lawyerRepository.findByDistrictArea1AndDistrictArea2Containing(area1, area2, pageable);
+        } else {
+            lawyerPage = lawyerRepository.findByDistrictArea1AndDistrictArea2Containing(area1, "", pageable);
+        }
 
-        return searchByDistrict(area1, area2);
+        return lawyerPage.map(LawyerRes::new);
     }
 
     // 서울특별시 -> 서울, 경상남도 -> 경남과 같이 area1 값을 처리
@@ -45,13 +50,5 @@ public class LawyerService {
             case "충청" -> area1.contains("남") ? "충남" : "충북";
             default -> prefix;
         };
-    }
-
-    @Transactional(readOnly = true)
-    public List<LawyerRes> searchByDistrict(String area1, String area2) {
-
-        return lawyerRepository.findByDistrictArea1AndDistrictArea2Containing(area1, area2).stream()
-                .map(LawyerRes::new)
-                .collect(Collectors.toList());
     }
 }
