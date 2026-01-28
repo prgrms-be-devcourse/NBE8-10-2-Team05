@@ -1,7 +1,6 @@
 package com.back.domain.member.member.service;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.http.ResponseCookie;
@@ -11,8 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.auth.entity.RefreshToken;
 import com.back.domain.auth.repository.RefreshTokenRepository;
+import com.back.domain.auth.store.RedisRefreshTokenStore;
 import com.back.domain.auth.util.RefreshTokenGenerator;
 import com.back.domain.auth.util.TokenHasher;
 import com.back.domain.member.member.dto.*;
@@ -37,6 +36,9 @@ public class MemberService {
 
     // refresh 저장소
     private final RefreshTokenRepository refreshTokenRepository;
+
+    // redis refresh 저장소
+    private final RedisRefreshTokenStore redisRefreshTokenStore;
 
     // refresh 토큰 만료 기간 14일로 가정함
     private static final int REFRESH_DAYS = 14;
@@ -199,26 +201,47 @@ public class MemberService {
         // 1) refreshToken 쿠키 원문 읽기
         String rawRefreshToken = getCookieValue(request, "refreshToken");
 
-        // 2) refreshToken이 있으면 DB에서 찾아서 폐기(revoke)
+        // 2) refreshToken이 있으면 Redis에서 삭제(폐기)
+        // - DB의 revokedAt = now 로직 대신
+        // - Redis에서는 delete가 "폐기" 역할
         if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
             String hash = TokenHasher.sha256Hex(rawRefreshToken);
-
-            refreshTokenRepository.findByTokenHash(hash).ifPresent(rt -> {
-                rt.revoke(); // revokedAt = now
-                // rt가 영속 상태면 save 없어도 되지만, 안전하게 save 해도 됨
-                refreshTokenRepository.save(rt);
-            });
-
-            // delete로 하고 싶으면 revoke 대신 이걸로 교체 가능
-            // refreshTokenRepository.findByTokenHash(hash).ifPresent(refreshTokenRepository::delete);
+            redisRefreshTokenStore.delete(hash);
         }
 
-        // access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
+        // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
         String deleteAccessCookie = buildDeleteCookieHeader("accessToken");
         String deleteRefreshCookie = buildDeleteCookieHeader("refreshToken");
 
         return new LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie);
     }
+
+    //    @Transactional
+    //    public LogoutCookieHeaders logout(HttpServletRequest request) {
+    //
+    //        // 1) refreshToken 쿠키 원문 읽기
+    //        String rawRefreshToken = getCookieValue(request, "refreshToken");
+    //
+    //        // 2) refreshToken이 있으면 DB에서 찾아서 폐기(revoke)
+    //        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
+    //            String hash = TokenHasher.sha256Hex(rawRefreshToken);
+    //
+    //            refreshTokenRepository.findByTokenHash(hash).ifPresent(rt -> {
+    //                rt.revoke(); // revokedAt = now
+    //                // rt가 영속 상태면 save 없어도 되지만, 안전하게 save 해도 됨
+    //                refreshTokenRepository.save(rt);
+    //            });
+    //
+    //            // delete로 하고 싶으면 revoke 대신 이걸로 교체 가능
+    //            // refreshTokenRepository.findByTokenHash(hash).ifPresent(refreshTokenRepository::delete);
+    //        }
+    //
+    //        // access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
+    //        String deleteAccessCookie = buildDeleteCookieHeader("accessToken");
+    //        String deleteRefreshCookie = buildDeleteCookieHeader("refreshToken");
+    //
+    //        return new LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie);
+    //    }
 
     // 요청에서 쿠키값 꺼내기
     private String getCookieValue(HttpServletRequest request, String name) {
@@ -249,42 +272,105 @@ public class MemberService {
         return memberRepository.findById(id);
     }
 
+    //    @Transactional
+    //    public String issueLoginCookies(Member member, HttpServletResponse response) {
+    //
+    //        // 1) AccessToken 발급
+    //        String accessToken = jwtProvider.issueAccessToken(
+    //                member.getId(), member.getEmail() == null ? "" : member.getEmail(),
+    // String.valueOf(member.getRole()));
+    //
+    //        // 2) RefreshToken 생성
+    //        String rawRefreshToken = RefreshTokenGenerator.generate();
+    //        String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
+    //
+    //        LocalDateTime expiresAt = LocalDateTime.now().plusDays(14);
+    //
+    //        RefreshToken refreshToken = RefreshToken.create(member, refreshTokenHash, expiresAt);
+    //        refreshTokenRepository.save(refreshToken);
+    //
+    //        // 3) AccessToken 쿠키
+    //        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+    //                .httpOnly(true)
+    //                .secure(false) // dev
+    //                .path("/")
+    //                .sameSite("Lax")
+    //                .maxAge(Duration.ofMinutes(20))
+    //                .build();
+    //
+    //        // 4) RefreshToken 쿠키
+    //        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", rawRefreshToken)
+    //                .httpOnly(true)
+    //                .secure(false)
+    //                .path("/")
+    //                .sameSite("Lax")
+    //                .maxAge(Duration.ofDays(14))
+    //                .build();
+    //
+    //        response.addHeader("Set-Cookie", accessCookie.toString());
+    //        response.addHeader("Set-Cookie", refreshCookie.toString());
+    //        return accessToken;
+    //    }
+
     @Transactional
     public String issueLoginCookies(Member member, HttpServletResponse response) {
 
+        // =========================
         // 1) AccessToken 발급
+        // =========================
         String accessToken = jwtProvider.issueAccessToken(
                 member.getId(), member.getEmail() == null ? "" : member.getEmail(), String.valueOf(member.getRole()));
 
-        // 2) RefreshToken 생성
+        // =========================
+        // 2) RefreshToken 생성 (원문 + 해시)
+        // =========================
+        // rawRefreshToken = 쿠키에 심는 "원문"
+        // ※ DB/Redis 어디에도 원문을 저장하지 않는게 보안상 안전함
         String rawRefreshToken = RefreshTokenGenerator.generate();
+
+        // tokenHash = 서버 저장소(DB/Redis)에 저장하는 "식별자"
+        // ※ 유출돼도 원문 복원이 어렵게 SHA-256 해시 사용
         String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
 
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(14);
+        // =========================
+        // 3) Redis에 refresh 저장 + TTL(만료시간)
+        // =========================
+        // DB의 expiresAt 컬럼을 Redis TTL로 대체함
+        // TTL이 끝나면 Redis가 자동으로 key를 삭제 -> "만료 처리" 끝
+        redisRefreshTokenStore.save(
+                refreshTokenHash, member.getId(), Duration.ofDays(REFRESH_DAYS) // 14일
+                );
 
-        RefreshToken refreshToken = RefreshToken.create(member, refreshTokenHash, expiresAt);
-        refreshTokenRepository.save(refreshToken);
-
-        // 3) AccessToken 쿠키
+        // =========================
+        // 4) AccessToken 쿠키 생성
+        // =========================
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(false) // dev
+                .secure(false) // dev 환경이면 false / prod(https)면 true
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(Duration.ofMinutes(20))
+                .maxAge(Duration.ofMinutes(20)) // access 유효기간 (너 정책대로)
                 .build();
 
-        // 4) RefreshToken 쿠키
+        // =========================
+        // 5) RefreshToken 쿠키 생성
+        // =========================
+        // refreshToken 쿠키에는 "원문"이 들어감 (클라이언트가 들고 있다가 재발급 요청에 보냄)
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", rawRefreshToken)
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(Duration.ofDays(14))
+                .maxAge(Duration.ofDays(REFRESH_DAYS))
                 .build();
 
+        // =========================
+        // 6) Set-Cookie 헤더로 내려주기
+        // =========================
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        // 응답 바디에서 accessToken을 쓰고 있길래 기존대로 반환
         return accessToken;
     }
 
