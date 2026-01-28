@@ -1,5 +1,7 @@
 package com.back.domain.welfare.estate.entity;
 
+import org.springframework.util.StringUtils;
+
 import com.back.domain.welfare.estate.dto.EstateDto;
 
 import jakarta.persistence.*;
@@ -92,12 +94,19 @@ public class Estate {
 
         this.hsmpNm = dto.hsmpNm();
         this.brtcNm = dto.brtcNm();
-        this.signguCode = dto.pnu().substring(0, 5);
+        this.signguCode = extractSignguCode(dto.pnu());
         this.signguNm = dto.signguNm();
         this.fullAdres = dto.fullAdres();
 
         this.rentGtn = dto.rentGtn();
         this.mtRntchrg = dto.mtRntchrg();
         this.url = dto.url();
+    }
+
+    private String extractSignguCode(String pnu) {
+        if (StringUtils.hasText(pnu) && pnu.length() >= 5) {
+            return pnu.substring(0, 5);
+        }
+        return "";
     }
 }
