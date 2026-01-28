@@ -1,5 +1,7 @@
 package com.back.domain.welfare.estate.entity;
 
+import org.springframework.util.StringUtils;
+
 import com.back.domain.welfare.estate.dto.EstateDto;
 
 import jakarta.persistence.*;
@@ -60,6 +62,9 @@ public class Estate {
     @Column(name = "signgu_nm")
     private String signguNm; // 시/군/구 명 (예: 시흥시, 강남구)
 
+    @Column(name = "signgu_code")
+    private String signguCode; // 시/군/구 코드
+
     @Column(name = "full_adres")
     private String fullAdres; // 전체 주소 (예: 경기도 시흥시 정왕동 1799-2)
 
@@ -89,11 +94,19 @@ public class Estate {
 
         this.hsmpNm = dto.hsmpNm();
         this.brtcNm = dto.brtcNm();
+        this.signguCode = extractSignguCode(dto.pnu());
         this.signguNm = dto.signguNm();
         this.fullAdres = dto.fullAdres();
 
         this.rentGtn = dto.rentGtn();
         this.mtRntchrg = dto.mtRntchrg();
         this.url = dto.url();
+    }
+
+    private String extractSignguCode(String pnu) {
+        if (StringUtils.hasText(pnu) && pnu.length() >= 5) {
+            return pnu.substring(0, 5);
+        }
+        return "";
     }
 }
