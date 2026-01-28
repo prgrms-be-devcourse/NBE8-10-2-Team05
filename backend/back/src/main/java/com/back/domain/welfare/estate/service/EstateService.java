@@ -61,7 +61,7 @@ public class EstateService {
         return body.items().stream().map(Estate::new).toList();
     }
 
-    public List<Estate> searchEstateLocation(String signguNm) {
-        return estateRepository.findBySignguNmContaining(signguNm);
+    public List<Estate> searchEstateLocation(String sido) {
+        return estateRepository.findByBrtcNmContaining(sido);
     }
 }
