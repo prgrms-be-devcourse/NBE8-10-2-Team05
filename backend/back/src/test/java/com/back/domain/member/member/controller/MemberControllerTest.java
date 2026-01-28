@@ -378,7 +378,7 @@ public class MemberControllerTest {
                 .roadAddress("서울특별시 강남구 테헤란로 427")
                 .build();
 
-        AddressDto enrichedDto = AddressDto.builder()
+        Address enrichedDto = Address.builder()
                 .postcode("12345")
                 .addressName("서울특별시 강남구 테헤란로 427")
                 .hCode("4514069000")

@@ -74,9 +74,9 @@ public class MemberDetailService {
                 .roadAddress(address.roadAddress())
                 .build();
 
-        AddressDto enrichedAddressDto = geoService.getGeoCode(addressDto);
-        // 입력된 불완전한 address -> geoService 이용, 엄밀한 주소 데이터로 보충해줌
-        memberDetail.updateAddress(enrichedAddressDto);
+        Address enrichedAddress = geoService.getGeoCode(addressDto);
+        // 입력된 불완전한 addressDto -> geoService 이용, 엄밀한 주소 데이터Address로 보충해줌
+        memberDetail.updateAddress(enrichedAddress);
     }
 
     public void updateMemberInfo(Member member, MemberDetailReq req) {

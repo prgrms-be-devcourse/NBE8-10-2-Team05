@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.dto.GeoApiResponseDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
@@ -16,15 +17,15 @@ import lombok.RequiredArgsConstructor;
 public class GeoService {
     private final GeoApiService geoApiService;
 
-    public AddressDto getGeoCode(AddressDto addressDto) {
+    public Address getGeoCode(AddressDto addressDto) {
         GeoApiResponseDto responseDto = geoApiService.fetchGeoCode(addressDto);
 
-        AddressDto updatedDto = Optional.ofNullable(responseDto)
+        Address updatedDto = Optional.ofNullable(responseDto)
                 .map(GeoApiResponseDto::documents)
                 .filter(docs -> !docs.isEmpty()) // 리스트가 비어있지 않은지 확인
                 .map(List::getFirst) // 첫 번째 Document 꺼내기
                 .map(GeoApiResponseDto.Document::address)
-                .map(address -> AddressDto.of(addressDto, address))
+                .map(address -> Address.of(addressDto, address))
                 .orElseThrow(() -> new ServiceException("501", "kakao local api return값에서 parsing에 실패하였습니다."));
 
         return updatedDto;
