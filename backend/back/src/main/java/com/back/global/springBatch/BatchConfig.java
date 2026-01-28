@@ -24,6 +24,9 @@ import com.back.domain.welfare.center.center.entity.Center;
 import com.back.global.springBatch.center.CenterApiItemProcessor;
 import com.back.global.springBatch.center.CenterApiItemReader;
 import com.back.global.springBatch.center.CenterApiItemWriter;
+import com.back.global.springBatch.estate.EstateApiItemProcessor;
+import com.back.global.springBatch.estate.EstateApiItemReader;
+import com.back.global.springBatch.estate.EstateApiItemWriter;
 
 import io.netty.channel.ConnectTimeoutException;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +35,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BatchConfig {
     private final BatchJobListener batchJobListener;
+    private final BatchStepFactory batchStepFactory;
 
     private final CenterApiItemReader centerApiItemReader;
     private final CenterApiItemProcessor centerApiItemProcessor;
     private final CenterApiItemWriter centerApiItemWriter;
+
+    private final EstateApiItemReader estateApiItemReader;
+    private final EstateApiItemProcessor estateApiItemProcessor;
+    private final EstateApiItemWriter estateApiItemWriter;
 
     @Bean
     public AsyncTaskExecutor taskExecutor() {
@@ -89,15 +97,9 @@ public class BatchConfig {
 
     @Bean
     @StepScope
-    public Step fetchEstateApiStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-        return new StepBuilder("fetchEstateApiStep", jobRepository)
-                .tasklet(
-                        (contribution, chunkContext) -> {
-                            System.out.println("Hello, Spring Batch!");
-                            return RepeatStatus.FINISHED;
-                        },
-                        transactionManager)
-                .build();
+    public Step fetchEstateApiStep(BatchStepFactory factory) {
+        return factory.createApiStep(
+                "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
     }
 
     @Bean
