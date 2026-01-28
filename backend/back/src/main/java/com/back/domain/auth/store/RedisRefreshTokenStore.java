@@ -74,4 +74,15 @@ public class RedisRefreshTokenStore {
         String key = PREFIX + tokenHash;
         redis.delete(key);
     }
+
+    public void deleteAllByMemberId(Long memberId) {
+        String pattern = PREFIX + "*";
+
+        redis.keys(pattern).forEach(key -> {
+            String value = redis.opsForValue().get(key);
+            if (String.valueOf(memberId).equals(value)) {
+                redis.delete(key);
+            }
+        });
+    }
 }
