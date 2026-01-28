@@ -60,8 +60,8 @@ public class MemberService {
         }
 
         // 이메일 중복 체크
-        if (memberRepository.existsByEmail(req.email())) {
-            throw new ServiceException("MEMBER_409", "이미 존재하는 이메일입니다");
+        if (memberRepository.existsByEmailAndStatus(req.email(), Member.MemberStatus.ACTIVE)) {
+            throw new ServiceException("MEMBER_409", "이미 사용 중인 이메일입니다");
         }
 
         // 비밀번호 암호화
