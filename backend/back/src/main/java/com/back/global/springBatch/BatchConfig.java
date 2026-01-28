@@ -8,17 +8,19 @@ import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
-import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
+import com.back.domain.welfare.estate.dto.EstateDto;
+import com.back.domain.welfare.estate.entity.Estate;
+import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
+import com.back.domain.welfare.policy.entity.Policy;
 import com.back.global.springBatch.center.CenterApiItemProcessor;
 import com.back.global.springBatch.center.CenterApiItemReader;
 import com.back.global.springBatch.center.CenterApiItemWriter;
@@ -79,36 +81,26 @@ public class BatchConfig {
         return new JobBuilder("fetchApiJob", jobRepository)
                 .listener(batchJobListener)
                 .start(fetchCenterApiStep)
+                // .start(fetchEstateApiStep)
+                // .start(fetchPolicyApiStep)
                 .build();
     }
 
     @Bean
-    public Step fetchCenterApiStep(
-            JobRepository jobRepository,
-            PlatformTransactionManager transactionManager,
-            AsyncTaskExecutor taskExecutor) {
-
-        return new StepBuilder("fetchCenterApiStep", jobRepository)
-                .<CenterApiResponseDto.CenterDto, Center>chunk(1000)
-                .reader(centerApiItemReader) // @Value로 주입받기 위해 null 전달
-                .processor(centerApiItemProcessor)
-                .writer(centerApiItemWriter.jpaItemWriter())
-                .transactionManager(transactionManager)
-                .faultTolerant() // retry나 skip 같은 예외 처리 옵션들을 사용 스위치
-                .retryPolicy(retryPolicy())
-                .taskExecutor(taskExecutor)
-                .build();
+    public Step fetchCenterApiStep(BatchStepFactory factory) {
+        return factory.<CenterApiResponseDto.CenterDto, Center>createApiStep(
+                "fetchCenterApiStep", centerApiItemReader, centerApiItemProcessor, centerApiItemWriter.jpaItemWriter());
     }
 
     @Bean
     public Step fetchEstateApiStep(BatchStepFactory factory) {
-        return factory.createApiStep(
+        return factory.<EstateDto, Estate>createApiStep(
                 "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
     }
 
     @Bean
     public Step fetchPolicyApiStep(BatchStepFactory factory) {
-        return factory.createApiStep(
+        return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
                 "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyApiItemWriter.jpaItemWriter());
     }
 }
