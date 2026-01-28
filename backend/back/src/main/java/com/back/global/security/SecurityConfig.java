@@ -1,6 +1,6 @@
 package com.back.global.security;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                //                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용할 엔드포인트
                         .requestMatchers("/favicon.ico")
@@ -48,6 +47,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/auth/reissue")
                         .permitAll()
+                        .requestMatchers("/error")
+                        .permitAll()
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
@@ -56,7 +57,8 @@ public class SecurityConfig {
                 // 기본 구현은 HttpSession을 사용함.
                 // STATELESS로 설정하면 OAuth2 인증 과정이 깨지므로,
                 // 로그인 과정에서만 세션을 허용하는 IF_REQUIRED로 설정.
-                .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
+                // .sessionManagement(sm -> sm.sessionCreationPolicy(IF_REQUIRED))
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))
                 .oauth2Login(
                         oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                                 .successHandler(customOAuth2LoginSuccessHandler))
