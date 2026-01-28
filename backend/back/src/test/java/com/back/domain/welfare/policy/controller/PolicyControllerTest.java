@@ -42,30 +42,23 @@ public class PolicyControllerTest {
     @Autowired
     private ElasticsearchClient elasticsearchClient;
 
-    private boolean elasticsearchAvailable = false;
-
     @BeforeEach
-    @Transactional
     void setUp() throws Exception {
+        // 1️⃣ ES 서버 살아있는지만 확인
         try {
-            boolean esAvailable = elasticsearchClient.ping().value()
-                    && elasticsearchClient
-                            .indices()
-                            .exists(e -> e.index("policy"))
-                            .value();
-
-            assumeTrue(esAvailable, "Elasticsearch 서버가 없어서 테스트 스킵");
+            assumeTrue(elasticsearchClient.ping().value(), "Elasticsearch 서버가 없어서 테스트 스킵");
         } catch (Exception e) {
             assumeTrue(false, "Elasticsearch 연결 실패 → 테스트 스킵");
         }
 
+        // 2️⃣ index 정리
         cleanupElasticsearch();
 
-        // DB 정리
+        // 3️⃣ DB 정리
         policyRepository.deleteAll();
         policyRepository.flush();
 
-        // 테스트 데이터 생성
+        // 4️⃣ 테스트 데이터 생성
         Policy policy = Policy.builder()
                 .plcyNo("API-" + UUID.randomUUID())
                 .plcyNm("청년 주거 지원 컨트롤러 테스트")
@@ -80,20 +73,22 @@ public class PolicyControllerTest {
                 .plcyExplnCn("컨트롤러 테스트용 정책 설명")
                 .build();
 
-        policyRepository.save(policy);
-        policyRepository.flush();
+        policyRepository.saveAndFlush(policy);
 
-        // ES 인덱싱
+        // 5️⃣ index 생성 보장
         policyElasticSearchService.ensureIndex();
-        Thread.sleep(500);
+
+        // 6️⃣ reindex
         policyElasticSearchService.reindexAllFromDb();
+
+        // 7️⃣ ES 반영 대기
         Thread.sleep(1500);
     }
 
     private void cleanupElasticsearch() throws Exception {
         if (elasticsearchClient.indices().exists(e -> e.index(INDEX)).value()) {
             elasticsearchClient.indices().delete(d -> d.index(INDEX));
-            Thread.sleep(500); // 삭제 안정화 대기
+            Thread.sleep(500); // 삭제 안정화
         }
     }
 

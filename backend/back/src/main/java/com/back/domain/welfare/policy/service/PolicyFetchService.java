@@ -1,5 +1,6 @@
 package com.back.domain.welfare.policy.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,9 +26,10 @@ public class PolicyFetchService {
     private final PolicyRepository policyRepository;
     private final PolicyApiClient policyApiClient;
     private final ObjectMapper objectMapper;
+    private final PolicyElasticSearchService policyElasticSearchService;
 
     @Transactional
-    public void fetchAndSavePolicies(PolicyFetchRequestDto requestDto) {
+    public void fetchAndSavePolicies(PolicyFetchRequestDto requestDto) throws IOException {
 
         int pageSize = 100;
         int pageNum = 1;
@@ -52,6 +54,8 @@ public class PolicyFetchService {
             PolicyFetchResponseDto nextFetchResponse = policyApiClient.fetchPolicyPage(requestDto, pageNum, pageSize);
             savePolicies(nextFetchResponse.result().youthPolicyList());
         }
+
+        policyElasticSearchService.reindexAllFromDb();
     }
 
     private void savePolicies(List<PolicyFetchResponseDto.PolicyItem> items) {

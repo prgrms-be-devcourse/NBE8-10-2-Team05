@@ -42,7 +42,7 @@ public class PolicyController {
     }
 
     @GetMapping("/list")
-    public void getPolicy() {
+    public void getPolicy() throws IOException {
         PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto(null, "1", "100", "json");
 
         policyFetchService.fetchAndSavePolicies(requestDto);
