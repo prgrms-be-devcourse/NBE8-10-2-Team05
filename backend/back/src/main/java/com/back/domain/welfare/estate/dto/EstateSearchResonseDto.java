@@ -1,3 +1,7 @@
 package com.back.domain.welfare.estate.dto;
 
-public record EstateSearchResonseDto() {}
+import java.util.List;
+
+import com.back.domain.welfare.estate.entity.Estate;
+
+public record EstateSearchResonseDto(List<Estate> estateList) {}
