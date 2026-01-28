@@ -3,8 +3,8 @@ package com.back.domain.member.member.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.entity.Address;
-import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.dto.MemberDetailRes;
@@ -74,9 +74,9 @@ public class MemberDetailService {
                 .roadAddress(address.roadAddress())
                 .build();
 
-        AddressDto enrichedAddressDto = geoService.getGeoCode(addressDto);
-        // 입력된 불완전한 address -> geoService 이용, 엄밀한 주소 데이터로 보충해줌
-        memberDetail.updateAddress(enrichedAddressDto);
+        Address enrichedAddress = geoService.getGeoCode(addressDto);
+        // 입력된 불완전한 addressDto -> geoService 이용, 엄밀한 주소 데이터Address로 보충해줌
+        memberDetail.updateAddress(enrichedAddress);
     }
 
     public void updateMemberInfo(Member member, MemberDetailReq req) {
