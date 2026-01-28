@@ -78,19 +78,20 @@ class BatchConfigTest {
 
         given(centerApiItemReader.read())
                 .willReturn(new CenterApiResponseDto.CenterDto(1, "", "", "", "", "", ""))
-                .willReturn(null); // 한 건만 처리
+                .willReturn(null); // 한 건만 처리 null을 반환하는 것은 Spring Batch에게 "이제 읽을 데이터가 없으니 이 단계를 끝내라"라고 알리는 신호
 
         // when
         JobExecution jobExecution = jobOperatorTestUtils.startStep("fetchCenterApiStep");
 
         // then
         assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-        // BATCH_STEP_EXECUTION 테이블의 rollback_count가 2인지 확인 (재시도 횟수)
-        // assertThat(jobExecution.getStepExecutions().iterator().next().getRollbackCount())
-        //        .isEqualTo(2);
+
         then(centerApiItemProcessor)
                 .should(times(3)) // 1차 실패 + 2차 실패 + 3차 성공 = 총 3번 호출
                 .process(any());
+
+        assertThat(jobExecution.getStepExecutions().iterator().next().getWriteCount())
+                .isEqualTo(1);
     }
 
     @Test
