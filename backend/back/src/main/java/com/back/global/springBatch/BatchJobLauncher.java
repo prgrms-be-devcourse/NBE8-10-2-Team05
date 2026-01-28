@@ -19,16 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 public class BatchJobLauncher {
 
     private final JobOperator jobOperator; // 권장 실행 방식
-    private final Job myJob;
+    private final Job fetchApiJob;
 
     public void runJob() {
         try {
-            log.info("배치 실행 시작: JobName={}, time={}", myJob.getName(), System.currentTimeMillis());
+            log.info("배치 실행 시작: JobName={}, time={}", fetchApiJob.getName(), System.currentTimeMillis());
 
             JobExecution jobExecution = jobOperator.start(
-                    myJob,
+                    fetchApiJob,
                     new JobParametersBuilder()
-                            .addString("job:", myJob.getName())
+                            .addString("job:", fetchApiJob.getName())
                             .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
                             .toJobParameters());
 
