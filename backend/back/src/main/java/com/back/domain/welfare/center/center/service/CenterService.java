@@ -53,4 +53,9 @@ public class CenterService {
 
         return centerList;
     }
+
+    public List<Center> searchCenterList(String sido) {
+
+        return centerRepository.findByLocation(sido);
+    }
 }
