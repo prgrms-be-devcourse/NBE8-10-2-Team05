@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record CenterResponseDto(
+public record CenterApiResponseDto(
         int page, int perPage, int totalCount, int currentCount, int matchCount, List<CenterDto> data) {
     public record CenterDto(
             @JsonProperty("연번") int id,

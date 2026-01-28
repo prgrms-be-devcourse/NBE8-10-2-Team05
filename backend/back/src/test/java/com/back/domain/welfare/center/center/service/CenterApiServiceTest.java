@@ -11,8 +11,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.welfare.center.center.dto.CenterRequestDto;
-import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,8 +26,8 @@ class CenterApiServiceTest {
     @DisplayName("실제 API 테스트 : 필요할때만 수동으로 실행")
     @Disabled
     void t1() {
-        CenterRequestDto centerRequestDto = CenterRequestDto.from(1, 100);
-        CenterResponseDto responseDto = centerApiService.fetchCenter(centerRequestDto);
+        CenterApiRequestDto centerApiRequestDto = CenterApiRequestDto.from(1, 100);
+        CenterApiResponseDto responseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
         assertNotNull(responseDto);
         assertNotNull(responseDto.data());
