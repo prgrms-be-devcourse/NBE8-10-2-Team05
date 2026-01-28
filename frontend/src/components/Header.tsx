@@ -31,7 +31,7 @@ export default function Header() {
       <span>|</span>
       <span>정책 검색</span>
       <span>|</span>
-      <span>행복주택</span>
+      <Link href="/estate">행복주택</Link>
       <span>|</span>
       <span>시설찾기</span>
       <span>|</span>

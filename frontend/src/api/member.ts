@@ -123,6 +123,24 @@ export async function updateAddress(
   return data;
 }
 
+// ===== 회원 상세 정보 조회 (인증 필요) =====
+export async function getMemberDetail(): Promise<MemberDetailRes> {
+  const response = await fetchWithAuth(
+    `/api/v1/member/member/detail`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (!response.ok) {
+    const errorData: ApiErrorResponse = await response.json();
+    throw new ApiError(errorData.resultCode, errorData.msg);
+  }
+
+  const data: MemberDetailRes = await response.json();
+  return data;
+}
+
 // ===== 로그아웃 (인증 필요) =====
 export async function logout(): Promise<void> {
   const response = await fetchWithAuth(
