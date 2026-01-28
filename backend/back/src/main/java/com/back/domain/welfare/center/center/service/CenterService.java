@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.back.domain.welfare.center.center.dto.CenterRequestDto;
-import com.back.domain.welfare.center.center.dto.CenterResponseDto;
+import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
 import com.back.domain.welfare.center.center.repository.CenterRepository;
 
@@ -25,8 +25,8 @@ public class CenterService {
     public List<Center> getCenterData() {
 
         int pageSize = 100;
-        CenterRequestDto centerRequestDto = CenterRequestDto.from(1, pageSize);
-        CenterResponseDto responseDto = centerApiService.fetchCenter(centerRequestDto);
+        CenterApiRequestDto centerApiRequestDto = CenterApiRequestDto.from(1, pageSize);
+        CenterApiResponseDto responseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
         int totalCnt = responseDto.totalCount();
         int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
@@ -39,8 +39,8 @@ public class CenterService {
         for (int pageNo = 2; pageNo <= totalPages; pageNo++) {
             log.debug("fetchCenter pageNo : {} ,pageSize : {} 실행", pageSize, pageNo);
 
-            centerRequestDto = CenterRequestDto.from(pageNo, pageSize);
-            CenterResponseDto nextResponseDto = centerApiService.fetchCenter(centerRequestDto);
+            centerApiRequestDto = CenterApiRequestDto.from(pageNo, pageSize);
+            CenterApiResponseDto nextResponseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
             List<Center> updatedCenterList =
                     nextResponseDto.data().stream().map(Center::dtoToEntity).toList();

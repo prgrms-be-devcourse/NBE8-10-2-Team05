@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.back.domain.welfare.center.center.dto.CenterSearchResponseDto;
 import com.back.domain.welfare.center.center.service.CenterService;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class CenterController {
     private final CenterService centerService;
 
-    @GetMapping("/list")
-    public void getCenterList(@RequestParam String sido) {}
+    @GetMapping("/location")
+    public CenterSearchResponseDto getCenterList(@RequestParam String sido) {
+        return null;
+    }
 }
