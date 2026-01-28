@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.back.domain.welfare.estate.entity.Estate;
 
 public interface EstateRepository extends JpaRepository<Estate, Integer> {
-    List<Estate> searchBySignguCode(String signguCode);
+    List<Estate> findBySignguNmContaining(String signguNm);
 }

@@ -63,7 +63,7 @@ public class Estate {
     private String signguNm; // 시/군/구 명 (예: 시흥시, 강남구)
 
     @Column(name = "signgu_code")
-    private String signguCode; // 시/군/구 명 (예: 시흥시, 강남구)
+    private String signguCode; // 시/군/구 코드
 
     @Column(name = "full_adres")
     private String fullAdres; // 전체 주소 (예: 경기도 시흥시 정왕동 1799-2)
