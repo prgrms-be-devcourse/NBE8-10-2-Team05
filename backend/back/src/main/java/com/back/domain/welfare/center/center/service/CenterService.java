@@ -54,8 +54,8 @@ public class CenterService {
         return centerList;
     }
 
-    public List<Center> searchCenterList(String sido) {
+    public List<Center> searchCenterList(String sido, String signguNm) {
 
-        return centerRepository.findByLocation(sido);
+        return centerRepository.findByAddressContaining(sido);
     }
 }

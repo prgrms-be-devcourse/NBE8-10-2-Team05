@@ -20,8 +20,8 @@ public class CenterController {
     private final CenterService centerService;
 
     @GetMapping("/location")
-    public CenterSearchResponseDto getCenterList(@RequestParam String sido) {
-        List<Center> estateList = centerService.getCenterData();
+    public CenterSearchResponseDto getCenterList(@RequestParam String sido, @RequestParam String signguNm) {
+        List<Center> estateList = centerService.searchCenterList(sido, signguNm);
 
         return new CenterSearchResponseDto(estateList);
     }
