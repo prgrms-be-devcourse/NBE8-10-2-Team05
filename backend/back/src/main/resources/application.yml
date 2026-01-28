@@ -29,6 +29,8 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     com.back: DEBUG
+    org.springframework.batch: DEBUG
+    org.springframework.retry: DEBUG
 custom:
   accessToken:
     expirationSeconds: 2000
