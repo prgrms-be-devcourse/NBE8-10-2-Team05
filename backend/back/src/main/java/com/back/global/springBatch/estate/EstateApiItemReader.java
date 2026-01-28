@@ -30,7 +30,7 @@ public class EstateApiItemReader extends AbstractPagingItemReader<EstateDto> {
     // 생성자를 통해 totalCount를 주입받음
     public EstateApiItemReader(EstateApiClient apiService) {
         this.estateApiClient = apiService;
-        this.totalCount = 100;
+        this.totalCount = 88;
         setPageSize(100); // 한번에 읽을 양 설정
     }
 
@@ -48,9 +48,6 @@ public class EstateApiItemReader extends AbstractPagingItemReader<EstateDto> {
             try {
                 // 현재 선택된 키로 API 호출 (페이지 번호 전달)
 
-                // CenterApiRequestDto requestDto = CenterApiRequestDto.from(1, getPageSize());
-                // CenterApiResponseDto responseDto = centerApiService.fetchCenter(requestDto);
-
                 EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder()
                         .pageNo(1)
                         .numOfRows(getPageSize())
@@ -58,10 +55,9 @@ public class EstateApiItemReader extends AbstractPagingItemReader<EstateDto> {
                 EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
 
                 List<EstateDto> data = responseDto.response().body().items();
-
                 results.addAll(data);
-
                 success = true;
+
             } catch (HttpClientErrorException e) { // 4xx 에러
                 if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) { // 429 에러
                     log.warn("API 한도 초과! 키를 교체합니다.");

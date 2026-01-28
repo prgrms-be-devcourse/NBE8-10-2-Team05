@@ -4,13 +4,11 @@ import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Set;
 
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.retry.RetryPolicy;
@@ -27,6 +25,9 @@ import com.back.global.springBatch.center.CenterApiItemWriter;
 import com.back.global.springBatch.estate.EstateApiItemProcessor;
 import com.back.global.springBatch.estate.EstateApiItemReader;
 import com.back.global.springBatch.estate.EstateApiItemWriter;
+import com.back.global.springBatch.policy.PolicyApiItemProcessor;
+import com.back.global.springBatch.policy.PolicyApiItemReader;
+import com.back.global.springBatch.policy.PolicyApiItemWriter;
 
 import io.netty.channel.ConnectTimeoutException;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,10 @@ public class BatchConfig {
     private final EstateApiItemReader estateApiItemReader;
     private final EstateApiItemProcessor estateApiItemProcessor;
     private final EstateApiItemWriter estateApiItemWriter;
+
+    private final PolicyApiItemReader policyApiItemReader;
+    private final PolicyApiItemProcessor policyApiItemProcessor;
+    private final PolicyApiItemWriter policyApiItemWriter;
 
     @Bean
     public AsyncTaskExecutor taskExecutor() {
@@ -96,26 +101,14 @@ public class BatchConfig {
     }
 
     @Bean
-    @StepScope
     public Step fetchEstateApiStep(BatchStepFactory factory) {
         return factory.createApiStep(
                 "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
     }
 
     @Bean
-    public Step fetchPolicyApiStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-        return new StepBuilder("fetchPolicyApiStep", jobRepository)
-                .tasklet(
-                        (contribution, chunkContext) -> {
-                            System.out.println("Hello, Spring Batch!");
-                            return RepeatStatus.FINISHED;
-                        },
-                        transactionManager)
-                .build();
+    public Step fetchPolicyApiStep(BatchStepFactory factory) {
+        return factory.createApiStep(
+                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyApiItemWriter.jpaItemWriter());
     }
-
-    // exceptionClass.put(ConnectException.class, true);
-    //        exceptionClass.put(SocketTimeoutException.class, true);
-    //        exceptionClass.put(RestClientException.class, true);
-
 }
