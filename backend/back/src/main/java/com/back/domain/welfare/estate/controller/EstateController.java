@@ -20,8 +20,8 @@ public class EstateController {
     private EstateService estateService;
 
     @GetMapping("/location")
-    public EstateSearchResonseDto getEstateLocation(@RequestParam String sido) {
-        List<Estate> estateList = estateService.searchEstateLocation(sido);
+    public EstateSearchResonseDto getEstateLocation(@RequestParam String sido, @RequestParam String signguNm) {
+        List<Estate> estateList = estateService.searchEstateLocation(sido, signguNm);
 
         return new EstateSearchResonseDto(estateList);
     }
