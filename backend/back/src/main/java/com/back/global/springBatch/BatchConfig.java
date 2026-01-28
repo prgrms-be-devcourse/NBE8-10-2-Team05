@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Set;
 
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
@@ -101,6 +102,7 @@ public class BatchConfig {
     }
 
     @Bean
+    @StepScope
     public Step fetchEstateApiStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("fetchEstateApiStep", jobRepository)
                 .tasklet(
