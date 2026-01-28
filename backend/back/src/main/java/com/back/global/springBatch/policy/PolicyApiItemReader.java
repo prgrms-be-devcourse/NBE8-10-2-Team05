@@ -1,4 +1,4 @@
-package com.back.global.springBatch.center;
+package com.back.global.springBatch.policy;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,26 +10,26 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
-import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
-import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
-import com.back.domain.welfare.center.center.service.CenterApiService;
+import com.back.domain.welfare.policy.dto.PolicyFetchRequestDto;
+import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
+import com.back.domain.welfare.policy.service.PolicyApiClient;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component // Spring이 관리하도록 등록
 @StepScope // 매우 중요! Step 실행 시점에 생성되어야 함
 @Slf4j
-public class CenterApiItemReader extends AbstractPagingItemReader<CenterApiResponseDto.CenterDto> {
+public class PolicyApiItemReader extends AbstractPagingItemReader<PolicyFetchResponseDto.PolicyItem> {
 
-    private final CenterApiService centerApiService;
+    private final PolicyApiClient policyApiClient;
     private final int totalCount;
     private List<String> apiKeys = List.of("1", "2", "3");
     private Integer currentKeyIdx = 0;
 
     // 생성자를 통해 totalCount를 주입받음
-    public CenterApiItemReader(CenterApiService apiService) {
-        this.centerApiService = apiService;
-        this.totalCount = 481;
+    public PolicyApiItemReader(PolicyApiClient apiService) {
+        this.policyApiClient = apiService;
+        this.totalCount = 2000;
         setPageSize(1000); // 한번에 읽을 양 설정
     }
 
@@ -47,10 +47,11 @@ public class CenterApiItemReader extends AbstractPagingItemReader<CenterApiRespo
             try {
                 // 현재 선택된 키로 API 호출 (페이지 번호 전달)
 
-                CenterApiRequestDto requestDto = CenterApiRequestDto.from(1, getPageSize());
-                CenterApiResponseDto responseDto = centerApiService.fetchCenter(requestDto);
+                PolicyFetchRequestDto requestDto = new PolicyFetchRequestDto("", "", "", "");
+                PolicyFetchResponseDto responseDto = policyApiClient.fetchPolicyPage(requestDto, 1, getPageSize());
 
-                List<CenterApiResponseDto.CenterDto> data = responseDto.data();
+                List<PolicyFetchResponseDto.PolicyItem> data =
+                        responseDto.result().youthPolicyList();
                 results.addAll(data);
                 success = true;
 
