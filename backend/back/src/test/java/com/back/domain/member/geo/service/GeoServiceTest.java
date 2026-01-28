@@ -15,8 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.dto.GeoApiResponseDto;
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -35,7 +36,7 @@ class GeoServiceTest {
 
         AddressDto addressDto = AddressDto.builder().addressName("경기도 성남시 분당구").build();
 
-        AddressDto updatedAddressDto = AddressDto.builder()
+        Address updatedAddressDto = Address.builder()
                 .hCode("4113500000") // 업데이트될 값
                 .latitude(37.3947)
                 .longitude(127.1111)
@@ -44,7 +45,7 @@ class GeoServiceTest {
 
         when(geoApiService.fetchGeoCode(any())).thenReturn(responseDto);
 
-        AddressDto result = geoService.getGeoCode(addressDto);
+        Address result = geoService.getGeoCode(addressDto);
 
         // then
         assertThat(result).isNotNull();

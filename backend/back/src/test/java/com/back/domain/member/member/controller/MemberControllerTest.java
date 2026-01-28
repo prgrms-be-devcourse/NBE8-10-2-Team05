@@ -27,8 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.entity.Address;
-import com.back.domain.member.geo.entity.AddressDto;
 import com.back.domain.member.geo.service.GeoService;
 import com.back.domain.member.member.dto.MemberDetailReq;
 import com.back.domain.member.member.entity.Member;
@@ -379,7 +379,7 @@ public class MemberControllerTest {
                 .roadAddress("서울특별시 강남구 테헤란로 427")
                 .build();
 
-        AddressDto enrichedDto = AddressDto.builder()
+        Address enrichedDto = Address.builder()
                 .postcode("12345")
                 .addressName("서울특별시 강남구 테헤란로 427")
                 .hCode("4514069000")

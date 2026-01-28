@@ -1,6 +1,6 @@
 package com.back.domain.member.member.entity;
 
-import com.back.domain.member.geo.entity.AddressDto;
+import com.back.domain.member.geo.entity.Address;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
@@ -74,7 +74,7 @@ public class MemberDetail {
         private Double latitude; // 위도
         private Double longitude; // 경도
 
-        public static Address from(AddressDto dto) {
+        public static Address from(com.back.domain.member.geo.entity.Address dto) {
             return Address.builder()
                     .postcode(dto.postcode())
                     .roadAddress(dto.roadAddress())
@@ -85,7 +85,7 @@ public class MemberDetail {
         }
     }
 
-    public void updateAddress(AddressDto dto) {
-        this.address = Address.from(dto);
+    public void updateAddress(com.back.domain.member.geo.entity.Address address) {
+        this.address = Address.from(address);
     }
 }
