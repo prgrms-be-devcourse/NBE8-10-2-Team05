@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class BatchConfig {
+    private final BatchJobListener batchJobListener;
+
     private final CenterApiItemReader centerApiItemReader;
     private final CenterApiItemProcessor centerApiItemProcessor;
     private final CenterApiItemWriter centerApiItemWriter;
@@ -62,6 +64,7 @@ public class BatchConfig {
             JobRepository jobRepository, Step fetchCenterApiStep, Step fetchEstateApiStep, Step fetchPolicyApiStep) {
 
         return new JobBuilder("fetchApiJob", jobRepository)
+                .listener(batchJobListener)
                 .start(fetchCenterApiStep)
                 .build();
     }
