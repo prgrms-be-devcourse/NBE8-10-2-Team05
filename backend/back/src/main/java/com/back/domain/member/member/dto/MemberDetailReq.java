@@ -4,6 +4,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.global.enumtype.EducationLevel;
 import com.back.global.enumtype.EmploymentStatus;
 import com.back.global.enumtype.MarriageStatus;
+import com.back.global.enumtype.SpecialStatus;
 
 public record MemberDetailReq(
         // Member 정보
@@ -20,4 +21,4 @@ public record MemberDetailReq(
         Integer income,
         EmploymentStatus employmentStatus,
         EducationLevel educationLevel,
-        String specialStatus) {}
+        SpecialStatus specialStatus) {}

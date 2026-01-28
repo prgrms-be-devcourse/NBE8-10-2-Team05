@@ -11,8 +11,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.back.domain.member.geo.dto.AddressDto;
 import com.back.domain.member.geo.dto.GeoApiResponseDto;
-import com.back.domain.member.geo.entity.AddressDto;
 
 @ActiveProfiles("test")
 @SpringBootTest
