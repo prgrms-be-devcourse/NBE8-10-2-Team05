@@ -3,9 +3,6 @@ package com.back.domain.member.member.service;
 import java.time.Duration;
 import java.util.Optional;
 
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +16,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.security.jwt.JwtProvider;
+import com.back.standard.util.ActorProvider;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +31,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final ActorProvider actorProvider;
+    private final AuthCookieService authCookieService;
 
     // refresh 저장소
     private final RefreshTokenRepository refreshTokenRepository;
@@ -83,25 +83,7 @@ public class MemberService {
         if (req.rrnFront() == null) throw new ServiceException("MEMBER-400", "rrnFront는 필수입니다.");
         if (req.rrnBackFirst() == null) throw new ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.");
 
-        // 현재 로그인 사용자 조회 (기존 me() 로직 재사용 가능)
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null
-                || !auth.isAuthenticated()
-                || auth.getPrincipal() == null
-                || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
-        }
-
-        Long memberId;
-        try {
-            memberId = (Long) auth.getPrincipal();
-        } catch (ClassCastException e) {
-            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
-        }
-
-        Member member = memberRepository
-                .findById(memberId)
-                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+        Member member = actorProvider.getActor();
 
         // 소셜 미완성 유저만 완료 처리
         if (member.getStatus() != Member.MemberStatus.PRE_REGISTERED) {
@@ -110,9 +92,6 @@ public class MemberService {
 
         member.completeSocialSignup(req.rrnFront(), req.rrnBackFirst());
     }
-
-    // 로그인 결과(바디 + Set-Cookie 2개)
-    public record LoginResult(LoginResponse body, String accessSetCookieHeader, String refreshSetCookieHeader) {}
 
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletResponse response) {
@@ -143,54 +122,8 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public MeResponse me() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null
-                || !auth.isAuthenticated()
-                || auth.getPrincipal() == null
-                || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
-        }
-
-        // get actor같은 연할을 하는 곳인데 강사님은 DB조회를 안하고 나는 DB조희를 함
-        Long memberId;
-        try {
-            // principal에 memberId를 넣어둔 상태라서 이렇게 꺼내면 됨
-            memberId = (Long) auth.getPrincipal();
-        } catch (ClassCastException e) {
-            // 혹시 String으로 들어오는 경우 대비
-            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
-        }
-
-        Member member = memberRepository
-                .findById(memberId)
-                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
-
+        Member member = actorProvider.getActor();
         return new MeResponse(member.getId(), member.getName(), member.getEmail());
-    }
-
-    // accessToken 쿠키를 만료(Max-Age=0)시켜 브라우저에서 제거한다.
-    public String buildLogoutSetCookieHeader() {
-        return ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(false) // dev(http) 기준. prod(https)면 true로 분기 필요
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ZERO) // Max-Age=0
-                .build()
-                .toString();
-    }
-
-    // 리프레시 토큰은 길게 가져감 -> 14일
-    private String buildRefreshCookieHeader(String rawRefreshToken) {
-        return ResponseCookie.from("refreshToken", rawRefreshToken)
-                .httpOnly(true)
-                .secure(false) // dev
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ofDays(REFRESH_DAYS))
-                .build()
-                .toString();
     }
 
     public record LogoutCookieHeaders(String deleteAccessCookieHeader, String deleteRefreshCookieHeader) {}
@@ -210,8 +143,8 @@ public class MemberService {
         }
 
         // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
-        String deleteAccessCookie = buildDeleteCookieHeader("accessToken");
-        String deleteRefreshCookie = buildDeleteCookieHeader("refreshToken");
+        String deleteAccessCookie = authCookieService.deleteCookie("accessToken");
+        String deleteRefreshCookie = authCookieService.deleteCookie("refreshToken");
 
         return new LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie);
     }
@@ -254,17 +187,6 @@ public class MemberService {
             }
         }
         return null;
-    }
-    // 쿠키 삭제용 Max-Age=0
-    private String buildDeleteCookieHeader(String cookieName) {
-        return ResponseCookie.from(cookieName, "")
-                .httpOnly(true)
-                .secure(false) // dev
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ZERO)
-                .build()
-                .toString();
     }
 
     @Transactional(readOnly = true)
@@ -342,35 +264,17 @@ public class MemberService {
                 );
 
         // =========================
-        // 4) AccessToken 쿠키 생성
+        // 4) AccessToken 쿠키 생성 + Set-Cookie 헤더로 내려주기
         // =========================
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(false) // dev 환경이면 false / prod(https)면 true
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ofMinutes(20)) // access 유효기간 (너 정책대로)
-                .build();
+        response.addHeader("Set-Cookie", authCookieService.accessCookie(accessToken, Duration.ofMinutes(20)));
 
         // =========================
-        // 5) RefreshToken 쿠키 생성
+        // 5) RefreshToken 쿠키 생성 + Set-Cookie 헤더로 내려주기
         // =========================
         // refreshToken 쿠키에는 "원문"이 들어감 (클라이언트가 들고 있다가 재발급 요청에 보냄)
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", rawRefreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .sameSite("Lax")
-                .maxAge(Duration.ofDays(REFRESH_DAYS))
-                .build();
+        response.addHeader(
+                "Set-Cookie", authCookieService.refreshCookie(rawRefreshToken, Duration.ofDays(REFRESH_DAYS)));
 
-        // =========================
-        // 6) Set-Cookie 헤더로 내려주기
-        // =========================
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-
-        // 응답 바디에서 accessToken을 쓰고 있길래 기존대로 반환
         return accessToken;
     }
 
@@ -401,25 +305,7 @@ public class MemberService {
 
     @Transactional
     public void withdraw(HttpServletResponse response) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null
-                || !auth.isAuthenticated()
-                || auth.getPrincipal() == null
-                || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
-        }
-
-        Long memberId;
-        try {
-            memberId = (Long) auth.getPrincipal();
-        } catch (ClassCastException e) {
-            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
-        }
-
-        Member member = memberRepository
-                .findById(memberId)
-                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+        Member member = actorProvider.getActor();
 
         // 이미 탈퇴한 회원 방어 (엔티티에서 예외 던져도 되고 여기서 해도 됨)
         if (member.getStatus() == Member.MemberStatus.DELETED) {
@@ -432,13 +318,13 @@ public class MemberService {
         // 2) refresh 토큰 폐기 (Redis)
         // - access는 짧으니 쿠키 만료로 충분
         // - refresh는 반드시 서버 저장소에서 폐기
-        redisRefreshTokenStore.deleteAllByMemberId(memberId);
+        redisRefreshTokenStore.deleteAllByMemberId(member.getId());
 
         // 2-1) DB refresh도 같이 쓰고 있으면 같이 삭제
         // refreshTokenRepository.deleteByMember_Id(memberId);
 
         // access/refresh 쿠키 제거
-        response.addHeader("Set-Cookie", buildDeleteCookieHeader("accessToken"));
-        response.addHeader("Set-Cookie", buildDeleteCookieHeader("refreshToken"));
+        response.addHeader("Set-Cookie", authCookieService.deleteCookie("accessToken"));
+        response.addHeader("Set-Cookie", authCookieService.deleteCookie("refreshToken"));
     }
 }
