@@ -34,6 +34,23 @@ public class BatchConfig {
     private final CenterApiItemProcessor centerApiItemProcessor;
     private final CenterApiItemWriter centerApiItemWriter;
 
+    //    @Bean
+    //    public JobRepositoryTestUtils jobRepositoryTestUtils(
+    //        JobRepository jobRepository) {
+    //
+    //        JobRepositoryTestUtils utils = new JobRepositoryTestUtils();
+    //        utils.setJobRepository(jobRepository);
+    //        utils.setDataSource(dataSource);
+    //        return utils;
+    //    }
+    //
+    //    @Bean
+    //    public JobLauncherTestUtils jobLauncherTestUtils(Job fetchApiJob) {
+    //        JobLauncherTestUtils utils = new JobLauncherTestUtils();
+    //        utils.setJob(fetchApiJob);
+    //        return utils;
+    //    }
+
     @Bean
     public AsyncTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
