@@ -398,4 +398,47 @@ public class MemberService {
                     return memberRepository.save(member);
                 });
     }
+
+    @Transactional
+    public void withdraw(HttpServletResponse response) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null
+                || !auth.isAuthenticated()
+                || auth.getPrincipal() == null
+                || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ServiceException("AUTH-401", "인증 정보가 없습니다.");
+        }
+
+        Long memberId;
+        try {
+            memberId = (Long) auth.getPrincipal();
+        } catch (ClassCastException e) {
+            memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
+        }
+
+        Member member = memberRepository
+                .findById(memberId)
+                .orElseThrow(() -> new ServiceException("MEMBER-404", "존재하지 않는 회원입니다."));
+
+        // 이미 탈퇴한 회원 방어 (엔티티에서 예외 던져도 되고 여기서 해도 됨)
+        if (member.getStatus() == Member.MemberStatus.DELETED) {
+            throw new ServiceException("MEMBER-400", "이미 탈퇴한 회원입니다.");
+        }
+
+        // 1) soft delete
+        member.withdraw(); // Status -> delete 로 바꾸는거임
+
+        // 2) refresh 토큰 폐기 (Redis)
+        // - access는 짧으니 쿠키 만료로 충분
+        // - refresh는 반드시 서버 저장소에서 폐기
+        redisRefreshTokenStore.deleteAllByMemberId(memberId);
+
+        // 2-1) DB refresh도 같이 쓰고 있으면 같이 삭제
+        // refreshTokenRepository.deleteByMember_Id(memberId);
+
+        // access/refresh 쿠키 제거
+        response.addHeader("Set-Cookie", buildDeleteCookieHeader("accessToken"));
+        response.addHeader("Set-Cookie", buildDeleteCookieHeader("refreshToken"));
+    }
 }
