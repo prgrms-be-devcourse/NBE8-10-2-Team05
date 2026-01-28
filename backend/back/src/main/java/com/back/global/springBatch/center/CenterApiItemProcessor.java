@@ -9,7 +9,7 @@ import com.back.domain.welfare.center.center.entity.Center;
 @Component
 public class CenterApiItemProcessor implements ItemProcessor<CenterApiResponseDto.CenterDto, Center> {
     @Override
-    public Center process(CenterApiResponseDto.CenterDto centerDto) {
+    public Center process(CenterApiResponseDto.CenterDto centerDto) throws Exception {
         return Center.dtoToEntity(centerDto);
     }
 }
