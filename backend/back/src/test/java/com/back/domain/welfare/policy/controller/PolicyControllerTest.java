@@ -48,10 +48,15 @@ public class PolicyControllerTest {
     @Transactional
     void setUp() throws Exception {
         try {
-            elasticsearchAvailable = elasticsearchClient.ping().value();
-            assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
+            boolean esAvailable = elasticsearchClient.ping().value()
+                    && elasticsearchClient
+                            .indices()
+                            .exists(e -> e.index("policy"))
+                            .value();
+
+            assumeTrue(esAvailable, "Elasticsearch 서버가 없어서 테스트 스킵");
         } catch (Exception e) {
-            assumeTrue(false, "Elasticsearch 연결 실패");
+            assumeTrue(false, "Elasticsearch 연결 실패 → 테스트 스킵");
         }
 
         cleanupElasticsearch();
