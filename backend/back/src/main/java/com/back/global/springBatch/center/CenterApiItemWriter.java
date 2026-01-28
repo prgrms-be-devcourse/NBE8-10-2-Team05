@@ -1,5 +1,6 @@
 package com.back.global.springBatch.center;
 
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ public class CenterApiItemWriter {
     private final EntityManagerFactory entityManagerFactory;
 
     @Bean
+    @StepScope
     public JpaItemWriter<Center> jpaItemWriter() {
         return new JpaItemWriterBuilder<Center>()
                 .entityManagerFactory(entityManagerFactory)

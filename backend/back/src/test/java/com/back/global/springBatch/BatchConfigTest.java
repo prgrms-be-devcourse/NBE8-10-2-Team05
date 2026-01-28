@@ -4,17 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.*;
 
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -23,8 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
 import com.back.global.springBatch.center.CenterApiItemProcessor;
+import com.back.global.springBatch.center.CenterApiItemReader;
 
 @SpringBootTest
 @SpringBatchTest
@@ -50,9 +56,16 @@ class BatchConfigTest {
     @MockitoBean
     CenterApiItemProcessor centerApiItemProcessor;
 
+    @MockitoBean
+    CenterApiItemReader centerApiItemReader;
+
+    @MockitoBean
+    ItemWriter<Center> centerApiItemWriter;
+
     @BeforeEach
     void clearMetadata() {
         jobRepositoryTestUtils.removeJobExecutions(); // 이전 테스트 기록 삭제
+        Mockito.reset(centerApiItemReader, centerApiItemProcessor);
     }
 
     @Test
@@ -63,33 +76,53 @@ class BatchConfigTest {
                 .willThrow(new SocketTimeoutException("2차 실패"))
                 .willReturn(new Center()); // 3차 성공
 
+        given(centerApiItemReader.read())
+                .willReturn(new CenterApiResponseDto.CenterDto(1, "", "", "", "", "", ""))
+                .willReturn(null); // 한 건만 처리
+
         // when
         JobExecution jobExecution = jobOperatorTestUtils.startStep("fetchCenterApiStep");
 
         // then
         assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
         // BATCH_STEP_EXECUTION 테이블의 rollback_count가 2인지 확인 (재시도 횟수)
-        assertThat(jobExecution.getStepExecutions().iterator().next().getRollbackCount())
-                .isEqualTo(2);
+        // assertThat(jobExecution.getStepExecutions().iterator().next().getRollbackCount())
+        //        .isEqualTo(2);
+        then(centerApiItemProcessor)
+                .should(times(3)) // 1차 실패 + 2차 실패 + 3차 성공 = 총 3번 호출
+                .process(any());
     }
 
     @Test
-    void multiThreadTest() throws Exception {
-        // given: 스레드 이름을 저장할 동기화된 셋
+    void multiThreadStepTest() throws Exception {
+        // given: 충분한 아이템 (여러 chunk 생성)
+        AtomicInteger counter = new AtomicInteger(0);
+
+        given(centerApiItemReader.read()).willAnswer(invocation -> {
+            int i = counter.incrementAndGet();
+            return i <= 100 ? new CenterApiResponseDto.CenterDto(i, "", "", "", "", "", "") : null;
+        });
+
+        // processor에서 살짝 sleep → 스레드 분산 유도
         Set<String> threadNames = Collections.synchronizedSet(new HashSet<>());
 
-        doAnswer(invocation -> {
-                    threadNames.add(Thread.currentThread().getName());
-                    return new Center();
-                })
-                .when(centerApiItemProcessor)
-                .process(any());
+        given(centerApiItemProcessor.process(any())).willAnswer(invocation -> {
+            threadNames.add(Thread.currentThread().getName());
+            Thread.sleep(50); // 🔥 없으면 한 스레드로 끝날 수도 있음
+            return new Center();
+        });
+
+        // writer는 그냥 통과
+        doNothing().when(centerApiItemWriter).write(any());
 
         // when
-        jobOperatorTestUtils.startStep("fetchCenterApiStep");
+        JobExecution jobExecution = jobOperatorTestUtils.startStep("fetchCenterApiStep");
 
-        // then: 사용된 스레드 이름이 1개 이상(멀티스레드)인지 확인
-        assertThat(threadNames.size()).isGreaterThan(1);
-        System.out.println("사용한 스레드들: " + threadNames);
+        // then
+        assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+
+        assertThat(threadNames.size()).as("멀티스레드로 실행되어야 함").isGreaterThan(1);
+
+        System.out.println("사용된 스레드: " + threadNames);
     }
 }
