@@ -2,6 +2,7 @@ package com.back.domain.welfare.policy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -202,6 +203,14 @@ class PolicyElasticSearchServiceIntegrationTest {
         }
 
         throw new AssertionError("⚠️ 타임아웃: " + expectedCount + "건 인덱싱 대기 실패 (마지막 확인: " + lastCount + "건)");
+    }
+
+    public PolicyDocumentMapper getPolicyDocumentMapper() {
+        return policyDocumentMapper;
+    }
+
+    public void setPolicyDocumentMapper(PolicyDocumentMapper policyDocumentMapper) {
+        this.policyDocumentMapper = policyDocumentMapper;
     }
 
     @Nested

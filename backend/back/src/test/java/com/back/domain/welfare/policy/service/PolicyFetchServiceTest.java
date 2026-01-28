@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,9 @@ public class PolicyFetchServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private PolicyElasticSearchService policyElasticSearchService;
 
     @InjectMocks
     private PolicyFetchService policyFetchService;
@@ -175,10 +179,11 @@ public class PolicyFetchServiceTest {
         responseDto = new PolicyFetchResponseDto(0, "SUCCESS", result);
 
         when(objectMapper.writeValueAsString(any())).thenReturn("{json}");
+        when(policyElasticSearchService.reindexAllFromDb()).thenReturn(0L);
     }
 
     @Test
-    void fetchAndSavePolicies_savesOnlyNewPolicies() {
+    void fetchAndSavePolicies_savesOnlyNewPolicies() throws IOException {
 
         // given
         when(policyApiClient.fetchPolicyPage(any(), eq(1), eq(100))).thenReturn(responseDto);
