@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 
 import io.jsonwebtoken.Claims;
@@ -27,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
+    private final MemberRepository memberRepository;
     private final Environment env;
 
     // 토큰 없이도 허용할 경로들 (SecurityConfig의 permitAll과 맞춰주는 게 중요)
@@ -80,6 +83,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long memberId = Long.valueOf(claims.getSubject());
             String role = String.valueOf(claims.get("role")); // 예: USER
 
+            // 탈퇴 회원 차단 (soft delete)
+            Member member = memberRepository
+                    .findById(memberId)
+                    .orElseThrow(() -> new ServiceException("AUTH-401", "존재하지 않는 회원입니다."));
+
+            if (member.getStatus() == Member.MemberStatus.DELETED) {
+                throw new ServiceException("AUTH-401", "탈퇴한 회원입니다.");
+            }
+
             // 5) Spring Security 인증 객체 생성
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
@@ -93,8 +105,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
 
+        } catch (ServiceException se) {
+            // 우리가 의도적으로 던진 401(탈퇴/없음 등)은 메시지 유지
+            throw se;
         } catch (Exception e) {
-            // 토큰이 위조되었거나, 만료되었거나, 파싱 실패한 경우
+            // 토큰 위조/만료/파싱 실패
             throw new ServiceException("AUTH-401", "유효하지 않은 토큰입니다.");
         }
     }

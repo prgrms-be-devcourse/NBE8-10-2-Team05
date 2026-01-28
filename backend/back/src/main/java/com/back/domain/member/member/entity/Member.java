@@ -25,6 +25,9 @@ public class Member {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(nullable = false, length = 20)
     private String name;
 
@@ -78,7 +81,8 @@ public class Member {
 
     public enum MemberStatus {
         PRE_REGISTERED, // 소셜 로그인만 완료(추가정보 미입력)
-        ACTIVE // 필수 정보 입력 완료
+        ACTIVE, // 필수 정보 입력 완료
+        DELETED // 회원 탈퇴
     }
 
     // 외부에서 new 못 하게 막고, 생성 규칙을 한 곳에 모으는 생성자
@@ -187,5 +191,21 @@ public class Member {
         this.rrnFront = rrnFront;
         this.rrnBackFirst = rrnBackFirst;
         this.touchModifiedAt();
+    }
+
+    // 탈퇴 메서드
+    public boolean isDeleted() {
+        return this.status == MemberStatus.DELETED;
+    }
+
+    // 탈퇴 메서드
+    public void withdraw() {
+        if (this.status == MemberStatus.DELETED) {
+            throw new IllegalStateException("이미 탈퇴한 회원입니다.");
+        }
+
+        this.status = MemberStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+        touchModifiedAt();
     }
 }
