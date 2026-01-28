@@ -1,4 +1,4 @@
-package com.back.global.springBatch.center;
+package com.back.global.springBatch.estate;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,27 +10,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
-import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
-import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
-import com.back.domain.welfare.center.center.service.CenterApiService;
+import com.back.domain.welfare.estate.dto.EstateDto;
+import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
+import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
+import com.back.domain.welfare.estate.service.EstateApiClient;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component // Spring이 관리하도록 등록
 @StepScope // 매우 중요! Step 실행 시점에 생성되어야 함
 @Slf4j
-public class CenterApiItemReader extends AbstractPagingItemReader<CenterApiResponseDto.CenterDto> {
+public class EstateApiItemReader extends AbstractPagingItemReader<EstateDto> {
 
-    private final CenterApiService centerApiService;
+    private final EstateApiClient estateApiClient;
     private final int totalCount;
     private List<String> apiKeys = List.of("1", "2", "3");
     private Integer currentKeyIdx = 0;
 
     // 생성자를 통해 totalCount를 주입받음
-    public CenterApiItemReader(CenterApiService apiService) {
-        this.centerApiService = apiService;
-        this.totalCount = 1000;
-        setPageSize(1000); // 한번에 읽을 양 설정
+    public EstateApiItemReader(EstateApiClient apiService) {
+        this.estateApiClient = apiService;
+        this.totalCount = 100;
+        setPageSize(100); // 한번에 읽을 양 설정
     }
 
     @Override
@@ -47,13 +48,20 @@ public class CenterApiItemReader extends AbstractPagingItemReader<CenterApiRespo
             try {
                 // 현재 선택된 키로 API 호출 (페이지 번호 전달)
 
-                CenterApiRequestDto requestDto = CenterApiRequestDto.from(1, getPageSize());
-                CenterApiResponseDto responseDto = centerApiService.fetchCenter(requestDto);
+                // CenterApiRequestDto requestDto = CenterApiRequestDto.from(1, getPageSize());
+                // CenterApiResponseDto responseDto = centerApiService.fetchCenter(requestDto);
 
-                List<CenterApiResponseDto.CenterDto> data = responseDto.data();
+                EstateFetchRequestDto requestDto = EstateFetchRequestDto.builder()
+                        .pageNo(1)
+                        .numOfRows(getPageSize())
+                        .build();
+                EstateFetchResponseDto responseDto = estateApiClient.fetchEstatePage(requestDto);
+
+                List<EstateDto> data = responseDto.response().body().items();
+
                 results.addAll(data);
-                success = true;
 
+                success = true;
             } catch (HttpClientErrorException e) { // 4xx 에러
                 if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) { // 429 에러
                     log.warn("API 한도 초과! 키를 교체합니다.");
