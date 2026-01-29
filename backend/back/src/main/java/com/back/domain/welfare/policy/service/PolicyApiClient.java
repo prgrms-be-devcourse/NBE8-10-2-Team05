@@ -6,7 +6,6 @@ import java.time.Duration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.back.domain.welfare.policy.config.YouthPolicyProperties;
 import com.back.domain.welfare.policy.dto.PolicyFetchRequestDto;
@@ -14,7 +13,6 @@ import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
-import reactor.util.retry.Retry;
 
 @Component
 @RequiredArgsConstructor
@@ -48,8 +46,8 @@ public class PolicyApiClient {
                     .retrieve()
                     .bodyToMono(String.class)
                     // delay넣지 않으면 외부 api에서 거부
-                    .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
-                            .filter(throwable -> throwable instanceof WebClientResponseException.InternalServerError))
+                    // .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(2))
+                    //       .filter(throwable -> throwable instanceof WebClientResponseException.InternalServerError))
                     // block으로 동기 처리
                     .block(Duration.ofSeconds(10)); // 10초 타임아웃
 
