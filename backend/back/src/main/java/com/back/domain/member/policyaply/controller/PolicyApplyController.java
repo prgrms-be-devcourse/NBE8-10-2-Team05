@@ -41,6 +41,7 @@ public class PolicyApplyController {
 
     @PostMapping("/welfare-application/{policyId}")
     public ResponseEntity<AddApplicationResponseDto> addApplication(@PathVariable Integer policyId) {
+
         Member member = actorProvider.getActor();
 
         if (member == null) {
