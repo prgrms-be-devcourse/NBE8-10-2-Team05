@@ -2,8 +2,10 @@ package com.back.domain.member.bookmark.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.back.domain.member.bookmark.entity.Bookmark;
 import com.back.domain.member.bookmark.repository.BookmarkRepository;
@@ -29,16 +31,19 @@ public class BookmarkService {
         return policies;
     }
 
-    // 원래 북마크 목록에 policy가 있었는지를 리턴한다.
+    @Transactional
     public String changeBookmarkStatus(Member member, Policy policy) {
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByApplicantAndPolicy(member, policy);
 
-        List<Policy> policies = getPolicies(member);
-
-        if (policies.contains(policy)) {
-            policies.remove(policy);
+        if (existingBookmark.isPresent()) {
+            // 북마크가 존재하면 삭제
+            bookmarkRepository.delete(existingBookmark.get());
             return "북마크가 해제되었습니다.";
         } else {
-            policies.add(policy);
+            // 북마크가 없으면 새로 생성
+            Bookmark newBookmark =
+                    Bookmark.builder().applicant(member).policy(policy).build();
+            bookmarkRepository.save(newBookmark);
             return "북마크가 추가되었습니다.";
         }
     }

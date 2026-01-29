@@ -6,6 +6,8 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.welfare.policy.entity.Policy;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "bookmark")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Bookmark {
 
     @Id
@@ -29,4 +33,15 @@ public class Bookmark {
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        modifiedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedAt = LocalDateTime.now();
+    }
 }
