@@ -48,7 +48,7 @@ public class BookmarkController {
     }
 
     @PostMapping("/welfare-bookmarks/{policyId}")
-    public ResponseEntity<BookmarkUpdateResponseDto> updateBookmark(@RequestParam int policyId) {
+    public ResponseEntity<BookmarkUpdateResponseDto> updateBookmark(@PathVariable int policyId) {
         Member member = actorProvider.getActor();
         if (member == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
