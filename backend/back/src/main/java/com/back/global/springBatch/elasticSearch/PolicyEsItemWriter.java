@@ -13,7 +13,6 @@ import com.back.domain.welfare.policy.entity.Policy;
 import com.back.domain.welfare.policy.mapper.PolicyDocumentMapper;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.Refresh;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,7 @@ public class PolicyEsItemWriter implements ItemWriter<Policy> {
         }
 
         try {
-            var resp = esClient.bulk(b -> b.operations(ops).refresh(Refresh.True));
+            var resp = esClient.bulk(b -> b.operations(ops)); // .refresh(Refresh.True)) 제거
             if (resp.errors()) {
                 // 에러 상세는 item별로 존재하므로, 우선 전체 에러만 로그로 남김 (필요 시 확장)
                 log.warn(
