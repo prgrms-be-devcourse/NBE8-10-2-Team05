@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
 import type { Policy } from "@/types/policy";
 import { getBookmarks } from "@/api/bookmark";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,34 +44,26 @@ export default function BookmarkPage() {
 
   if (authLoading || loading) {
     return (
-      <div>
-        <Header />
-        <main style={{ padding: "20px" }}>
-          <h1>북마크</h1>
-          <div>로딩 중...</div>
-        </main>
-      </div>
+      <main style={{ padding: "20px" }}>
+        <h1>북마크</h1>
+        <div>로딩 중...</div>
+      </main>
     );
   }
 
   if (!user) {
     return (
-      <div>
-        <Header />
-        <main style={{ padding: "20px" }}>
-          <h1>북마크</h1>
-          <p>북마크를 이용하려면 로그인이 필요합니다.</p>
-          <Link href="/login">로그인 페이지로 이동</Link>
-        </main>
-      </div>
+      <main style={{ padding: "20px" }}>
+        <h1>북마크</h1>
+        <p>북마크를 이용하려면 로그인이 필요합니다.</p>
+        <Link href="/login">로그인 페이지로 이동</Link>
+      </main>
     );
   }
 
   return (
-    <div>
-      <Header />
-      <main style={{ padding: "20px" }}>
-        <h1>북마크</h1>
+    <main style={{ padding: "20px" }}>
+      <h1>북마크</h1>
 
         {error && (
           <div style={{ color: "red", marginTop: "12px" }}>
@@ -119,6 +110,5 @@ export default function BookmarkPage() {
           )}
         </div>
       </main>
-    </div>
   );
 }
