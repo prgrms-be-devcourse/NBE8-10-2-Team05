@@ -1,6 +1,7 @@
 package com.back.domain.member.policyaply.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -8,16 +9,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,7 @@ import com.back.domain.member.policyaply.entity.Application;
 import com.back.domain.member.policyaply.repository.ApplicationRepository;
 import com.back.domain.welfare.policy.entity.Policy;
 import com.back.domain.welfare.policy.repository.PolicyRepository;
-import com.back.standard.util.Ut;
+import com.back.global.security.jwt.JwtProvider;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -40,9 +43,6 @@ public class ApiV1PolicyApplyControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private PolicyApplyController policyApplyController;
-
-    @Autowired
     private MemberRepository memberRepository;
 
     @Autowired
@@ -51,34 +51,33 @@ public class ApiV1PolicyApplyControllerTest {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    private static String JWT_SECRET_KEY;
+    @Autowired
+    private JwtProvider jwtProvider;
 
-    @Value("${custom.jwt.secretKey}")
-    void setJwtSecretKey(String key) {
-        JWT_SECRET_KEY = key;
+    public static void mockAuthentication(Member member) {
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(member, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
     }
-
-    private static final int JWT_EXPIRE_SECONDS = 60 * 20; // 20분
 
     @Test
     @DisplayName("신청내역 추가 - 200 + AddApplicationResponseDto 반환")
     void addApplicationSuccessTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
         Policy policy = createTestPolicy("TEST-POLICY-001", "테스트 정책");
         Policy savedPolicy = policyRepository.save(policy);
 
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
-
         // when & then: POST 요청 보내고 정상적인 응답 확인
         mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + savedPolicy.getId())
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -91,19 +90,17 @@ public class ApiV1PolicyApplyControllerTest {
     void addApplicationFailInvalidPolicyIdTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
 
         // given: 존재하지 않는 Policy ID
         Integer nonExistentPolicyId = 99999;
 
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
-
         // when & then: POST 요청 보내고 404 응답 확인
         mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + nonExistentPolicyId)
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -122,9 +119,8 @@ public class ApiV1PolicyApplyControllerTest {
         mockMvc.perform(post("/api/v1/member/policy-aply/welfare-application/" + savedPolicy.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(401))
-                .andExpect(jsonPath("$.message").value("로그인 후 이용해주세요"));
+                .andExpect(jsonPath("$.resultCode").value("AUTH-401"))
+                .andExpect(jsonPath("$.msg").value("인증 정보가 없습니다."));
     }
 
     @Test
@@ -133,9 +129,8 @@ public class ApiV1PolicyApplyControllerTest {
         // when & then: JWT 없이 GET 요청 보내고 401 응답 확인
         mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(401))
-                .andExpect(jsonPath("$.message").value("로그인 후 이용해주세요"));
+                .andExpect(jsonPath("$.resultCode").value("AUTH-401"))
+                .andExpect(jsonPath("$.msg").value("인증 정보가 없습니다."));
     }
 
     @Test
@@ -148,9 +143,8 @@ public class ApiV1PolicyApplyControllerTest {
         mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + nonExistentApplicationId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value(401))
-                .andExpect(jsonPath("$.message").value("로그인 후 이용해주세요"));
+                .andExpect(jsonPath("$.resultCode").value("AUTH-401"))
+                .andExpect(jsonPath("$.msg").value("인증 정보가 없습니다."));
     }
 
     @Test
@@ -158,7 +152,7 @@ public class ApiV1PolicyApplyControllerTest {
     void getApplicationsSuccessTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
         Policy policy = createTestPolicy("TEST-POLICY-001", "테스트 정책");
@@ -167,17 +161,13 @@ public class ApiV1PolicyApplyControllerTest {
         // given: Application 생성 및 저장
         Application application = new Application();
         application.setPolicy(savedPolicy);
-        application.setApplicant(savedMember);
+        application.setApplicant(saved);
         applicationRepository.save(application);
-
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: GET 요청 보내고 정상적인 응답 확인
         mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications")
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -194,16 +184,12 @@ public class ApiV1PolicyApplyControllerTest {
     void getApplicationsEmptyListTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
-
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
+        Member saved = memberRepository.save(member);
 
         // when & then: GET 요청 보내고 빈 리스트 반환 확인
         mockMvc.perform(get("/api/v1/member/policy-aply/welfare-applications")
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -216,7 +202,7 @@ public class ApiV1PolicyApplyControllerTest {
     void deleteApplicationSuccessTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
 
         // given: Policy 생성 및 저장
         Policy policy = createTestPolicy("TEST-POLICY-001", "테스트 정책");
@@ -225,17 +211,13 @@ public class ApiV1PolicyApplyControllerTest {
         // given: Application 생성 및 저장
         Application application = new Application();
         application.setPolicy(savedPolicy);
-        application.setApplicant(savedMember);
+        application.setApplicant(saved);
         Application savedApplication = applicationRepository.save(application);
-
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
 
         // when & then: PUT 요청 보내고 정상적인 응답 확인
         mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + savedApplication.getId())
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -248,19 +230,15 @@ public class ApiV1PolicyApplyControllerTest {
     void deleteApplicationNotFoundTest() throws Exception {
         // given: Member 생성 및 저장
         Member member = Member.createEmailUser("홍길동", "test@example.com", "encodedPassword123", "991231", "1");
-        Member savedMember = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
 
         // given: 존재하지 않는 Application ID
         Long nonExistentApplicationId = 99999L;
 
-        // given: JWT 토큰 생성
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
-
         // when & then: PUT 요청 보내고 404 응답 확인
         mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + nonExistentApplicationId)
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -288,14 +266,10 @@ public class ApiV1PolicyApplyControllerTest {
         application.setApplicant(savedMember1);
         Application savedApplication = applicationRepository.save(application);
 
-        // given: member2의 JWT 토큰 생성 (다른 사용자)
-        Map<String, Object> jwtBody = new HashMap<>();
-        jwtBody.put("memberId", savedMember2.getId());
-        String jwt = Ut.Jwt.toString(JWT_SECRET_KEY, JWT_EXPIRE_SECONDS, jwtBody);
-
         // when & then: PUT 요청 보내고 401 응답 확인
         mockMvc.perform(put("/api/v1/member/policy-aply/welfare-application/" + savedApplication.getId())
-                        .header("Authorization", "Bearer " + jwt)
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                savedMember2.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
