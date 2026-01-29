@@ -36,7 +36,11 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
         // 일반 로그인과 동일한 쿠키 발급 (access + refresh)
         memberService.issueLoginCookies(member, response);
 
-        // 프론트로 이동
-        response.sendRedirect("http://localhost:3000");
+        // PRE_REGISTERED 상태면 추가정보 입력 페이지로, ACTIVE면 메인으로
+        if (member.getStatus() == Member.MemberStatus.PRE_REGISTERED) {
+            response.sendRedirect("http://localhost:3000/social-signup");
+        } else {
+            response.sendRedirect("http://localhost:3000");
+        }
     }
 }

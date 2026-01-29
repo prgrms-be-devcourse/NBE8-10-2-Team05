@@ -180,3 +180,25 @@ export async function logout(): Promise<void> {
     throw new ApiError(errorData.resultCode, errorData.msg);
   }
 }
+
+// ===== 소셜 가입 추가정보 입력 (인증 필요) =====
+export async function completeSocialSignup(data: {
+  rrnFront: string;
+  rrnBackFirst: string;
+}): Promise<void> {
+  const response = await fetchWithAuth(
+    `/api/v1/member/member/complete-social`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData: ApiErrorResponse = await response.json();
+    throw new ApiError(errorData.resultCode, errorData.msg);
+  }
+}
