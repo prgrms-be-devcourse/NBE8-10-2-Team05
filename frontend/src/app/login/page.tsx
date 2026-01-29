@@ -48,38 +48,148 @@ export default function LoginPage() {
     }
   };
 
+  // 소셜 로그인 핸들러
+  const handleSocialLogin = (provider: "kakao" | "naver") => {
+    // 백엔드 OAuth2 엔드포인트로 리다이렉트
+    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+  };
+
   return (
     <div>
-      <main style={{ padding: "20px" }}>
+      <main style={{ padding: "20px", maxWidth: "400px", margin: "50px auto" }}>
         <h1>로그인</h1>
 
-        {error && <div style={{ color: "red" }}>{error}</div>}
+        {error && (
+          <div
+            style={{
+              color: "red",
+              padding: "10px",
+              marginBottom: "20px",
+              border: "1px solid red",
+              borderRadius: "4px",
+            } as React.CSSProperties}
+          >
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>이메일</label>
+        <form onSubmit={handleSubmit} style={{ marginBottom: "30px" }}>
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              이메일
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+              } as React.CSSProperties}
             />
           </div>
 
-          <div>
-            <label>비밀번호</label>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ display: "block", marginBottom: "5px" }}>
+              비밀번호
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+              } as React.CSSProperties}
             />
           </div>
 
-          <button type="submit" disabled={isLoading}>
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: "100%",
+              padding: "12px",
+              backgroundColor: isLoading ? "#ccc" : "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              fontSize: "16px",
+            } as React.CSSProperties}
+          >
             {isLoading ? "로그인 중..." : "로그인"}
           </button>
         </form>
+
+        {/* 구분선 */}
+        <div
+          style={{
+            textAlign: "center",
+            margin: "20px 0",
+            position: "relative",
+          }}
+        >
+          <hr style={{ border: "none", borderTop: "1px solid #ddd" }} />
+          <span
+            style={{
+              position: "absolute",
+              top: "-12px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              backgroundColor: "white",
+              padding: "0 10px",
+              color: "#666",
+            }}
+          >
+            또는
+          </span>
+        </div>
+
+        {/* 소셜 로그인 버튼 */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <button
+            onClick={() => handleSocialLogin("kakao")}
+            style={{
+              width: "100%",
+              padding: "0",
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src="/images/kakao_login_medium_narrow.png"
+              alt="카카오 로그인"
+              style={{
+                width: "183px",
+                height: "43px",
+              }}
+            />
+          </button>
+        </div>
+
+        {/* 회원가입 링크 */}
+        <div
+          style={{
+            marginTop: "20px",
+            textAlign: "center",
+            color: "#666",
+          }}
+        >
+          계정이 없으신가요?{" "}
+          <a href="/join" style={{ color: "#007bff", textDecoration: "none" }}>
+            회원가입
+          </a>
+        </div>
       </main>
     </div>
   );
