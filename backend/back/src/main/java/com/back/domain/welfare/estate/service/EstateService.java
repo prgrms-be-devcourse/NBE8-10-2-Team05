@@ -11,6 +11,7 @@ import com.back.domain.welfare.estate.dto.EstateFetchRequestDto;
 import com.back.domain.welfare.estate.dto.EstateFetchResponseDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.repository.EstateRepository;
+import com.back.standard.util.SidoNormalizer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -64,6 +65,7 @@ public class EstateService {
 
     @Cacheable(value = "estate", key = "#sido + ':' + #signguNm")
     public List<Estate> searchEstateLocation(String sido, String signguNm) {
-        return estateRepository.findByBrtcNmContainingAndSignguNmContaining(sido, signguNm);
+        String normalizedSido = SidoNormalizer.normalizeSido(sido);
+        return estateRepository.findByBrtcNmContainingAndSignguNmContaining(normalizedSido, signguNm);
     }
 }
