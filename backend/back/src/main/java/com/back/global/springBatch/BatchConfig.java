@@ -27,6 +27,8 @@ import com.back.global.springBatch.center.CenterApiItemWriter;
 import com.back.global.springBatch.estate.EstateApiItemProcessor;
 import com.back.global.springBatch.estate.EstateApiItemReader;
 import com.back.global.springBatch.estate.EstateApiItemWriter;
+import com.back.global.springBatch.lawyer.LawyerApiItemReader;
+import com.back.global.springBatch.lawyer.LawyerApiItemWriter;
 import com.back.global.springBatch.policy.PolicyApiItemProcessor;
 import com.back.global.springBatch.policy.PolicyApiItemReader;
 import com.back.global.springBatch.policy.PolicyApiItemWriter;
@@ -52,6 +54,50 @@ public class BatchConfig {
     private final PolicyApiItemProcessor policyApiItemProcessor;
     private final PolicyApiItemWriter policyApiItemWriter;
 
+    private final LawyerApiItemReader lawyerApiItemReader;
+    private final LawyerApiItemWriter lawyerApiItemWriter;
+
+    @Bean
+    public Job fetchApiJob(
+            JobRepository jobRepository,
+            Step fetchCenterApiStep,
+            Step fetchEstateApiStep,
+            Step fetchPolicyApiStep,
+            Step fetchLawyerApiStep) {
+
+        return new JobBuilder("fetchApiJob", jobRepository)
+                .listener(batchJobListener)
+                .start(fetchCenterApiStep)
+                // .start(fetchEstateApiStep)
+                // .start(fetchPolicyApiStep)
+                // .start(fetchLawyerApiStep)
+                .build();
+    }
+
+    @Bean
+    public Step fetchCenterApiStep(BatchStepFactory factory) {
+        return factory.<CenterApiResponseDto.CenterDto, Center>createApiStep(
+                "fetchCenterApiStep", centerApiItemReader, centerApiItemProcessor, centerApiItemWriter.jpaItemWriter());
+    }
+
+    @Bean
+    public Step fetchEstateApiStep(BatchStepFactory factory) {
+        return factory.<EstateDto, Estate>createApiStep(
+                "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
+    }
+
+    @Bean
+    public Step fetchPolicyApiStep(BatchStepFactory factory) {
+        return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
+                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyApiItemWriter.jpaItemWriter());
+    }
+
+    @Bean
+    public Step fetchLawyerApiStep(BatchStepFactory factory) {
+        return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
+                "fetchLawyerApiStep", policyApiItemReader, null, policyApiItemWriter.jpaItemWriter());
+    }
+
     @Bean
     public AsyncTaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -75,32 +121,20 @@ public class BatchConfig {
     }
 
     @Bean
-    public Job fetchApiJob(
-            JobRepository jobRepository, Step fetchCenterApiStep, Step fetchEstateApiStep, Step fetchPolicyApiStep) {
+    public AsyncTaskExecutor crawlingTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(4);
 
-        return new JobBuilder("fetchApiJob", jobRepository)
-                .listener(batchJobListener)
-                .start(fetchCenterApiStep)
-                // .start(fetchEstateApiStep)
-                // .start(fetchPolicyApiStep)
-                .build();
-    }
+        executor.setQueueCapacity(100);
 
-    @Bean
-    public Step fetchCenterApiStep(BatchStepFactory factory) {
-        return factory.<CenterApiResponseDto.CenterDto, Center>createApiStep(
-                "fetchCenterApiStep", centerApiItemReader, centerApiItemProcessor, centerApiItemWriter.jpaItemWriter());
-    }
+        executor.setThreadNamePrefix("crawler-");
 
-    @Bean
-    public Step fetchEstateApiStep(BatchStepFactory factory) {
-        return factory.<EstateDto, Estate>createApiStep(
-                "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
-    }
+        // 서버 종료 시 진행 중인 크롤링은 마무리하고 닫도록 설정
+        // executor.setWaitForTasksToCompleteOnShutdown(true);
+        // executor.setAwaitTerminationSeconds(60);
 
-    @Bean
-    public Step fetchPolicyApiStep(BatchStepFactory factory) {
-        return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
-                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyApiItemWriter.jpaItemWriter());
+        executor.initialize();
+        return executor;
     }
 }

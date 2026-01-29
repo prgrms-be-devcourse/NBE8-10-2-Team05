@@ -21,6 +21,8 @@ public class BatchStepFactory {
     private final AsyncTaskExecutor taskExecutor;
     private final RetryPolicy retryPolicy;
 
+    private final AsyncTaskExecutor crawlingTaskExecutor;
+
     public <I, O> Step createApiStep(
             String stepName, ItemReader<I> reader, ItemProcessor<I, O> processor, ItemWriter<O> writer) {
 
@@ -33,6 +35,19 @@ public class BatchStepFactory {
                 .faultTolerant()
                 .retryPolicy(retryPolicy) // 공통으로 사용하는 RetryPolicy
                 .taskExecutor(taskExecutor)
+                .build();
+    }
+
+    public <I, O> Step createCrawlStep(
+            String stepName, ItemReader<I> reader, ItemProcessor<I, O> processor, ItemWriter<O> writer) {
+
+        return new StepBuilder(stepName, jobRepository)
+                .<I, O>chunk(1000)
+                .reader(reader)
+                .processor(processor)
+                .writer(writer)
+                .transactionManager(transactionManager)
+                .taskExecutor(crawlingTaskExecutor)
                 .build();
     }
 }
