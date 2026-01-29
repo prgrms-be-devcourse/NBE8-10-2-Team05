@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -61,6 +62,9 @@ class BatchConfigTest {
 
     @MockitoBean
     ItemWriter<Center> centerApiItemWriter;
+
+    @MockitoBean
+    private JpaItemWriter<Center> centerJpaItemWriter; // Writer 클래스가 아닌 빈 타입을 Mocking
 
     @BeforeEach
     void clearMetadata() {
