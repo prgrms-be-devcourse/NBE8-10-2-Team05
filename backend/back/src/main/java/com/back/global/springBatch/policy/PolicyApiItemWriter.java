@@ -18,7 +18,7 @@ public class PolicyApiItemWriter {
 
     @Bean
     @StepScope
-    public JpaItemWriter<Policy> jpaItemWriter() {
+    public JpaItemWriter<Policy> policyJpaItemWriter() {
         return new JpaItemWriterBuilder<Policy>()
                 .entityManagerFactory(entityManagerFactory)
                 .build();

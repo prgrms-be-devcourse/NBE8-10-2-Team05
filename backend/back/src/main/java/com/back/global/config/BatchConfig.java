@@ -18,6 +18,7 @@ import org.springframework.web.client.ResourceAccessException;
 
 import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
+import com.back.domain.welfare.center.lawyer.entity.Lawyer;
 import com.back.domain.welfare.estate.dto.EstateDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
@@ -81,25 +82,34 @@ public class BatchConfig {
     @Bean
     public Step fetchCenterApiStep(BatchStepFactory factory) {
         return factory.<CenterApiResponseDto.CenterDto, Center>createApiStep(
-                "fetchCenterApiStep", centerApiItemReader, centerApiItemProcessor, centerApiItemWriter.jpaItemWriter());
+                "fetchCenterApiStep",
+                centerApiItemReader,
+                centerApiItemProcessor,
+                centerApiItemWriter.centerJpaItemWriter());
     }
 
     @Bean
     public Step fetchEstateApiStep(BatchStepFactory factory) {
         return factory.<EstateDto, Estate>createApiStep(
-                "fetchEstateApiStep", estateApiItemReader, estateApiItemProcessor, estateApiItemWriter.jpaItemWriter());
+                "fetchEstateApiStep",
+                estateApiItemReader,
+                estateApiItemProcessor,
+                estateApiItemWriter.estateJpaItemWriter());
     }
 
     @Bean
     public Step fetchPolicyApiStep(BatchStepFactory factory) {
         return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
-                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyApiItemWriter.jpaItemWriter());
+                "fetchPolicyApiStep",
+                policyApiItemReader,
+                policyApiItemProcessor,
+                policyApiItemWriter.policyJpaItemWriter());
     }
 
     @Bean
     public Step fetchLawyerApiStep(BatchStepFactory factory) {
-        return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
-                "fetchLawyerApiStep", policyApiItemReader, null, policyApiItemWriter.jpaItemWriter());
+        return factory.<Lawyer, Lawyer>createApiStep(
+                "fetchLawyerApiStep", lawyerApiItemReader, null, lawyerApiItemWriter.lawyerJpaItemWriter());
     }
 
     @Bean

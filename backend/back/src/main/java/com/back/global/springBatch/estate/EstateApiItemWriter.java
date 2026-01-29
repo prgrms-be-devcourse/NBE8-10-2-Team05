@@ -18,7 +18,7 @@ public class EstateApiItemWriter {
 
     @Bean
     @StepScope
-    public JpaItemWriter<Estate> jpaItemWriter() {
+    public JpaItemWriter<Estate> estateJpaItemWriter() {
         return new JpaItemWriterBuilder<Estate>()
                 .entityManagerFactory(entityManagerFactory)
                 .build();
