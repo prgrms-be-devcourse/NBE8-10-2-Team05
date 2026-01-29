@@ -1,6 +1,5 @@
-// Estate(행복주택) 관련 타입 정의
-
-export interface EstateItem {
+export interface Estate {
+  id: number;
   pblancId: string;
   pblancNm: string;
   sttusNm: string;
@@ -15,18 +14,18 @@ export interface EstateItem {
   hsmpNm: string;
   brtcNm: string;
   signguNm: string;
+  signguCode: string;
   fullAdres: string;
   rentGtn: number;
   mtRntchrg: number;
   url: string;
 }
 
-export interface EstateSearchParams {
-  signguCode?: string | null;
-  suplyTy?: string | null;
-  houseTy?: string | null;
-  lfstsTyAt?: string | null;
-  bassMtRntchrgSe?: string | null;
-  yearMtBegin?: string | null;
-  yearMtEnd?: string | null;
+export interface EstateSearchRequest {
+  sido: string;
+  signguNm: string;
+}
+
+export interface EstateSearchResponse {
+  estateList: Estate[];
 }
