@@ -29,13 +29,15 @@ export default function Header() {
         통합 복지 서비스
       </Link>
       <span>|</span>
-      <span>정책 검색</span>
+      <Link href="/">정책 검색</Link>
       <span>|</span>
       <Link href="/estate">행복주택</Link>
       <span>|</span>
       <Link href="/welfare/center">시설찾기</Link>
       <span>|</span>
       <Link href="/welfare/lawyer">노무사 찾기</Link>
+      <span>|</span>
+      <Link href="/bookmark">북마크</Link>
       <span>|</span>
       {isLoading ? (
         <span>로딩중...</span>

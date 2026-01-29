@@ -48,3 +48,43 @@ export interface PolicyDocument {
   // 검색용 텍스트
   description: string | null;
 }
+
+// ===== 북마크 응답 =====
+// GET /api/v1/member/bookmark/welfare-bookmarks
+// BookmarkPolicyResponseDto 기반
+export interface BookmarkPolicyResponse {
+  code: number;
+  message: string;
+  policies: Policy[] | null;
+}
+
+// Policy 엔티티 기반
+export interface Policy {
+  id: number | null;
+  plcyNo: string | null;
+  plcyNm: string | null;
+  plcyKywdNm: string | null;
+  plcyExplnCn: string | null;
+  plcySprtCn: string | null;
+  sprvsnInstCdNm: string | null;
+  operInstCdNm: string | null;
+  aplyPrdSeCd: string | null;
+  bizPrdBgngYmd: string | null;
+  bizPrdEndYmd: string | null;
+  plcyAplyMthdCn: string | null;
+  aplyUrlAddr: string | null;
+  sbmsnDcmntCn: string | null;
+  sprtTrgtMinAge: string | null;
+  sprtTrgtMaxAge: string | null;
+  sprtTrgtAgeLmtYn: string | null;
+  mrgSttsCd: string | null;
+  earnCndSeCd: string | null;
+  earnMinAmt: string | null;
+  earnMaxAmt: string | null;
+  zipCd: string | null;
+  jobCd: string | null;
+  schoolCd: string | null;
+  aplyYmd: string | null;
+  sbizCd: string | null;
+  rawJson: string | null;
+}
