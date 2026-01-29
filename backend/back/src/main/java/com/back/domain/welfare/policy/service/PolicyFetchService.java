@@ -29,6 +29,7 @@ public class PolicyFetchService {
     private final PolicyElasticSearchService policyElasticSearchService;
 
     @Transactional
+    @Deprecated
     public void fetchAndSavePolicies(PolicyFetchRequestDto requestDto) throws IOException {
 
         int pageSize = 100;
