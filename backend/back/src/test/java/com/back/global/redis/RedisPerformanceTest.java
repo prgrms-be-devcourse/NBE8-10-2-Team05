@@ -7,14 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@EnableCaching
 public class RedisPerformanceTest {
 
     @Autowired
