@@ -7,7 +7,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.back.domain.auth.repository.RefreshTokenRepository;
 import com.back.domain.auth.store.RedisRefreshTokenStore;
 import com.back.domain.auth.util.RefreshTokenGenerator;
 import com.back.domain.auth.util.TokenHasher;
@@ -33,9 +32,6 @@ public class MemberService {
     private final JwtProvider jwtProvider;
     private final ActorProvider actorProvider;
     private final AuthCookieService authCookieService;
-
-    // refresh 저장소
-    private final RefreshTokenRepository refreshTokenRepository;
 
     // redis refresh 저장소
     private final RedisRefreshTokenStore redisRefreshTokenStore;
