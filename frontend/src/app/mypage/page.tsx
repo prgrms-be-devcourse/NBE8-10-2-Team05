@@ -205,19 +205,10 @@ export default function MyPage() {
     }
   };
 
-  const inputStyle = { width: "100%", padding: "6px", boxSizing: "border-box" as const };
-  const fieldStyle = { marginBottom: "12px" };
-  const sectionStyle = {
-    border: "1px solid #ddd",
-    padding: "16px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-  };
-
   if (isLoadingDetail) {
     return (
-      <main style={{ padding: "20px" }}>
-        <p>회원 정보를 불러오는 중...</p>
+      <main className="ds-page-mid">
+        <div className="ds-empty">회원 정보를 불러오는 중...</div>
       </main>
     );
   }
@@ -228,41 +219,41 @@ export default function MyPage() {
         src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
         onLoad={() => setIsScriptLoaded(true)}
       />
-      <main style={{ padding: "20px", maxWidth: "600px" }}>
-        <h1>내 정보 수정</h1>
+      <main className="ds-page-mid">
+        <h1 className="ds-title">내 정보 수정</h1>
 
-        {error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
-        {successMsg && <div style={{ color: "green", marginBottom: "10px" }}>{successMsg}</div>}
+        {error && <div className="ds-alert-error">{error}</div>}
+        {successMsg && <div className="ds-alert-success">{successMsg}</div>}
 
         {/* 기본 정보 수정 */}
         <form onSubmit={handleBasicSubmit}>
-          <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>기본 정보</h2>
-            <div style={fieldStyle}>
-              <label>이름</label>
+          <div className="ds-section">
+            <h2>기본 정보</h2>
+            <div className="ds-form-group">
+              <label className="ds-label">이름</label>
               <input
                 type="text"
+                className="ds-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={detail?.name ?? ""}
-                style={inputStyle}
               />
             </div>
-            <div style={fieldStyle}>
-              <label>이메일</label>
+            <div className="ds-form-group">
+              <label className="ds-label">이메일</label>
               <input
                 type="email"
+                className="ds-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={detail?.email ?? ""}
-                style={inputStyle}
               />
             </div>
-            <div style={fieldStyle}>
-              <label>가입 유형</label>
-              <input type="text" value={detail?.type ?? ""} readOnly style={inputStyle} />
+            <div className="ds-form-group">
+              <label className="ds-label">가입 유형</label>
+              <input type="text" className="ds-input" value={detail?.type ?? ""} readOnly />
             </div>
-            <button type="submit" disabled={isSubmitting} style={{ padding: "8px 24px", cursor: "pointer" }}>
+            <button type="submit" disabled={isSubmitting} className="ds-btn ds-btn-primary">
               {isSubmitting ? "수정 중..." : "기본 정보 수정하기"}
             </button>
           </div>
@@ -270,15 +261,15 @@ export default function MyPage() {
 
         {/* 회원 상세 정보 수정 */}
         <form onSubmit={handleDetailSubmit}>
-          <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>상세 정보 수정</h2>
+          <div className="ds-section">
+            <h2>상세 정보 수정</h2>
 
-            <div style={fieldStyle}>
-              <label>결혼 상태</label>
+            <div className="ds-form-group">
+              <label className="ds-label">결혼 상태</label>
               <select
+                className="ds-select"
                 value={marriageStatus}
                 onChange={(e) => setMarriageStatus(e.target.value)}
-                style={inputStyle}
               >
                 <option value="">{currentMarriageLabel}</option>
                 {Object.entries(MarriageStatusLabel).map(([key, label]) => (
@@ -287,23 +278,23 @@ export default function MyPage() {
               </select>
             </div>
 
-            <div style={fieldStyle}>
-              <label>소득 (만원)</label>
+            <div className="ds-form-group">
+              <label className="ds-label">소득 (만원)</label>
               <input
                 type="number"
+                className="ds-input"
                 value={income}
                 onChange={(e) => setIncome(e.target.value)}
                 placeholder={detail?.income != null ? String(detail.income) : "소득을 입력하세요"}
-                style={inputStyle}
               />
             </div>
 
-            <div style={fieldStyle}>
-              <label>고용 상태</label>
+            <div className="ds-form-group">
+              <label className="ds-label">고용 상태</label>
               <select
+                className="ds-select"
                 value={employmentStatus}
                 onChange={(e) => setEmploymentStatus(e.target.value)}
-                style={inputStyle}
               >
                 <option value="">{currentEmploymentLabel}</option>
                 {Object.entries(EmploymentStatusLabel).map(([key, label]) => (
@@ -312,12 +303,12 @@ export default function MyPage() {
               </select>
             </div>
 
-            <div style={fieldStyle}>
-              <label>학력</label>
+            <div className="ds-form-group">
+              <label className="ds-label">학력</label>
               <select
+                className="ds-select"
                 value={educationLevel}
                 onChange={(e) => setEducationLevel(e.target.value)}
-                style={inputStyle}
               >
                 <option value="">{currentEducationLabel}</option>
                 {Object.entries(EducationLevelLabel).map(([key, label]) => (
@@ -326,12 +317,12 @@ export default function MyPage() {
               </select>
             </div>
 
-            <div style={fieldStyle}>
-              <label>특수 상태</label>
+            <div className="ds-form-group">
+              <label className="ds-label">특수 상태</label>
               <select
+                className="ds-select"
                 value={specialStatus}
                 onChange={(e) => setSpecialStatus(e.target.value)}
-                style={inputStyle}
               >
                 <option value="">{currentSpecialLabel}</option>
                 {Object.entries(SpecialStatusLabel).map(([key, label]) => (
@@ -340,7 +331,7 @@ export default function MyPage() {
               </select>
             </div>
 
-            <button type="submit" disabled={isSubmitting} style={{ padding: "8px 24px", cursor: "pointer" }}>
+            <button type="submit" disabled={isSubmitting} className="ds-btn ds-btn-primary">
               {isSubmitting ? "수정 중..." : "상세 정보 수정하기"}
             </button>
           </div>
@@ -348,42 +339,42 @@ export default function MyPage() {
 
         {/* 주소 정보 수정 */}
         <form onSubmit={handleAddressSubmit}>
-          <div style={sectionStyle}>
-            <h2 style={{ marginTop: 0 }}>주소 정보 수정</h2>
+          <div className="ds-section">
+            <h2>주소 정보 수정</h2>
 
             {detail?.roadAddress && (
-              <div style={{ marginBottom: "12px", color: "#666" }}>
+              <div className="ds-meta" style={{ marginBottom: "12px" }}>
                 현재 주소: {detail.roadAddress}
               </div>
             )}
 
-            <div style={{ marginBottom: "10px" }}>
-              <button type="button" onClick={openPostcodeSearch} style={{ padding: "8px 16px", cursor: "pointer" }}>
+            <div style={{ marginBottom: "16px" }}>
+              <button type="button" onClick={openPostcodeSearch} className="ds-btn ds-btn-secondary">
                 주소 검색
               </button>
             </div>
 
-            <div style={fieldStyle}>
-              <label>우편번호</label>
-              <input type="text" value={postcode} readOnly placeholder="주소 검색을 클릭하세요" style={inputStyle} />
+            <div className="ds-form-group">
+              <label className="ds-label">우편번호</label>
+              <input type="text" className="ds-input" value={postcode} readOnly placeholder="주소 검색을 클릭하세요" />
             </div>
 
-            <div style={fieldStyle}>
-              <label>도로명 주소</label>
-              <input type="text" value={roadAddress} readOnly placeholder="주소 검색을 클릭하세요" style={inputStyle} />
+            <div className="ds-form-group">
+              <label className="ds-label">도로명 주소</label>
+              <input type="text" className="ds-input" value={roadAddress} readOnly placeholder="주소 검색을 클릭하세요" />
             </div>
 
-            <div style={fieldStyle}>
-              <label>시군구 코드</label>
-              <input type="text" value={sigunguCode} readOnly style={inputStyle} />
+            <div className="ds-form-group">
+              <label className="ds-label">시군구 코드</label>
+              <input type="text" className="ds-input" value={sigunguCode} readOnly />
             </div>
 
-            <div style={fieldStyle}>
-              <label>법정동 코드</label>
-              <input type="text" value={bCode} readOnly style={inputStyle} />
+            <div className="ds-form-group">
+              <label className="ds-label">법정동 코드</label>
+              <input type="text" className="ds-input" value={bCode} readOnly />
             </div>
 
-            <button type="submit" disabled={isSubmitting || !roadAddress} style={{ padding: "8px 24px", cursor: "pointer" }}>
+            <button type="submit" disabled={isSubmitting || !roadAddress} className="ds-btn ds-btn-primary">
               {isSubmitting ? "수정 중..." : "주소 수정하기"}
             </button>
           </div>

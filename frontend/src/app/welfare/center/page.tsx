@@ -30,49 +30,56 @@ export default function CenterSearchPage() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>복지 센터 검색</h1>
-      
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="시/도 (예: 서울특별시)"
-          value={sido}
-          onChange={(e) => setSido(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        <input
-          type="text"
-          placeholder="시/군/구 (예: 종로구)"
-          value={signguNm}
-          onChange={(e) => setSignguNm(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        <button onClick={handleSearch} disabled={loading} style={{ padding: "5px 10px" }}>
+    <main className="ds-page">
+      <h1 className="ds-title">복지 센터 검색</h1>
+
+      <div className="ds-search-bar">
+        <div className="ds-form-group">
+          <label className="ds-label">시/도</label>
+          <input
+            type="text"
+            className="ds-input ds-input-inline"
+            placeholder="예: 서울특별시"
+            value={sido}
+            onChange={(e) => setSido(e.target.value)}
+            style={{ width: "180px" }}
+          />
+        </div>
+        <div className="ds-form-group">
+          <label className="ds-label">시/군/구</label>
+          <input
+            type="text"
+            className="ds-input ds-input-inline"
+            placeholder="예: 종로구"
+            value={signguNm}
+            onChange={(e) => setSignguNm(e.target.value)}
+            style={{ width: "180px" }}
+          />
+        </div>
+        <button onClick={handleSearch} disabled={loading} className="ds-btn ds-btn-primary">
           {loading ? "검색 중..." : "검색"}
         </button>
       </div>
 
-      {error && <div style={{ color: "red", marginBottom: "20px" }}>{error}</div>}
+      {error && <div className="ds-alert-error">{error}</div>}
 
-      <div>
-        <h2>검색 결과 ({centers.length}건)</h2>
-        {centers.length === 0 ? (
-          <p>검색 결과가 없습니다.</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {centers.map((center) => (
-              <li key={center.id} style={{ border: "1px solid #ccc", margin: "10px 0", padding: "10px" }}>
-                <h3>{center.name}</h3>
-                <p><strong>주소:</strong> {center.address}</p>
-                <p><strong>연락처:</strong> {center.contact}</p>
-                <p><strong>운영자:</strong> {center.operator}</p>
-                <p><strong>유형:</strong> {center.corpType}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+      <h2 className="ds-subtitle">검색 결과 ({centers.length}건)</h2>
+
+      {centers.length === 0 ? (
+        <div className="ds-empty">검색 결과가 없습니다.</div>
+      ) : (
+        <div>
+          {centers.map((center) => (
+            <div key={center.id} className="ds-list-card">
+              <h3>{center.name}</h3>
+              <p><strong>주소:</strong> {center.address}</p>
+              <p><strong>연락처:</strong> {center.contact}</p>
+              <p><strong>운영자:</strong> {center.operator}</p>
+              <p><strong>유형:</strong> {center.corpType}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

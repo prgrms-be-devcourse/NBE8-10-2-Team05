@@ -63,90 +63,67 @@ export default function ApplicationsPage() {
 
   if (authLoading || loading) {
     return (
-      <main style={{ padding: "20px" }}>
-        <h1>정책 신청내역</h1>
-        <div>로딩 중...</div>
+      <main className="ds-page">
+        <h1 className="ds-title">정책 신청내역</h1>
+        <div className="ds-empty">로딩 중...</div>
       </main>
     );
   }
 
   if (!user) {
     return (
-      <main style={{ padding: "20px" }}>
-        <h1>정책 신청내역</h1>
-        <p>신청내역을 확인하려면 로그인이 필요합니다.</p>
-        <Link href="/login">로그인 페이지로 이동</Link>
+      <main className="ds-page">
+        <h1 className="ds-title">정책 신청내역</h1>
+        <div className="ds-empty">
+          <p>신청내역을 확인하려면 로그인이 필요합니다.</p>
+          <Link href="/login" className="ds-link">로그인 페이지로 이동</Link>
+        </div>
       </main>
     );
   }
 
   return (
-    <main style={{ padding: "20px" }}>
-      <h1>정책 신청내역</h1>
+    <main className="ds-page">
+      <h1 className="ds-title">정책 신청내역</h1>
 
-      {error && (
-        <div style={{ color: "red", marginTop: "12px" }}>오류: {error}</div>
-      )}
+      {error && <div className="ds-alert-error">{error}</div>}
 
-      <div style={{ marginTop: "12px" }}>
-        <div>신청된 정책: {applications.length}건</div>
+      <div className="ds-count">신청된 정책: {applications.length}건</div>
 
-        {applications.length === 0 ? (
-          <div style={{ marginTop: "8px" }}>신청한 정책이 없습니다.</div>
-        ) : (
-          <div>
-            {applications.map((app) => (
-              <div
-                key={app.id}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "12px",
-                  marginTop: "8px",
-                }}
-              >
-                <div>
-                  <strong>
-                    {app.policy?.plcyNm ?? "(정책명 없음)"}
-                  </strong>
-                </div>
-                <div>정책번호: {app.policy?.plcyNo ?? "-"}</div>
-                {app.policy?.plcyExplnCn && (
-                  <div style={{ marginTop: "4px" }}>
-                    {app.policy.plcyExplnCn}
-                  </div>
-                )}
-                <div
-                  style={{
-                    marginTop: "4px",
-                    fontSize: "14px",
-                    color: "#666",
-                  }}
-                >
-                  신청일: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "-"}
-                </div>
-                <div style={{ marginTop: "8px" }}>
-                  <button
-                    type="button"
-                    onClick={() => handleCancel(app.id)}
-                    disabled={cancellingIds.has(app.id)}
-                    style={{
-                      padding: "4px 12px",
-                      cursor: cancellingIds.has(app.id)
-                        ? "not-allowed"
-                        : "pointer",
-                      backgroundColor: "#fff",
-                      color: "#c00",
-                      border: "1px solid #c00",
-                    }}
-                  >
-                    {cancellingIds.has(app.id) ? "취소 중..." : "신청 취소"}
-                  </button>
-                </div>
+      {applications.length === 0 ? (
+        <div className="ds-empty">신청한 정책이 없습니다.</div>
+      ) : (
+        <div>
+          {applications.map((app) => (
+            <div key={app.id} className="ds-card">
+              <div className="ds-card-title">
+                {app.policy?.plcyNm ?? "(정책명 없음)"}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div className="ds-card-sub">
+                정책번호: {app.policy?.plcyNo ?? "-"}
+              </div>
+              {app.policy?.plcyExplnCn && (
+                <div className="ds-card-body">{app.policy.plcyExplnCn}</div>
+              )}
+              <div className="ds-card-meta">
+                <span>
+                  신청일: {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : "-"}
+                </span>
+              </div>
+              <div className="ds-card-actions">
+                <button
+                  type="button"
+                  onClick={() => handleCancel(app.id)}
+                  disabled={cancellingIds.has(app.id)}
+                  className="ds-btn ds-btn-danger ds-btn-sm"
+                >
+                  {cancellingIds.has(app.id) ? "취소 중..." : "신청 취소"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

@@ -75,95 +75,83 @@ export default function BookmarkPage() {
 
   if (authLoading || loading) {
     return (
-      <main style={{ padding: "20px" }}>
-        <h1>북마크</h1>
-        <div>로딩 중...</div>
+      <main className="ds-page">
+        <h1 className="ds-title">북마크한 정책</h1>
+        <div className="ds-empty">로딩 중...</div>
       </main>
     );
   }
 
   if (!user) {
     return (
-      <main style={{ padding: "20px" }}>
-        <h1>북마크</h1>
-        <p>북마크를 이용하려면 로그인이 필요합니다.</p>
-        <Link href="/login">로그인 페이지로 이동</Link>
+      <main className="ds-page">
+        <h1 className="ds-title">북마크한 정책</h1>
+        <div className="ds-empty">
+          <p>북마크를 이용하려면 로그인이 필요합니다.</p>
+          <Link href="/login" className="ds-link">
+            로그인 페이지로 이동
+          </Link>
+        </div>
       </main>
     );
   }
 
   return (
-    <main style={{ padding: "20px" }}>
-      <h1>북마크</h1>
+    <main className="ds-page">
+      <h1 className="ds-title">북마크한 정책</h1>
 
-      {error && (
-        <div style={{ color: "red", marginTop: "12px" }}>
-          오류: {error}
-        </div>
-      )}
+      {error && <div className="ds-alert-error">{error}</div>}
 
-      <div style={{ marginTop: "12px" }}>
-        <div>북마크된 정책: {policies.length}건</div>
+      <div className="ds-count">북마크된 정책: {policies.length}건</div>
 
-        {policies.length === 0 ? (
-          <div style={{ marginTop: "8px" }}>북마크된 정책이 없습니다.</div>
-        ) : (
-          <div>
-            {policies.map((policy, index) => {
-              const key = policy.id ?? index;
-              const policyId = policy.id;
-              const isRemoving = policyId != null && removingIds.has(policyId);
+      {policies.length === 0 ? (
+        <div className="ds-empty">북마크된 정책이 없습니다.</div>
+      ) : (
+        <div>
+          {policies.map((policy, index) => {
+            const key = policy.id ?? index;
+            const policyId = policy.id;
+            const isRemoving = policyId != null && removingIds.has(policyId);
 
-              return (
-                <div
-                  key={key}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "12px",
-                    marginTop: "8px",
-                  }}
-                >
-                  <div>
-                    <strong>{policy.plcyNm ?? "(정책명 없음)"}</strong>
-                  </div>
-                  <div>정책번호: {policy.plcyNo ?? "-"}</div>
-                  {policy.plcyExplnCn && (
-                    <div style={{ marginTop: "4px" }}>{policy.plcyExplnCn}</div>
-                  )}
-                  <div style={{ marginTop: "4px", fontSize: "14px", color: "#666" }}>
-                    {policy.sprtTrgtMinAge != null && policy.sprtTrgtMaxAge != null && (
+            return (
+              <div key={key} className="ds-card">
+                <div className="ds-card-title">
+                  {policy.plcyNm ?? "(정책명 없음)"}
+                </div>
+                <div className="ds-card-sub">
+                  정책번호: {policy.plcyNo ?? "-"}
+                </div>
+                {policy.plcyExplnCn && (
+                  <div className="ds-card-body">{policy.plcyExplnCn}</div>
+                )}
+                <div className="ds-card-meta">
+                  {policy.sprtTrgtMinAge != null &&
+                    policy.sprtTrgtMaxAge != null && (
                       <span>
-                        연령: {policy.sprtTrgtMinAge}~{policy.sprtTrgtMaxAge}세 |{" "}
+                        연령: {policy.sprtTrgtMinAge}~{policy.sprtTrgtMaxAge}세
                       </span>
                     )}
-                    {policy.zipCd && <span>지역: {policy.zipCd} | </span>}
-                    {policy.mrgSttsCd && <span>결혼: {policy.mrgSttsCd} | </span>}
-                    {policy.plcyKywdNm && <span>태그: {policy.plcyKywdNm}</span>}
-                  </div>
-                  {policyId != null && (
-                    <div style={{ marginTop: "8px" }}>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveBookmark(policyId)}
-                        disabled={isRemoving}
-                        style={{
-                          padding: "4px 12px",
-                          cursor: isRemoving ? "not-allowed" : "pointer",
-                          backgroundColor: "#fff",
-                          color: "#333",
-                          border: "1px solid #333",
-                        }}
-                      >
-                        {isRemoving ? "취소 중..." : "북마크 취소"}
-                      </button>
-                    </div>
+                  {policy.plcyKywdNm && (
+                    <span>{policy.sprtTrgtMinAge != null ? " | " : ""}태그: {policy.plcyKywdNm}</span>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                {policyId != null && (
+                  <div className="ds-card-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBookmark(policyId)}
+                      disabled={isRemoving}
+                      className="ds-btn ds-btn-danger ds-btn-sm"
+                    >
+                      {isRemoving ? "취소 중..." : "북마크 취소"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 }
