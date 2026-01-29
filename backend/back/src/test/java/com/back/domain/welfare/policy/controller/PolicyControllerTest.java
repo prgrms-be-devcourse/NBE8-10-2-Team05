@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +81,7 @@ public class PolicyControllerTest {
         // 6️⃣ reindex
         policyElasticSearchService.reindexAllFromDb();
 
-        // 7️⃣ ES 반영 대기
-        Thread.sleep(1500);
+        elasticsearchClient.indices().refresh(r -> r.index(INDEX));
     }
 
     private void cleanupElasticsearch() throws Exception {
@@ -111,7 +109,6 @@ public class PolicyControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /api/v1/policy/search - 조건 없이 전체 검색")
     void search_policy_without_conditions() throws Exception {
         mockMvc.perform(get("/api/v1/welfare/policy/search").param("from", "0").param("size", "10"))
