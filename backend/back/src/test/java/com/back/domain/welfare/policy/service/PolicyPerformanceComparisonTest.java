@@ -227,7 +227,8 @@ class PolicyPerformanceComparisonTest {
     void comparePerformance_byAge() {
         assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-        // Given
+        // DB: 정책 나이 [min,max]가 사용자 구간 [25,35] 안에 포함(min≥25, max≤35). createTestData에서 i%10==0 인 정책이 [25,35].
+        // ES: 사용자 나이 30이 정책 [min,max]에 포함(min≤30, max≥30).
         PolicySearchRequestDto dbRequest = new PolicySearchRequestDto(25, 35, null, null, null, null, null);
 
         PolicySearchCondition esCondition =
@@ -251,8 +252,10 @@ class PolicyPerformanceComparisonTest {
     void comparePerformance_byEarn() {
         assumeTrue(elasticsearchAvailable, "Elasticsearch 서버가 필요합니다");
 
-        // Given
-        PolicySearchRequestDto dbRequest = new PolicySearchRequestDto(null, null, null, null, null, 2000, 5000);
+        // DB: 정책 소득 [earnMin,earnMax]가 사용자 구간 [2000,4000] 안에 포함(earnMin≥2000, earnMax≤4000).
+        //     → [2k,3k], [3k,4k]만 매칭(20건). ES: 사용자 소득 3000이 정책 구간에 포함 → 동일 20건.
+        //     (기존 2000~5000이면 [4k,5k]까지 포함돼 DB 30건, ES 20건으로 어긋남)
+        PolicySearchRequestDto dbRequest = new PolicySearchRequestDto(null, null, null, null, null, 2000, 4000);
 
         PolicySearchCondition esCondition =
                 PolicySearchCondition.builder().earn(3000).build();
@@ -399,18 +402,28 @@ class PolicyPerformanceComparisonTest {
     }
 
     // ========== Helper Methods ==========
-
     private void createTestData(int count) {
         List<Policy> policies = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
             String uniqueId = UUID.randomUUID().toString().substring(0, 8);
 
+            int minAge;
+            int maxAge;
+            if (i % 10 == 0) {
+                // DB 나이 조건(25~35)에 매칭되도록: 정책 [25,35]
+                minAge = 25;
+                maxAge = 35;
+            } else {
+                minAge = 20 + (i % 50);
+                maxAge = 40 + (i % 30);
+            }
+
             Policy policy = Policy.builder()
                     .plcyNo("PERF-" + i + "-" + uniqueId)
                     .plcyNm("정책 " + i)
-                    .sprtTrgtMinAge(String.valueOf(20 + (i % 50)))
-                    .sprtTrgtMaxAge(String.valueOf(40 + (i % 30)))
+                    .sprtTrgtMinAge(String.valueOf(minAge))
+                    .sprtTrgtMaxAge(String.valueOf(maxAge))
                     .sprtTrgtAgeLmtYn("Y")
                     .earnCndSeCd("연소득")
                     .earnMinAmt(String.valueOf((i % 10) * 1000))

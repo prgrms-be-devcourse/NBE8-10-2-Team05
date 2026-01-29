@@ -122,7 +122,6 @@ public class ApiV1BookmarkControllerTest {
 
         // when & then: POST 요청 (북마크 추가) 후 정상 응답 확인
         mockMvc.perform(post("/api/v1/member/bookmark/welfare-bookmarks/" + savedPolicy.getId())
-                        .param("policyId", String.valueOf(savedPolicy.getId()))
                         .with(authentication(new UsernamePasswordAuthenticationToken(
                                 saved.getId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")))))
                         .contentType(MediaType.APPLICATION_JSON))
