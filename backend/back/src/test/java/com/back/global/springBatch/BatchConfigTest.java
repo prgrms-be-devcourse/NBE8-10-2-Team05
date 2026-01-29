@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
+import com.back.domain.welfare.center.center.service.CenterApiService;
 import com.back.global.springBatch.center.CenterApiItemProcessor;
 import com.back.global.springBatch.center.CenterApiItemReader;
 
@@ -55,6 +57,9 @@ class BatchConfigTest {
     }
 
     @MockitoBean
+    private CenterApiService centerApiService;
+
+    @MockitoBean
     CenterApiItemProcessor centerApiItemProcessor;
 
     @MockitoBean
@@ -68,6 +73,11 @@ class BatchConfigTest {
 
     @BeforeEach
     void clearMetadata() {
+        CenterApiResponseDto mockResponse = new CenterApiResponseDto(1, 1, 1, 1, 1, List.of());
+        // 진짜 api를 호출하지 않도록 잡아준다.
+        // enient()를 붙이면 "안 써도 괜찮으니까 일단 설정해 둬"라는 뜻이 되어 에러 없이 통과
+        lenient().when(centerApiService.fetchCenter(any())).thenReturn(mockResponse);
+
         jobRepositoryTestUtils.removeJobExecutions(); // 이전 테스트 기록 삭제
         Mockito.reset(centerApiItemReader, centerApiItemProcessor);
     }
