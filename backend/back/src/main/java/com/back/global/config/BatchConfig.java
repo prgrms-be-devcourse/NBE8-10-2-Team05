@@ -5,6 +5,7 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
+import org.springframework.batch.infrastructure.item.support.CompositeItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
@@ -47,7 +48,8 @@ public class BatchConfig {
 
     private final PolicyApiItemReader policyApiItemReader;
     private final PolicyApiItemProcessor policyApiItemProcessor;
-    private final JpaItemWriter<Policy> policyJpaItemWriter;
+    // private final JpaItemWriter<Policy> policyJpaItemWriter;
+    private final CompositeItemWriter<Policy> compositeItemWriter;
 
     private final LawyerApiItemReader lawyerApiItemReader;
     private final JpaItemWriter<Lawyer> lawyerJpaItemWriter;
@@ -63,9 +65,9 @@ public class BatchConfig {
         return new JobBuilder("fetchApiJob", jobRepository)
                 .listener(batchJobListener)
                 .start(fetchCenterApiStep)
-                // .start(fetchEstateApiStep)
-                // .start(fetchPolicyApiStep)
-                // .start(fetchLawyerApiStep)
+                // .next(fetchEstateApiStep)
+                .next(fetchPolicyApiStep)
+                // .next(fetchLawyerApiStep)
                 .build();
     }
 
@@ -84,7 +86,7 @@ public class BatchConfig {
     @Bean
     public Step fetchPolicyApiStep(BatchStepFactory factory) {
         return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
-                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, policyJpaItemWriter);
+                "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, compositeItemWriter);
     }
 
     @Bean
