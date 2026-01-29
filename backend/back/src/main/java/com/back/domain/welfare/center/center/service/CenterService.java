@@ -3,6 +3,7 @@ package com.back.domain.welfare.center.center.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
@@ -54,8 +55,8 @@ public class CenterService {
         return centerList;
     }
 
+    @Cacheable(value = "center", key = "#sido + ':' + #signguNm")
     public List<Center> searchCenterList(String sido, String signguNm) {
-
         return centerRepository.findByAddressContaining(sido);
     }
 }
