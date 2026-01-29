@@ -119,16 +119,21 @@ export default function PolicySearch() {
       return;
     }
 
-    setTogglingIds((prev) => new Set(prev).add(policyId));
+    // 이미 북마크된 경우, 검색 결과 화면에서는 취소를 허용하지 않음
+    if (bookmarkedIds.has(policyId)) {
+      return;
+    }
+
+    setTogglingIds((prev) => {
+      const next = new Set(prev);
+      next.add(policyId);
+      return next;
+    });
     try {
       await toggleBookmark(policyId);
       setBookmarkedIds((prev) => {
         const next = new Set(prev);
-        if (next.has(policyId)) {
-          next.delete(policyId);
-        } else {
-          next.add(policyId);
-        }
+        next.add(policyId);
         return next;
       });
     } catch (err: unknown) {
@@ -338,11 +343,20 @@ export default function PolicySearch() {
                       <button
                         type="button"
                         onClick={() => handleToggleBookmark(policy.policyId!)}
-                        disabled={togglingIds.has(policy.policyId)}
+                        disabled={
+                          togglingIds.has(policy.policyId) ||
+                          bookmarkedIds.has(policy.policyId)
+                        }
                         style={{
                           padding: "4px 12px",
-                          cursor: togglingIds.has(policy.policyId) ? "not-allowed" : "pointer",
-                          backgroundColor: bookmarkedIds.has(policy.policyId) ? "#333" : "#fff",
+                          cursor:
+                            togglingIds.has(policy.policyId) ||
+                            bookmarkedIds.has(policy.policyId)
+                              ? "not-allowed"
+                              : "pointer",
+                          backgroundColor: bookmarkedIds.has(policy.policyId)
+                            ? "#333"
+                            : "#fff",
                           color: bookmarkedIds.has(policy.policyId) ? "#fff" : "#333",
                           border: "1px solid #333",
                         }}
@@ -350,7 +364,7 @@ export default function PolicySearch() {
                         {togglingIds.has(policy.policyId)
                           ? "처리중..."
                           : bookmarkedIds.has(policy.policyId)
-                            ? "북마크 해제"
+                            ? "북마크 완료"
                             : "북마크"}
                       </button>
                     )}

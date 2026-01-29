@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Policy } from "@/types/policy";
-import { getBookmarks } from "@/api/bookmark";
+import { getBookmarks, toggleBookmark } from "@/api/bookmark";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function BookmarkPage() {
@@ -12,6 +12,7 @@ export default function BookmarkPage() {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (authLoading) return;
@@ -39,8 +40,38 @@ export default function BookmarkPage() {
       }
     };
 
-    fetchBookmarks();
+    void fetchBookmarks();
   }, [user, authLoading]);
+
+  const handleRemoveBookmark = async (policyId: number) => {
+    if (!user) {
+      setError("북마크를 취소하려면 로그인이 필요합니다.");
+      return;
+    }
+
+    setRemovingIds((prev) => {
+      const next = new Set(prev);
+      next.add(policyId);
+      return next;
+    });
+
+    try {
+      await toggleBookmark(policyId);
+      setPolicies((prev) => prev.filter((p) => p.id !== policyId));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("북마크를 취소하는 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setRemovingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(policyId);
+        return next;
+      });
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -65,22 +96,27 @@ export default function BookmarkPage() {
     <main style={{ padding: "20px" }}>
       <h1>북마크</h1>
 
-        {error && (
-          <div style={{ color: "red", marginTop: "12px" }}>
-            오류: {error}
-          </div>
-        )}
+      {error && (
+        <div style={{ color: "red", marginTop: "12px" }}>
+          오류: {error}
+        </div>
+      )}
 
-        <div style={{ marginTop: "12px" }}>
-          <div>북마크된 정책: {policies.length}건</div>
+      <div style={{ marginTop: "12px" }}>
+        <div>북마크된 정책: {policies.length}건</div>
 
-          {policies.length === 0 ? (
-            <div style={{ marginTop: "8px" }}>북마크된 정책이 없습니다.</div>
-          ) : (
-            <div>
-              {policies.map((policy, index) => (
+        {policies.length === 0 ? (
+          <div style={{ marginTop: "8px" }}>북마크된 정책이 없습니다.</div>
+        ) : (
+          <div>
+            {policies.map((policy, index) => {
+              const key = policy.id ?? index;
+              const policyId = policy.id;
+              const isRemoving = policyId != null && removingIds.has(policyId);
+
+              return (
                 <div
-                  key={policy.id ?? index}
+                  key={key}
                   style={{
                     border: "1px solid #ccc",
                     padding: "12px",
@@ -96,19 +132,38 @@ export default function BookmarkPage() {
                   )}
                   <div style={{ marginTop: "4px", fontSize: "14px", color: "#666" }}>
                     {policy.sprtTrgtMinAge != null && policy.sprtTrgtMaxAge != null && (
-                      <span>연령: {policy.sprtTrgtMinAge}~{policy.sprtTrgtMaxAge}세 | </span>
+                      <span>
+                        연령: {policy.sprtTrgtMinAge}~{policy.sprtTrgtMaxAge}세 |{" "}
+                      </span>
                     )}
                     {policy.zipCd && <span>지역: {policy.zipCd} | </span>}
                     {policy.mrgSttsCd && <span>결혼: {policy.mrgSttsCd} | </span>}
-                    {policy.plcyKywdNm && (
-                      <span>태그: {policy.plcyKywdNm}</span>
-                    )}
+                    {policy.plcyKywdNm && <span>태그: {policy.plcyKywdNm}</span>}
                   </div>
+                  {policyId != null && (
+                    <div style={{ marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveBookmark(policyId)}
+                        disabled={isRemoving}
+                        style={{
+                          padding: "4px 12px",
+                          cursor: isRemoving ? "not-allowed" : "pointer",
+                          backgroundColor: "#fff",
+                          color: "#333",
+                          border: "1px solid #333",
+                        }}
+                      >
+                        {isRemoving ? "취소 중..." : "북마크 취소"}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
