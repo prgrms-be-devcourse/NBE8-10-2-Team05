@@ -3,6 +3,7 @@ package com.back.domain.welfare.estate.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +62,7 @@ public class EstateService {
         return body.items().stream().map(Estate::new).toList();
     }
 
+    @Cacheable(value = "estate", key = "#sido + ':' + #signguNm")
     public List<Estate> searchEstateLocation(String sido, String signguNm) {
         return estateRepository.findByBrtcNmContainingAndSignguNmContaining(sido, signguNm);
     }

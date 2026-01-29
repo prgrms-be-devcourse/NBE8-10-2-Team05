@@ -1,5 +1,6 @@
 package com.back.domain.welfare.center.lawyer.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class LawyerService {
     private final LawyerRepository lawyerRepository;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "lawyer", key = "{#lawyerReq, #pageable}")
     public Page<LawyerRes> searchByDistrict(LawyerReq lawyerReq, Pageable pageable) {
 
         String area1 = normalizeArea1(lawyerReq.area1());
