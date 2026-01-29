@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { join, ApiError } from "@/api/member";
 import type { JoinRequest } from "@/types/member";
-import Header from "@/components/Header";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -50,7 +49,6 @@ export default function JoinPage() {
 
   return (
     <div>
-      <Header />
       <main style={{ padding: "20px" }}>
         <h1>회원가입</h1>
 

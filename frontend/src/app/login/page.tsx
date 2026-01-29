@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { login, ApiError } from "@/api/member";
 import { useAuth } from "@/contexts/AuthContext";
 import type { LoginRequest } from "@/types/member";
-import Header from "@/components/Header";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,7 +50,6 @@ export default function LoginPage() {
 
   return (
     <div>
-      <Header />
       <main style={{ padding: "20px" }}>
         <h1>로그인</h1>
 
