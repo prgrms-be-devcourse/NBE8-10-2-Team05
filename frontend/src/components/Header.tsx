@@ -33,7 +33,9 @@ export default function Header() {
       <span>|</span>
       <Link href="/estate">행복주택</Link>
       <span>|</span>
-      <span>시설찾기</span>
+      <Link href="/welfare/center">시설찾기</Link>
+      <span>|</span>
+      <Link href="/welfare/lawyer">노무사 찾기</Link>
       <span>|</span>
       {isLoading ? (
         <span>로딩중...</span>
