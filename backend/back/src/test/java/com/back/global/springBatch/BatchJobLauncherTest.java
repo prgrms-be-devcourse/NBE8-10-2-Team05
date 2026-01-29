@@ -13,10 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
-@SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 class BatchJobLauncherTest {
