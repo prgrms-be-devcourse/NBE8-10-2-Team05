@@ -39,6 +39,8 @@ export default function Header() {
       <span>|</span>
       <Link href="/bookmark">북마크</Link>
       <span>|</span>
+      <Link href="/applications">신청내역</Link>
+      <span>|</span>
       {isLoading ? (
         <span>로딩중...</span>
       ) : user ? (

@@ -58,6 +58,46 @@ export interface BookmarkPolicyResponse {
   policies: Policy[] | null;
 }
 
+// ===== 북마크 토글 응답 =====
+// POST /api/v1/member/bookmark/welfare-bookmarks/{policyId}
+// BookmarkUpdateResponseDto 기반
+export interface BookmarkUpdateResponse {
+  code: number;
+  message: string;
+}
+
+// ===== 신청 관련 =====
+// GET /api/v1/member/policy-aply/welfare-applications
+// Application 엔티티 그대로 직렬화 (Policy, Member 포함)
+export interface ApplicationItem {
+  id: number;
+  policy: Policy;
+  applicant: ApplicationMember;
+  createdAt: string; // ISO 8601
+  modifiedAt: string; // ISO 8601
+}
+
+// Application 내 Member (엔티티 전체 직렬화)
+export interface ApplicationMember {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// POST /api/v1/member/policy-aply/welfare-application/{policyId}
+// AddApplicationResponseDto 기반
+export interface AddApplicationResponse {
+  status: number;
+  message: string;
+}
+
+// PUT /api/v1/member/policy-aply/welfare-application/{id}
+// DeleteApplicationResponseDto 기반
+export interface DeleteApplicationResponse {
+  code: number;
+  message: string;
+}
+
 // Policy 엔티티 기반
 export interface Policy {
   id: number | null;
