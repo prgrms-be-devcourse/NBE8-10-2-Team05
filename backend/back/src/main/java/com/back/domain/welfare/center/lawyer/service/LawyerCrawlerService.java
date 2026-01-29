@@ -1,14 +1,21 @@
 package com.back.domain.welfare.center.lawyer.service;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.back.domain.welfare.center.lawyer.entity.Lawyer;
 
@@ -64,6 +71,36 @@ public class LawyerCrawlerService {
             lawyerSaveService.saveList(lawyerList);
             lawyerList.clear();
         }
+    }
+
+    @Retryable(
+            retryFor = {
+                SocketTimeoutException.class,
+                ResourceAccessException.class,
+                ConnectTimeoutException.class,
+                HttpClientErrorException.TooManyRequests.class,
+                HttpServerErrorException.ServiceUnavailable.class
+            },
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000, multiplier = 2.0) // 2초 → 4초 → 8초
+            )
+    public List<Lawyer> crawlEachPage(String area1, int startPage) {
+        List<Lawyer> lawyerList = new ArrayList<>();
+
+        String url = String.format(SEARCH_URL, area1, startPage);
+        Elements rows = crawlAndSelectRows(url);
+        // 테이블 내부 각각 행의 정보을 받아옴
+
+        for (Element row : rows) {
+            // 열 별로 순회하면서 파싱
+            Lawyer lawyer = parseRowToLawyer(row, area1);
+
+            if (lawyer != null) {
+                lawyerList.add(lawyer);
+            }
+        }
+
+        return lawyerList;
     }
 
     // 해당 열의 요소를 분해해서 데이터를 Lawyer로 저장
