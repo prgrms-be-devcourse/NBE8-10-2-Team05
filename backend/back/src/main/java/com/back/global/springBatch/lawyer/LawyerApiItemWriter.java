@@ -18,7 +18,7 @@ public class LawyerApiItemWriter {
 
     @Bean
     @StepScope
-    public JpaItemWriter<Lawyer> jpaItemWriter() {
+    public JpaItemWriter<Lawyer> lawyerJpaItemWriter() {
         return new JpaItemWriterBuilder<Lawyer>()
                 .entityManagerFactory(entityManagerFactory)
                 .build();

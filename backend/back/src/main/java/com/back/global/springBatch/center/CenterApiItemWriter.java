@@ -18,7 +18,7 @@ public class CenterApiItemWriter {
 
     @Bean
     @StepScope
-    public JpaItemWriter<Center> jpaItemWriter() {
+    public JpaItemWriter<Center> centerJpaItemWriter() {
         return new JpaItemWriterBuilder<Center>()
                 .entityManagerFactory(entityManagerFactory)
                 .build();
