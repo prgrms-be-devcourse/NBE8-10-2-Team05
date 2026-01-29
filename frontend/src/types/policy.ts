@@ -18,6 +18,44 @@ export interface PolicySearchRequest {
   size: number;
 }
 
+// ===== 검색 드롭다운용 코드 맵 =====
+// 백엔드 CodeEnum 기반 (code → 한글 라벨)
+
+// EducationRequirement (학력요건)
+export const SchoolCodeLabel: Record<string, string> = {
+  "049001": "고졸 미만",
+  "049002": "고교 재학",
+  "049003": "고졸 예정",
+  "049004": "고교 졸업",
+  "049005": "대학 재학",
+  "049006": "대졸 예정",
+  "049007": "대학 졸업",
+  "049008": "석·박사",
+  "049009": "기타",
+  "049010": "제한없음",
+};
+
+// JobRequirement (취업요건)
+export const JobCodeLabel: Record<string, string> = {
+  "013001": "재직자",
+  "013002": "자영업자",
+  "013003": "미취업자",
+  "013004": "프리랜서",
+  "013005": "일용근로자",
+  "013006": "(예비)창업자",
+  "013007": "단기근로자",
+  "013008": "영농종사자",
+  "013009": "기타",
+  "013010": "제한없음",
+};
+
+// MarriageRequirement (결혼상태)
+export const MarriageStatusCodeLabel: Record<string, string> = {
+  "055001": "기혼",
+  "055002": "미혼",
+  "055003": "제한없음",
+};
+
 // ===== 검색 응답 =====
 // PolicyDocument 기반
 export interface PolicyDocument {

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import type { PolicyDocument, PolicySearchRequest } from "@/types/policy";
+import { JobCodeLabel, SchoolCodeLabel, MarriageStatusCodeLabel } from "@/types/policy";
 import { searchPolicies } from "@/api/policy";
 import { getBookmarks, toggleBookmark } from "@/api/bookmark";
 import { getApplications, addApplication } from "@/api/application";
@@ -235,25 +236,29 @@ export default function PolicySearch() {
           </label>
 
           <label>
-            직업코드:{" "}
-            <input
-              type="text"
+            취업상태:{" "}
+            <select
               value={jobCode}
               onChange={(e) => setJobCode(e.target.value)}
-              placeholder="직업코드"
-              style={{ width: "100px" }}
-            />
+            >
+              <option value="">전체</option>
+              {Object.entries(JobCodeLabel).map(([code, label]) => (
+                <option key={code} value={code}>{label}</option>
+              ))}
+            </select>
           </label>
 
           <label>
-            학력코드:{" "}
-            <input
-              type="text"
+            학력:{" "}
+            <select
               value={schoolCode}
               onChange={(e) => setSchoolCode(e.target.value)}
-              placeholder="학력코드"
-              style={{ width: "100px" }}
-            />
+            >
+              <option value="">전체</option>
+              {Object.entries(SchoolCodeLabel).map(([code, label]) => (
+                <option key={code} value={code}>{label}</option>
+              ))}
+            </select>
           </label>
 
           <label>
@@ -263,8 +268,9 @@ export default function PolicySearch() {
               onChange={(e) => setMarriageStatus(e.target.value)}
             >
               <option value="">전체</option>
-              <option value="SINGLE">미혼</option>
-              <option value="MARRIED">기혼</option>
+              {Object.entries(MarriageStatusCodeLabel).map(([code, label]) => (
+                <option key={code} value={code}>{label}</option>
+              ))}
             </select>
           </label>
         </div>
@@ -276,7 +282,7 @@ export default function PolicySearch() {
               type="text"
               value={keywordsInput}
               onChange={(e) => setKeywordsInput(e.target.value)}
-              placeholder="예: 주거, 취업, 교육"
+              placeholder="예: 주거지원, 보조금"
               style={{ width: "300px" }}
             />
           </label>
@@ -297,8 +303,6 @@ export default function PolicySearch() {
       {/* 검색 결과 */}
       {searched && !loading && (
         <div style={{ marginTop: "20px" }}>
-          <div>검색 결과: {results.length}건</div>
-
           {results.length === 0 ? (
             <div style={{ marginTop: "8px" }}>검색 결과가 없습니다.</div>
           ) : (
