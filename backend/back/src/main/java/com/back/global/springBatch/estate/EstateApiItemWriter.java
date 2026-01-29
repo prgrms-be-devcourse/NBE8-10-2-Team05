@@ -1,6 +1,5 @@
 package com.back.global.springBatch.estate;
 
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,6 @@ public class EstateApiItemWriter {
     private final EntityManagerFactory entityManagerFactory;
 
     @Bean
-    @StepScope
     public JpaItemWriter<Estate> estateJpaItemWriter() {
         return new JpaItemWriterBuilder<Estate>()
                 .entityManagerFactory(entityManagerFactory)

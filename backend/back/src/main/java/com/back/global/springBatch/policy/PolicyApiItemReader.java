@@ -3,7 +3,6 @@ package com.back.global.springBatch.policy;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.AbstractPagingItemReader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ import com.back.domain.welfare.policy.service.PolicyApiClient;
 import lombok.extern.slf4j.Slf4j;
 
 @Component // Spring이 관리하도록 등록
-@StepScope // 매우 중요! Step 실행 시점에 생성되어야 함
 @Slf4j
 public class PolicyApiItemReader extends AbstractPagingItemReader<PolicyFetchResponseDto.PolicyItem> {
 

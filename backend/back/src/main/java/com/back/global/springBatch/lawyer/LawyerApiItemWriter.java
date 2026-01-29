@@ -1,6 +1,5 @@
 package com.back.global.springBatch.lawyer;
 
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,6 @@ public class LawyerApiItemWriter {
     private final EntityManagerFactory entityManagerFactory;
 
     @Bean
-    @StepScope
     public JpaItemWriter<Lawyer> lawyerJpaItemWriter() {
         return new JpaItemWriterBuilder<Lawyer>()
                 .entityManagerFactory(entityManagerFactory)

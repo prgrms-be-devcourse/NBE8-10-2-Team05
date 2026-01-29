@@ -7,7 +7,6 @@ import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.batch.infrastructure.item.ItemReader;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -15,13 +14,12 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-public class BatchStepFactory {
+public class BatchStepCrawlFactory {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final AsyncTaskExecutor taskExecutor;
-    private final RetryPolicy retryPolicy;
+    private final AsyncTaskExecutor crawlingTaskExecutor;
 
-    public <I, O> Step createApiStep(
+    public <I, O> Step createCrawlStep(
             String stepName, ItemReader<I> reader, ItemProcessor<I, O> processor, ItemWriter<O> writer) {
 
         return new StepBuilder(stepName, jobRepository)
@@ -30,9 +28,7 @@ public class BatchStepFactory {
                 .processor(processor)
                 .writer(writer)
                 .transactionManager(transactionManager)
-                .faultTolerant()
-                .retryPolicy(retryPolicy) // 공통으로 사용하는 RetryPolicy
-                .taskExecutor(taskExecutor)
+                .taskExecutor(crawlingTaskExecutor)
                 .build();
     }
 }
