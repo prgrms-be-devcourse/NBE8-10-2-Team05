@@ -10,6 +10,7 @@ import com.back.domain.welfare.center.center.dto.CenterApiRequestDto;
 import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
 import com.back.domain.welfare.center.center.entity.Center;
 import com.back.domain.welfare.center.center.repository.CenterRepository;
+import com.back.standard.util.SidoNormalizer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -57,6 +58,7 @@ public class CenterService {
 
     @Cacheable(value = "center", key = "#sido + ':' + #signguNm")
     public List<Center> searchCenterList(String sido, String signguNm) {
-        return centerRepository.findByAddressContaining(sido);
+        String normalizedSido = SidoNormalizer.normalizeSido(sido);
+        return centerRepository.findByAddressContaining(normalizedSido);
     }
 }
