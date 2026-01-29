@@ -66,7 +66,7 @@ public class BatchConfig {
                 .listener(batchJobListener)
                 .start(fetchCenterApiStep)
                 // .start(fetchEstateApiStep)
-                // .start(fetchPolicyApiStep)
+                .start(fetchPolicyApiStep)
                 // .start(fetchLawyerApiStep)
                 .build();
     }
