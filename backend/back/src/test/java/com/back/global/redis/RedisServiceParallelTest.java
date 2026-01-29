@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,7 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
-@EnableCaching
 @Execution(ExecutionMode.CONCURRENT) // ✅ 멀티코어 병렬 실행
 class RedisServiceParallelTest {
 
