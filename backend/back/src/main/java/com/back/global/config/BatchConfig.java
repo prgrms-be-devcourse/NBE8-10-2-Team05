@@ -1,4 +1,4 @@
-package com.back.global.springBatch;
+package com.back.global.config;
 
 import java.net.SocketTimeoutException;
 import java.time.Duration;
@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -21,6 +22,8 @@ import com.back.domain.welfare.estate.dto.EstateDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.back.domain.welfare.policy.entity.Policy;
+import com.back.global.springBatch.BatchJobListener;
+import com.back.global.springBatch.BatchStepFactory;
 import com.back.global.springBatch.center.CenterApiItemProcessor;
 import com.back.global.springBatch.center.CenterApiItemReader;
 import com.back.global.springBatch.center.CenterApiItemWriter;
@@ -37,6 +40,7 @@ import io.netty.channel.ConnectTimeoutException;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
+@EnableRetry
 @RequiredArgsConstructor
 public class BatchConfig {
     private final BatchJobListener batchJobListener;
