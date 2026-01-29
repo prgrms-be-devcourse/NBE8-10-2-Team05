@@ -29,7 +29,6 @@ public class PolicyApiItemWriter {
                 .build();
     }
 
-    // 부분 실패: DB 저장은 성공했는데 ES 전송 중 네트워크 오류가 나면, Spring Batch는 해당 **Chunk 전체를 실패(Rollback)**로 처리합니다.
     @Bean
     public CompositeItemWriter<Policy> compositePolicyWriter() {
         return new CompositeItemWriterBuilder<Policy>()
