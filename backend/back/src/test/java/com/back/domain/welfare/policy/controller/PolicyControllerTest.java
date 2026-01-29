@@ -81,8 +81,7 @@ public class PolicyControllerTest {
         // 6️⃣ reindex
         policyElasticSearchService.reindexAllFromDb();
 
-        // 7️⃣ ES 반영 대기
-        Thread.sleep(1500);
+        elasticsearchClient.indices().refresh(r -> r.index(INDEX));
     }
 
     private void cleanupElasticsearch() throws Exception {
