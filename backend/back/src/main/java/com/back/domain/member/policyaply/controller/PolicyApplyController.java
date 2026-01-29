@@ -1,9 +1,7 @@
 package com.back.domain.member.policyaply.controller;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +12,7 @@ import com.back.domain.member.policyaply.dto.AddApplicationResponseDto;
 import com.back.domain.member.policyaply.dto.DeleteApplicationResponseDto;
 import com.back.domain.member.policyaply.entity.Application;
 import com.back.domain.member.policyaply.service.PolicyApplyService;
-import com.back.standard.util.Ut;
+import com.back.standard.util.ActorProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,56 +23,11 @@ public class PolicyApplyController {
 
     private final PolicyApplyService policyApplyService;
     private final MemberRepository memberRepository;
-
-    @Value("${custom.jwt.secretKey}")
-    private String jwtSecretKey;
-
-    /**
-     * JWT 토큰에서 Member 추출
-     * @param authorizationHeader Authorization 헤더 값 (Bearer {token} 형식)
-     * @return Member 엔티티, 토큰이 유효하지 않거나 멤버를 찾을 수 없으면 null
-     */
-    private Member extractMemberFromJwt(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return null;
-        }
-
-        String jwt = authorizationHeader.substring(7); // "Bearer " 제거
-
-        // JWT 유효성 검증
-        if (!Ut.Jwt.isValid(jwtSecretKey, jwt)) {
-            return null;
-        }
-
-        // JWT payload 추출
-        Map<String, Object> payload = Ut.Jwt.payload(jwtSecretKey, jwt);
-        if (payload == null) {
-            return null;
-        }
-
-        // memberId 추출
-        Object memberIdObj = payload.get("memberId");
-        if (memberIdObj == null) {
-            return null;
-        }
-
-        long memberId;
-        if (memberIdObj instanceof Integer) {
-            memberId = ((Integer) memberIdObj).longValue();
-        } else if (memberIdObj instanceof Long) {
-            memberId = (Long) memberIdObj;
-        } else {
-            return null;
-        }
-
-        // Member 조회
-        return memberRepository.findById(memberId).orElse(null);
-    }
+    private final ActorProvider actorProvider;
 
     @GetMapping("/welfare-applications")
-    public ResponseEntity<?> getApplicationList(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        Member member = extractMemberFromJwt(authorizationHeader);
+    public ResponseEntity<?> getApplicationList() {
+        Member member = actorProvider.getActor();
 
         if (member == null) {
             AddApplicationResponseDto responseDto =
@@ -87,10 +40,9 @@ public class PolicyApplyController {
     }
 
     @PostMapping("/welfare-application/{policyId}")
-    public ResponseEntity<AddApplicationResponseDto> addApplication(
-            @PathVariable Integer policyId,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        Member member = extractMemberFromJwt(authorizationHeader);
+    public ResponseEntity<AddApplicationResponseDto> addApplication(@PathVariable Integer policyId) {
+
+        Member member = actorProvider.getActor();
 
         if (member == null) {
             AddApplicationResponseDto addApplicationResponseDto =
@@ -112,11 +64,9 @@ public class PolicyApplyController {
     }
 
     @PutMapping("/welfare-application/{id}")
-    public ResponseEntity<DeleteApplicationResponseDto> deleteAplication(
-            @PathVariable long id,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-        Member member = extractMemberFromJwt(authorizationHeader);
+    public ResponseEntity<DeleteApplicationResponseDto> deleteAplication(@PathVariable long id) {
 
+        Member member = actorProvider.getActor();
         if (member == null) {
             DeleteApplicationResponseDto deleteApplicationResponseDto =
                     new DeleteApplicationResponseDto(HttpStatus.UNAUTHORIZED.value(), "로그인 후 이용해주세요");
