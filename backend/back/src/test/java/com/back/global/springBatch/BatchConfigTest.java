@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.job.JobExecution;
-import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.test.JobOperatorTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
@@ -66,9 +65,6 @@ class BatchConfigTest {
     CenterApiItemReader centerApiItemReader;
 
     @MockitoBean
-    ItemWriter<Center> centerApiItemWriter;
-
-    @MockitoBean
     private JpaItemWriter<Center> centerJpaItemWriter; // Writer 클래스가 아닌 빈 타입을 Mocking
 
     @BeforeEach
@@ -79,7 +75,7 @@ class BatchConfigTest {
         lenient().when(centerApiService.fetchCenter(any())).thenReturn(mockResponse);
 
         jobRepositoryTestUtils.removeJobExecutions(); // 이전 테스트 기록 삭제
-        Mockito.reset(centerApiItemReader, centerApiItemProcessor);
+        Mockito.reset(centerApiItemReader, centerApiItemProcessor, centerJpaItemWriter);
     }
 
     @Test
@@ -128,7 +124,7 @@ class BatchConfigTest {
         });
 
         // writer는 그냥 통과
-        doNothing().when(centerApiItemWriter).write(any());
+        doNothing().when(centerJpaItemWriter).write(any());
 
         // when
         JobExecution jobExecution = jobOperatorTestUtils.startStep("fetchCenterApiStep");
