@@ -20,7 +20,6 @@ import {
   SpecialStatusLabel,
 } from "@/types/member";
 import type { DaumPostcodeData } from "@/types/daum-postcode";
-import Header from "@/components/Header";
 
 export default function MyPage() {
   // 서버에서 불러온 기존 정보
@@ -217,22 +216,18 @@ export default function MyPage() {
 
   if (isLoadingDetail) {
     return (
-      <div>
-        <Header />
-        <main style={{ padding: "20px" }}>
-          <p>회원 정보를 불러오는 중...</p>
-        </main>
-      </div>
+      <main style={{ padding: "20px" }}>
+        <p>회원 정보를 불러오는 중...</p>
+      </main>
     );
   }
 
   return (
-    <div>
+    <>
       <Script
         src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
         onLoad={() => setIsScriptLoaded(true)}
       />
-      <Header />
       <main style={{ padding: "20px", maxWidth: "600px" }}>
         <h1>내 정보 수정</h1>
 
@@ -394,6 +389,6 @@ export default function MyPage() {
           </div>
         </form>
       </main>
-    </div>
+    </>
   );
 }
