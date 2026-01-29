@@ -1,33 +1,42 @@
-import type { EstateItem, EstateSearchParams } from "@/types/estate";
-import type { ApiErrorResponse } from "@/types/member";
-import { ApiError } from "@/api/member";
+import { EstateSearchRequest, EstateSearchResponse } from "@/types/estate";
 
-export async function fetchEstateList(
-  params: EstateSearchParams
-): Promise<EstateItem[]> {
-  const query = new URLSearchParams();
+export class ApiError extends Error {
+  constructor(
+    public resultCode: string,
+    public msg: string
+  ) {
+    super(`${resultCode}: ${msg}`);
+    this.name = "ApiError";
+  }
+}
 
-  if (params.signguCode) query.set("signguCode", params.signguCode);
-  if (params.suplyTy) query.set("suplyTy", params.suplyTy);
-  if (params.houseTy) query.set("houseTy", params.houseTy);
-  if (params.lfstsTyAt) query.set("lfstsTyAt", params.lfstsTyAt);
-  if (params.bassMtRntchrgSe) query.set("bassMtRntchrgSe", params.bassMtRntchrgSe);
-  if (params.yearMtBegin) query.set("yearMtBegin", params.yearMtBegin);
-  if (params.yearMtEnd) query.set("yearMtEnd", params.yearMtEnd);
-
-  const queryString = query.toString();
-  const url = `/api/v1/welfare/estate/list${queryString ? `?${queryString}` : ""}`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    credentials: "include",
+/**
+ * 행복주택 검색
+ * GET /api/v1/welfare/estate/location
+ */
+export async function searchEstates(
+  req: EstateSearchRequest
+): Promise<EstateSearchResponse> {
+  const params = new URLSearchParams({
+    sido: req.sido,
+    signguNm: req.signguNm,
   });
 
+  const response = await fetch(
+    `/api/v1/welfare/estate/location?${params.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
   if (!response.ok) {
-    const errorData: ApiErrorResponse = await response.json();
-    throw new ApiError(errorData.resultCode, errorData.msg);
+    const errorData = await response.json();
+    throw new ApiError(errorData.resultCode || "UNKNOWN", errorData.msg || "Unknown error");
   }
 
-  const data: EstateItem[] = await response.json();
-  return data;
+  return response.json();
 }

@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/welfare/estate")
 @RequiredArgsConstructor
 public class EstateController {
-    private EstateService estateService;
+    private final EstateService estateService;
 
     @GetMapping("/location")
     public EstateSearchResonseDto getEstateLocation(@RequestParam String sido, @RequestParam String signguNm) {
