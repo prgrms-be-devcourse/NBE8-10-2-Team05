@@ -28,14 +28,17 @@ import com.back.domain.welfare.estate.repository.EstateRepository;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.back.domain.welfare.policy.entity.Policy;
 import com.back.domain.welfare.policy.repository.PolicyRepository;
+import com.back.domain.welfare.policy.service.PolicyElasticSearchService;
 import com.back.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @RequiredArgsConstructor
 @Profile("dev")
+@Slf4j
 public class BaseInitData {
     @Autowired
     @Lazy
@@ -48,6 +51,7 @@ public class BaseInitData {
     private final CenterRepository centerRepository;
     private final LawyerRepository lawyerRepository;
     private final LawyerCrawlerService lawyerCrawlerService;
+    private final PolicyElasticSearchService policyElasticSearchService;
 
     private final ObjectMapper objectMapper;
 
@@ -100,6 +104,12 @@ public class BaseInitData {
 
     @Transactional
     public void initPolicy() {
+        try {
+            policyElasticSearchService.deleteIndex();
+        } catch (IOException e) {
+            log.warn("ES 인덱스 삭제 실패 (무시하고 진행): {}", e.getMessage());
+        }
+
         if (policyRepository.count() >= 50) {
             return;
         }
@@ -112,6 +122,7 @@ public class BaseInitData {
                     .toList();
 
             policyRepository.saveAll(policyList);
+            policyElasticSearchService.saveAll(policyList);
 
         } catch (IOException e) {
             throw new ServiceException("500", "policy 초기 데이터 로드 실패", e);

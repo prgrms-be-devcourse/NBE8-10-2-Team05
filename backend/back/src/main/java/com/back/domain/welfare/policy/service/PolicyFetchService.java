@@ -41,11 +41,14 @@ public class PolicyFetchService {
         int totalCnt = fetchResponse.result().pagging().totCount();
         int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
 
+        // 테스트를 위해 최대 2페이지까지만 수집하도록 제한
+        int limitPage = Math.min(totalPages, 2);
+
         // 1페이지 저장
         savePolicies(fetchResponse.result().youthPolicyList());
 
-        // 2페이지 이상 반복
-        for (pageNum = 2; pageNum <= totalPages; pageNum++) {
+        // 2페이지 이상 반복 (limitPage까지만)
+        for (pageNum = 2; pageNum <= limitPage; pageNum++) {
             try {
                 Thread.sleep(500); // API 과부하 방지
             } catch (InterruptedException e) {

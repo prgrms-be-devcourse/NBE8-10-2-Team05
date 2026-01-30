@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { searchEstates } from "@/api/estate";
 import { Estate } from "@/types/estate";
 
@@ -31,6 +32,14 @@ export default function EstatePage() {
 
   return (
     <div style={{ padding: "20px" }}>
+      <div style={{ marginBottom: "20px", textAlign: "right" }}>
+        <Link href="/estate/test">
+          <button style={{ padding: "8px 16px", backgroundColor: "#6c5ce7", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+            🚀 성능 테스트 페이지로 이동
+          </button>
+        </Link>
+      </div>
+
       <h1>행복주택 검색</h1>
       
       <div style={{ marginBottom: "20px" }}>

@@ -37,10 +37,43 @@ public class PolicyElasticSearchService {
 
     private static final String INDEX = "policy";
 
-    /**
-     * ES 인덱스가 없으면 생성합니다.
-     * - 매핑은 "지금 필요한 최소"만 잡아두고, 추후 검색 고도화 시 확장하는 것을 권장합니다.
-     */
+    @Transactional
+    public void deleteIndex() throws IOException {
+        if (esClient.indices().exists(ExistsRequest.of(r -> r.index(INDEX))).value()) {
+            esClient.indices().delete(d -> d.index(INDEX));
+            log.info("Elasticsearch index deleted: {}", INDEX);
+        }
+    }
+
+    @Transactional
+    public long saveAll(List<Policy> policies) throws IOException {
+        ensureIndex();
+
+        if (policies.isEmpty()) {
+            return 0;
+        }
+
+        List<BulkOperation> ops = new ArrayList<>(policies.size());
+        for (Policy policy : policies) {
+            PolicyDocument doc = policyDocumentMapper.toDocument(policy);
+            if (doc == null || doc.getPolicyId() == null) {
+                continue;
+            }
+
+            ops.add(BulkOperation.of(b -> b.index(
+                    i -> i.index(INDEX).id(String.valueOf(doc.getPolicyId())).document(doc))));
+        }
+
+        var resp = esClient.bulk(b -> b.operations(ops).refresh(Refresh.True));
+        if (resp.errors()) {
+            log.warn("ES bulk save completed with errors.");
+        } else {
+            log.info("ES bulk save completed. items={}", ops.size());
+        }
+
+        return ops.size();
+    }
+
     @Transactional
     public void ensureIndex() throws IOException {
         boolean exists =
@@ -70,10 +103,6 @@ public class PolicyElasticSearchService {
         log.info("Elasticsearch index created: {}", INDEX);
     }
 
-    /**
-     * DB의 Policy 전체를 ES에 Bulk로 다시 적재합니다.
-     * - 운영에서는 스케줄러/배치/관리자 API에서 호출하는 형태를 권장합니다.
-     */
     @Transactional
     public long reindexAllFromDb() throws IOException {
         ensureIndex();
@@ -96,7 +125,6 @@ public class PolicyElasticSearchService {
 
         var resp = esClient.bulk(b -> b.operations(ops).refresh(Refresh.True));
         if (resp.errors()) {
-            // 에러 상세는 item별로 존재하므로, 우선 전체 에러만 로그로 남김 (필요 시 확장)
             log.warn(
                     "Elasticsearch bulk reindex completed with errors. took={}, items={}",
                     resp.took(),
@@ -111,10 +139,6 @@ public class PolicyElasticSearchService {
         return ops.size();
     }
 
-    /**
-     * 키워드 검색(기본): 정책명/설명/키워드 배열을 대상으로 검색합니다.
-     * - 컨트롤러/요구사항에 맞춰 필드/가중치/정렬을 쉽게 확장할 수 있게 구성했습니다.
-     */
     public List<PolicyDocument> searchByKeyword(String keyword, int from, int size) throws IOException {
         String q = (keyword == null) ? "" : keyword.trim();
 
@@ -124,7 +148,6 @@ public class PolicyElasticSearchService {
                         .size(Math.min(Math.max(size, 1), 100))
                         .query(query -> query.bool(b -> {
                             if (q.isEmpty()) {
-                                // 키워드가 없으면 match_all
                                 return b.must(m -> m.matchAll(ma -> ma));
                             }
                             return b.must(m -> m.multiMatch(mm ->
@@ -138,18 +161,7 @@ public class PolicyElasticSearchService {
                 .toList();
     }
 
-    /**
-     * PolicySearchCondition을 사용한 고급 검색
-     * - PolicyQueryBuilder를 통해 복합 조건(나이, 소득, 지역, 직업, 학력, 결혼상태, 키워드)을 지원합니다.
-     *
-     * @param condition 검색 조건 (keyword, age, earn, regionCode, jobCode, schoolCode, marriageStatus, keywords)
-     * @param from 페이지네이션 시작 위치 (0부터 시작)
-     * @param size 한 번에 가져올 문서 개수 (1~100)
-     * @return 검색된 PolicyDocument 리스트
-     * @throws IOException Elasticsearch 연결/쿼리 오류 시
-     */
     public List<PolicyDocument> search(PolicySearchCondition condition, int from, int size) throws IOException {
-        // PolicyQueryBuilder로 ES Query 생성
         Query query = policyQueryBuilder.build(condition);
 
         SearchResponse<PolicyDocument> response = esClient.search(
@@ -165,16 +177,6 @@ public class PolicyElasticSearchService {
                 .toList();
     }
 
-    /**
-     * PolicySearchCondition을 사용한 고급 검색 (총 개수 포함)
-     * - 페이징 정보와 함께 전체 검색 결과 개수를 반환합니다.
-     *
-     * @param condition 검색 조건
-     * @param from 페이지네이션 시작 위치
-     * @param size 한 번에 가져올 문서 개수
-     * @return 검색 결과와 총 개수를 포함한 SearchResult 객체
-     * @throws IOException Elasticsearch 연결/쿼리 오류 시
-     */
     public SearchResult searchWithTotal(PolicySearchCondition condition, int from, int size) throws IOException {
         Query query = policyQueryBuilder.build(condition);
 
@@ -193,9 +195,6 @@ public class PolicyElasticSearchService {
         return new SearchResult(documents, response.hits().total().value());
     }
 
-    /**
-     * 검색 결과와 총 개수를 담는 내부 클래스
-     */
     public static class SearchResult {
         private final List<PolicyDocument> documents;
         private final long total;

@@ -68,4 +68,9 @@ public class EstateService {
         String normalizedSido = SidoNormalizer.normalizeSido(sido);
         return estateRepository.findByBrtcNmContainingAndSignguNmContaining(normalizedSido, signguNm);
     }
+
+    public List<Estate> searchEstateLocationNoCache(String sido, String signguNm) {
+        String normalizedSido = SidoNormalizer.normalizeSido(sido);
+        return estateRepository.findByBrtcNmContainingAndSignguNmContaining(normalizedSido, signguNm);
+    }
 }

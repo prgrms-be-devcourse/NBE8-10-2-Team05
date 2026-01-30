@@ -1,47 +1,63 @@
-import type { PolicyDocument, PolicySearchRequest } from "@/types/policy";
-import type { ApiErrorResponse } from "@/types/member";
-import { ApiError } from "@/api/member";
-
-// GET /api/v1/welfare/policy/search
-export async function searchPolicies(
-  params: PolicySearchRequest
-): Promise<PolicyDocument[]> {
-  const query = new URLSearchParams();
-
-  // 필수 파라미터
-  query.set("from", String(params.from));
-  query.set("size", String(params.size));
-
-  // 선택 파라미터
-  if (params.keyword) query.set("keyword", params.keyword);
-  if (params.age != null) query.set("age", String(params.age));
-  if (params.earn != null) query.set("earn", String(params.earn));
-  if (params.regionCode) query.set("regionCode", params.regionCode);
-  if (params.jobCode) query.set("jobCode", params.jobCode);
-  if (params.schoolCode) query.set("schoolCode", params.schoolCode);
-  if (params.marriageStatus) query.set("marriageStatus", params.marriageStatus);
-  if (params.zipCd) query.set("zipCd", params.zipCd);
-
-  // keywords는 배열 → 반복 파라미터로 전달
-  if (params.keywords && params.keywords.length > 0) {
-    for (const kw of params.keywords) {
-      query.append("keywords", kw);
+export async function searchPolicies(params: any) {
+  // null이나 undefined 값 제거
+  const cleanParams: any = {};
+  Object.keys(params).forEach(key => {
+    if (params[key] !== null && params[key] !== undefined && params[key] !== "") {
+      cleanParams[key] = params[key];
     }
+  });
+
+  // from, size 기본값 설정
+  if (cleanParams.from === undefined) cleanParams.from = 0;
+  if (cleanParams.size === undefined) cleanParams.size = 10;
+
+  const query = new URLSearchParams(cleanParams).toString();
+  const response = await fetch(`/api/v1/welfare/policy/search?${query}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Elasticsearch 검색 실패");
   }
+  return response.json();
+}
 
-  const queryString = query.toString();
-  const url = `/api/v1/welfare/policy/search${queryString ? `?${queryString}` : ""}`;
+export async function searchPolicyDb(params: any) {
+  // null이나 undefined 값 제거
+  const cleanParams: any = {};
+  Object.keys(params).forEach(key => {
+    if (params[key] !== null && params[key] !== undefined && params[key] !== "") {
+      cleanParams[key] = params[key];
+    }
+  });
 
-  const response = await fetch(url, {
+  const query = new URLSearchParams(cleanParams).toString();
+  const response = await fetch(`/api/v1/welfare/policy/search/db?${query}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("DB 검색 실패");
+  }
+  return response.json();
+}
+
+export async function fetchPolicies(): Promise<string> {
+  const response = await fetch(`/api/v1/welfare/policy/list`, {
     method: "GET",
     credentials: "include",
   });
 
   if (!response.ok) {
-    const errorData: ApiErrorResponse = await response.json();
-    throw new ApiError(errorData.resultCode, errorData.msg);
+    throw new Error("데이터 적재 실패");
   }
-
-  const data: PolicyDocument[] = await response.json();
-  return data;
+  return response.text();
 }
