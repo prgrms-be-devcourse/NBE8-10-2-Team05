@@ -55,142 +55,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
-      <main style={{ padding: "20px", maxWidth: "400px", margin: "50px auto" }}>
-        <h1>로그인</h1>
+    <main className="ds-page-narrow">
+      <h1 className="ds-title">로그인</h1>
 
-        {error && (
-          <div
-            style={{
-              color: "red",
-              padding: "10px",
-              marginBottom: "20px",
-              border: "1px solid red",
-              borderRadius: "4px",
-            } as React.CSSProperties}
-          >
-            {error}
-          </div>
-        )}
+      {error && <div className="ds-alert-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ marginBottom: "30px" }}>
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              이메일
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-              } as React.CSSProperties}
-            />
-          </div>
+      <form onSubmit={handleSubmit}>
+        <div className="ds-form-group">
+          <label className="ds-label">이메일</label>
+          <input
+            type="email"
+            className="ds-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", marginBottom: "5px" }}>
-              비밀번호
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-              } as React.CSSProperties}
-            />
-          </div>
+        <div className="ds-form-group">
+          <label className="ds-label">비밀번호</label>
+          <input
+            type="password"
+            className="ds-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: isLoading ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: isLoading ? "not-allowed" : "pointer",
-              fontSize: "16px",
-            } as React.CSSProperties}
-          >
-            {isLoading ? "로그인 중..." : "로그인"}
-          </button>
-        </form>
-
-        {/* 구분선 */}
-        <div
-          style={{
-            textAlign: "center",
-            margin: "20px 0",
-            position: "relative",
-          }}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="ds-btn ds-btn-primary ds-btn-full"
         >
-          <hr style={{ border: "none", borderTop: "1px solid #ddd" }} />
-          <span
-            style={{
-              position: "absolute",
-              top: "-12px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              backgroundColor: "white",
-              padding: "0 10px",
-              color: "#666",
-            }}
-          >
-            또는
-          </span>
-        </div>
+          {isLoading ? "로그인 중..." : "로그인"}
+        </button>
+      </form>
 
-        {/* 소셜 로그인 버튼 */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <button
-            onClick={() => handleSocialLogin("kakao")}
-            style={{
-              width: "100%",
-              padding: "0",
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <img
-              src="/images/kakao_login_medium_narrow.png"
-              alt="카카오 로그인"
-              style={{
-                width: "183px",
-                height: "43px",
-              }}
-            />
-          </button>
-        </div>
+      {/* 구분선 */}
+      <div className="ds-divider">
+        <span>또는</span>
+      </div>
 
-        {/* 회원가입 링크 */}
-        <div
-          style={{
-            marginTop: "20px",
-            textAlign: "center",
-            color: "#666",
-          }}
+      {/* 소셜 로그인 버튼 */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <button
+          onClick={() => handleSocialLogin("kakao")}
+          className="ds-social-btn"
         >
-          계정이 없으신가요?{" "}
-          <a href="/join" style={{ color: "#007bff", textDecoration: "none" }}>
-            회원가입
-          </a>
-        </div>
-      </main>
-    </div>
+          <img
+            src="/images/kakao_login_medium_narrow.png"
+            alt="카카오 로그인"
+            style={{ width: "183px", height: "43px" }}
+          />
+        </button>
+      </div>
+
+      {/* 회원가입 링크 */}
+      <div style={{ marginTop: "24px", textAlign: "center" }}>
+        <span className="ds-meta">계정이 없으신가요? </span>
+        <a href="/join" className="ds-link">회원가입</a>
+      </div>
+    </main>
   );
 }

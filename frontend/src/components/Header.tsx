@@ -24,40 +24,35 @@ export default function Header() {
   };
 
   return (
-    <header style={{ display: "flex", gap: "20px", padding: "16px", borderBottom: "1px solid #ccc", alignItems: "center" }}>
-      <Link href="/" style={{ fontWeight: "bold" }}>
+    <header className="ds-header">
+      <Link href="/" className="ds-header-logo">
         통합 복지 서비스
       </Link>
-      <span>|</span>
-      <Link href="/">정책 검색</Link>
-      <span>|</span>
-      <Link href="/estate">행복주택</Link>
-      <span>|</span>
-      <Link href="/welfare/center">시설찾기</Link>
-      <span>|</span>
-      <Link href="/welfare/lawyer">노무사 찾기</Link>
-      <span>|</span>
-      <Link href="/bookmark">북마크</Link>
-      <span>|</span>
-      <Link href="/applications">신청내역</Link>
-      <span>|</span>
-      {isLoading ? (
-        <span>로딩중...</span>
-      ) : user ? (
-        <span>
-          <Link href="/mypage">{user.name}님 환영합니다</Link>
-          {" | "}
-          <button type="button" onClick={handleLogout}>
-            로그아웃
-          </button>
-        </span>
-      ) : (
-        <span>
-          <Link href="/login">로그인</Link>
-          {" / "}
-          <Link href="/join">회원가입</Link>
-        </span>
-      )}
+      <nav className="ds-header-nav">
+        <Link href="/">정책 검색</Link>
+        <Link href="/estate">행복주택</Link>
+        <Link href="/welfare/center">시설찾기</Link>
+        <Link href="/welfare/lawyer">노무사 찾기</Link>
+        <Link href="/bookmark">북마크</Link>
+        <Link href="/applications">신청내역</Link>
+      </nav>
+      <div className="ds-header-user">
+        {isLoading ? (
+          <span className="ds-meta">로딩중...</span>
+        ) : user ? (
+          <>
+            <Link href="/mypage">{user.name}님</Link>
+            <button type="button" onClick={handleLogout} className="ds-header-logout">
+              로그아웃
+            </button>
+          </>
+        ) : (
+          <>
+            <Link href="/login">로그인</Link>
+            <Link href="/join">회원가입</Link>
+          </>
+        )}
+      </div>
     </header>
   );
 }

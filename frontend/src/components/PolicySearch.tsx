@@ -194,151 +194,147 @@ export default function PolicySearch() {
     <div>
       {/* 검색 폼 */}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "12px" }}>
-          <label>
-            키워드:{" "}
-            <input
-              type="text"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder="검색어 입력"
-            />
-          </label>
+        <div className="ds-form-group">
+          <label className="ds-label">키워드</label>
+          <input
+            type="text"
+            className="ds-input"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="검색어 입력"
+          />
         </div>
 
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "12px" }}>
-          <label>
-            나이:{" "}
+        <div className="ds-search-bar">
+          <div className="ds-form-group">
+            <label className="ds-label">나이</label>
             <input
               type="number"
+              className="ds-input ds-input-inline"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="나이"
-              style={{ width: "80px" }}
+              style={{ width: "90px" }}
             />
-          </label>
+          </div>
 
-          <label>
-            소득(만원):{" "}
+          <div className="ds-form-group">
+            <label className="ds-label">소득(만원)</label>
             <input
               type="number"
+              className="ds-input ds-input-inline"
               value={earn}
               onChange={(e) => setEarn(e.target.value)}
               placeholder="소득"
-              style={{ width: "100px" }}
+              style={{ width: "110px" }}
             />
-          </label>
+          </div>
 
-          <label>
-            지역코드:{" "}
+          <div className="ds-form-group">
+            <label className="ds-label">지역코드</label>
             <input
               type="text"
+              className="ds-input ds-input-inline"
               value={regionCode}
               onChange={(e) => setRegionCode(e.target.value)}
               placeholder="지역코드"
-              style={{ width: "100px" }}
+              style={{ width: "110px" }}
             />
-          </label>
+          </div>
 
-          <label>
-            취업상태:{" "}
+          <div className="ds-form-group">
+            <label className="ds-label">취업상태</label>
             <select
+              className="ds-select ds-input-inline"
               value={jobCode}
               onChange={(e) => setJobCode(e.target.value)}
+              style={{ width: "130px" }}
             >
               <option value="">전체</option>
               {Object.entries(JobCodeLabel).map(([code, label]) => (
                 <option key={code} value={code}>{label}</option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label>
-            학력:{" "}
+          <div className="ds-form-group">
+            <label className="ds-label">학력</label>
             <select
+              className="ds-select ds-input-inline"
               value={schoolCode}
               onChange={(e) => setSchoolCode(e.target.value)}
+              style={{ width: "130px" }}
             >
               <option value="">전체</option>
               {Object.entries(SchoolCodeLabel).map(([code, label]) => (
                 <option key={code} value={code}>{label}</option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label>
-            결혼상태:{" "}
+          <div className="ds-form-group">
+            <label className="ds-label">결혼상태</label>
             <select
+              className="ds-select ds-input-inline"
               value={marriageStatus}
               onChange={(e) => setMarriageStatus(e.target.value)}
+              style={{ width: "120px" }}
             >
               <option value="">전체</option>
               {Object.entries(MarriageStatusCodeLabel).map(([code, label]) => (
                 <option key={code} value={code}>{label}</option>
               ))}
             </select>
-          </label>
+          </div>
         </div>
 
-        <div style={{ marginBottom: "12px" }}>
-          <label>
-            태그 (쉼표 구분):{" "}
-            <input
-              type="text"
-              value={keywordsInput}
-              onChange={(e) => setKeywordsInput(e.target.value)}
-              placeholder="예: 주거지원, 보조금"
-              style={{ width: "300px" }}
-            />
-          </label>
+        <div className="ds-form-group">
+          <label className="ds-label">태그 (쉼표 구분)</label>
+          <input
+            type="text"
+            className="ds-input"
+            value={keywordsInput}
+            onChange={(e) => setKeywordsInput(e.target.value)}
+            placeholder="예: 주거지원, 보조금"
+          />
         </div>
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="ds-btn ds-btn-primary">
           {loading ? "검색 중..." : "검색"}
         </button>
       </form>
 
       {/* 에러 */}
-      {error && (
-        <div style={{ color: "red", marginTop: "12px" }}>
-          오류: {error}
-        </div>
-      )}
+      {error && <div className="ds-alert-error" style={{ marginTop: "16px" }}>{error}</div>}
 
       {/* 검색 결과 */}
       {searched && !loading && (
-        <div style={{ marginTop: "20px" }}>
+        <div style={{ marginTop: "24px" }}>
           {results.length === 0 ? (
-            <div style={{ marginTop: "8px" }}>검색 결과가 없습니다.</div>
+            <div className="ds-empty">검색 결과가 없습니다.</div>
           ) : (
             <div>
               {results.map((policy, index) => (
                 <div
                   key={policy.policyId ?? index}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "12px",
-                    marginTop: "8px",
-                  }}
+                  className="ds-card"
                 >
-                  <div>
-                    <strong>{policy.plcyNm ?? "(정책명 없음)"}</strong>
+                  <div className="ds-card-title">
+                    {policy.plcyNm ?? "(정책명 없음)"}
                   </div>
-                  <div>정책번호: {policy.plcyNo ?? "-"}</div>
+                  <div className="ds-card-sub">정책번호: {policy.plcyNo ?? "-"}</div>
                   {policy.description && (
-                    <div style={{ marginTop: "4px" }}>{policy.description}</div>
+                    <div className="ds-card-body">{policy.description}</div>
                   )}
-                  <div style={{ marginTop: "4px", fontSize: "14px", color: "#666" }}>
+                  <div className="ds-card-meta">
                     {policy.minAge != null && policy.maxAge != null && (
-                      <span>연령: {policy.minAge}~{policy.maxAge}세 | </span>
+                      <span>연령: {policy.minAge}~{policy.maxAge}세</span>
                     )}
-                    {policy.regionCode && <span>지역: {policy.regionCode} | </span>}
-                    {policy.marriageStatus && <span>결혼: {policy.marriageStatus} | </span>}
                     {policy.keywords && policy.keywords.length > 0 && (
                       <span>태그: {policy.keywords.join(", ")}</span>
                     )}
                   </div>
-                  <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+                  <div className="ds-card-actions">
                     {policy.policyId != null && (
                       <button
                         type="button"
@@ -347,19 +343,11 @@ export default function PolicySearch() {
                           togglingIds.has(policy.policyId) ||
                           bookmarkedIds.has(policy.policyId)
                         }
-                        style={{
-                          padding: "4px 12px",
-                          cursor:
-                            togglingIds.has(policy.policyId) ||
-                            bookmarkedIds.has(policy.policyId)
-                              ? "not-allowed"
-                              : "pointer",
-                          backgroundColor: bookmarkedIds.has(policy.policyId)
-                            ? "#333"
-                            : "#fff",
-                          color: bookmarkedIds.has(policy.policyId) ? "#fff" : "#333",
-                          border: "1px solid #333",
-                        }}
+                        className={`ds-btn ds-btn-sm ${
+                          bookmarkedIds.has(policy.policyId)
+                            ? "ds-btn-done"
+                            : "ds-btn-secondary"
+                        }`}
                       >
                         {togglingIds.has(policy.policyId)
                           ? "처리중..."
@@ -373,16 +361,11 @@ export default function PolicySearch() {
                         type="button"
                         onClick={() => handleApply(policy.policyId!)}
                         disabled={applyingIds.has(policy.policyId) || appliedIds.has(policy.policyId)}
-                        style={{
-                          padding: "4px 12px",
-                          cursor:
-                            applyingIds.has(policy.policyId) || appliedIds.has(policy.policyId)
-                              ? "not-allowed"
-                              : "pointer",
-                          backgroundColor: appliedIds.has(policy.policyId) ? "#333" : "#fff",
-                          color: appliedIds.has(policy.policyId) ? "#fff" : "#333",
-                          border: "1px solid #333",
-                        }}
+                        className={`ds-btn ds-btn-sm ${
+                          appliedIds.has(policy.policyId)
+                            ? "ds-btn-done"
+                            : "ds-btn-primary"
+                        }`}
                       >
                         {applyingIds.has(policy.policyId)
                           ? "처리중..."
@@ -396,14 +379,19 @@ export default function PolicySearch() {
               ))}
 
               {/* 페이징 */}
-              <div style={{ marginTop: "12px", display: "flex", gap: "8px" }}>
-                <button onClick={handlePrevPage} disabled={from === 0 || loading}>
+              <div className="ds-pagination">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={from === 0 || loading}
+                  className="ds-btn ds-btn-secondary ds-btn-sm"
+                >
                   이전
                 </button>
                 <span>페이지 {Math.floor(from / PAGE_SIZE) + 1}</span>
                 <button
                   onClick={handleNextPage}
                   disabled={results.length < PAGE_SIZE || loading}
+                  className="ds-btn ds-btn-secondary ds-btn-sm"
                 >
                   다음
                 </button>
