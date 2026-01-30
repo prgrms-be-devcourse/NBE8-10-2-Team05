@@ -162,7 +162,8 @@ public class BaseInitData {
             return;
         }
 
-        lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
+        lawyerCrawlerService.crawlAllPages();
+        // lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
 
         if (lawyerRepository.count() < 1) {
             throw new ServiceException("500", "InitData lawyer 초기 데이터 로드 실패");
