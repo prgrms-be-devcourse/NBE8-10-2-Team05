@@ -129,7 +129,15 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
     // CI 환경(보통 2코어)과 로컬 환경에 맞춰 동적으로 코어 할당
-    maxParallelForks = 2
+    val isCi = System.getenv("CI") != null || System.getenv("GITHUB_ACTIONS") != null
+
+    maxParallelForks = if (isCi) {
+        // CI 환경: 가용한 모든 코어 사용
+        Runtime.getRuntime().availableProcessors()
+    } else {
+        // 로컬 환경: 작업 편의를 위해 절반만 사용 (최소 1개)
+        (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    }
 
     testLogging {
         events("passed", "skipped", "failed")
