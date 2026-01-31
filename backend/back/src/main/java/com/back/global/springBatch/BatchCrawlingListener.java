@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class BatchJobListener implements JobExecutionListener {
+public class BatchCrawlingListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution jobExecution) {
         // 종료 시간에서 시작 시간을 빼서 계산

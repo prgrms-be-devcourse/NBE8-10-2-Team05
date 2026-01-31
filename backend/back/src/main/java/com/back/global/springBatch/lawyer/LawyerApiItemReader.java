@@ -3,6 +3,7 @@ package com.back.global.springBatch.lawyer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.AbstractPagingItemReader;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,6 +15,7 @@ import com.back.domain.welfare.center.lawyer.service.LawyerCrawlerService;
 import lombok.extern.slf4j.Slf4j;
 
 @Component // Spring이 관리하도록 등록
+@StepScope
 @Slf4j
 public class LawyerApiItemReader extends AbstractPagingItemReader<Lawyer> {
 

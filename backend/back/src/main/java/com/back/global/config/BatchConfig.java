@@ -21,6 +21,7 @@ import com.back.domain.welfare.estate.dto.EstateDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.back.domain.welfare.policy.entity.Policy;
+import com.back.global.springBatch.BatchCrawlingListener;
 import com.back.global.springBatch.BatchJobListener;
 import com.back.global.springBatch.BatchStepCrawlFactory;
 import com.back.global.springBatch.BatchStepFactory;
@@ -57,6 +58,7 @@ public class BatchConfig {
 
     private final LawyerApiItemReader lawyerApiItemReader;
     private final JpaItemWriter<Lawyer> lawyerJpaItemWriter;
+    private final BatchCrawlingListener batchCrawlingListener;
 
     @Bean
     public Job fetchApiJob(
@@ -111,7 +113,7 @@ public class BatchConfig {
             builder.next(createStep(factory, regions.get(i))); // 다음 지역들 연결
         }
 
-        return builder.build();
+        return builder.listener(batchCrawlingListener).build();
     }
 
     private Step createStep(BatchStepCrawlFactory factory, String region) {
