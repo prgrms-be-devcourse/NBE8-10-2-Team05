@@ -113,13 +113,13 @@ public class BatchConfig {
             builder.next(createStep(factory, regions.get(i))); // 다음 지역들 연결
         }
 
-        return builder.listener(batchCrawlingListener).build();
+        return builder.listener(batchJobListener).build();
     }
 
     private Step createStep(BatchStepCrawlFactory factory, String region) {
         // Step 이름에 지역명을 넣어 구분 (중요!)
         return factory.createCrawlStep(
-                "fetchLawyerStep_" + region,
+                region,
                 lawyerApiItemReader, // @StepScope가 동작하여 런타임에 region 주입됨
                 null,
                 lawyerJpaItemWriter);

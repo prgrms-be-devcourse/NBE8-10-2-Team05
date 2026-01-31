@@ -5,6 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.database.AbstractPagingItemReader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -25,6 +26,9 @@ public class LawyerApiItemReader extends AbstractPagingItemReader<Lawyer> {
         "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
     };
     private Integer currentRegionIdx = 0;
+
+    @Value("#{stepExecutionContext['region']}")
+    String region;
 
     // 생성자를 통해 totalCount를 주입받음
     public LawyerApiItemReader(LawyerCrawlerService apiService) {
