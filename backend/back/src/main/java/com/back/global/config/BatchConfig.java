@@ -69,9 +69,8 @@ public class BatchConfig {
         return new JobBuilder("fetchApiJob", jobRepository)
                 .listener(batchJobListener)
                 .start(fetchCenterApiStep)
-                // .next(fetchEstateApiStep)
-                // .next(fetchPolicyApiStep)
-                .start(fetchLawyerApiStep)
+                .next(fetchEstateApiStep)
+                .next(fetchPolicyApiStep)
                 .build();
     }
 
@@ -91,12 +90,6 @@ public class BatchConfig {
     public Step fetchPolicyApiStep(BatchStepFactory factory) {
         return factory.<PolicyFetchResponseDto.PolicyItem, Policy>createApiStep(
                 "fetchPolicyApiStep", policyApiItemReader, policyApiItemProcessor, compositeItemWriter);
-    }
-
-    @Bean
-    public Step fetchLawyerApiStep(BatchStepCrawlFactory factory) {
-        return factory.<Lawyer, Lawyer>createCrawlStep(
-                "fetchLawyerApiStep", lawyerApiItemReader, null, lawyerJpaItemWriter);
     }
 
     @Bean
