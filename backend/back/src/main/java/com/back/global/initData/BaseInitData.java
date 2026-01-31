@@ -54,7 +54,7 @@ public class BaseInitData {
     @Bean
     ApplicationRunner baseInitDataApplicationRunner() {
         return args -> {
-            self.initMember();
+            // self.initMember();
             // self.initPolicy();
             // self.initEstate();
             // self.initCenter();

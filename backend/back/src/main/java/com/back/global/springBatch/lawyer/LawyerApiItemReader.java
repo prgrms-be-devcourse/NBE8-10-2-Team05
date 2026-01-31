@@ -38,7 +38,7 @@ public class LawyerApiItemReader extends AbstractPagingItemReader<Lawyer> {
         else results.clear();
 
         try {
-            List<Lawyer> data = lawyerCrawlerService.crawlEachPage(region, getPage());
+            List<Lawyer> data = lawyerCrawlerService.crawlEachPage(region, getPage() + 1);
             results.addAll(data);
 
         } catch (ResourceAccessException e) {

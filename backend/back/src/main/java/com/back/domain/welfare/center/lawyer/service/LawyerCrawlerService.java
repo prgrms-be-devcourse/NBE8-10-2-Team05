@@ -20,9 +20,11 @@ import org.springframework.web.client.ResourceAccessException;
 import com.back.domain.welfare.center.lawyer.entity.Lawyer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LawyerCrawlerService {
     private final String SEARCH_URL = "https://www.youthlabor.co.kr/company/search?text=&area=%s&area2=&page=%d";
     // 시/도인 area1, 페이지 숫자인 page를 넣어서 찾을 수 있도록
@@ -85,10 +87,13 @@ public class LawyerCrawlerService {
             backoff = @Backoff(delay = 2000, multiplier = 2.0) // 2초 → 4초 → 8초
             )
     public List<Lawyer> crawlEachPage(String area1, int startPage) {
+        log.debug("crawlEachPage region:{} area1: {}", area1, startPage);
         List<Lawyer> lawyerList = new ArrayList<>();
 
         String url = String.format(SEARCH_URL, area1, startPage);
         Elements rows = crawlAndSelectRows(url);
+
+        log.debug("Elements rows: {} ", rows);
 
         for (Element row : rows) {
             // 열 별로 순회하면서 파싱
@@ -102,6 +107,8 @@ public class LawyerCrawlerService {
             if (lawyer.getCorporation() == null) {
                 continue;
             }
+
+            log.debug("lawyer : {} ", lawyer);
 
             lawyerList.add(lawyer);
         }

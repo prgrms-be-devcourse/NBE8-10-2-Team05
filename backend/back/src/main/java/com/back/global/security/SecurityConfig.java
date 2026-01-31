@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/error")
                         .permitAll()
+                        .requestMatchers("/batchTest")
+                        .permitAll()
                         // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())

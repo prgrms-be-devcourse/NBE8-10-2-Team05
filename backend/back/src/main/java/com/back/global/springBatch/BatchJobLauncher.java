@@ -8,6 +8,7 @@ import org.springframework.batch.core.launch.JobExecutionAlreadyRunningException
 import org.springframework.batch.core.launch.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.JobRestartException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -22,22 +23,24 @@ public class BatchJobLauncher {
     private final Job fetchApiJob;
     private final Job fetchLawyerJob;
 
+    @Async
     public void runJob() {
         try {
-            log.info("배치[1/2] 실행 시작: JobName={}, time={}", fetchApiJob.getName(), System.currentTimeMillis());
-
-            JobExecution jobExecution = jobOperator.start(
-                    fetchApiJob,
-                    new JobParametersBuilder()
-                            .addString("job:", fetchApiJob.getName())
-                            .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
-                            .toJobParameters());
-
-            // API Job이 성공적으로 끝났는지 확인 (실패 시 중단하고 싶다면 조건문 추가)
-            if (jobExecution.getStatus().isUnsuccessful()) {
-                log.error(">>> API 수집 Job 실패로 인해 크롤링 Job을 시작하지 않습니다.");
-                return;
-            }
+            //            log.info("배치[1/2] 실행 시작: JobName={}, time={}", fetchApiJob.getName(),
+            // System.currentTimeMillis());
+            //
+            //            JobExecution jobExecution = jobOperator.start(
+            //                    fetchApiJob,
+            //                    new JobParametersBuilder()
+            //                            .addString("job:", fetchApiJob.getName())
+            //                            .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
+            //                            .toJobParameters());
+            //
+            //            // API Job이 성공적으로 끝났는지 확인 (실패 시 중단하고 싶다면 조건문 추가)
+            //            if (jobExecution.getStatus().isUnsuccessful()) {
+            //                log.error(">>> API 수집 Job 실패로 인해 크롤링 Job을 시작하지 않습니다.");
+            //                return;
+            //            }
 
             log.info("배치[1/2] 실행 시작: JobName={}, time={}", fetchLawyerJob.getName(), System.currentTimeMillis());
 
@@ -48,7 +51,7 @@ public class BatchJobLauncher {
                             .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
                             .toJobParameters());
 
-            log.info("배치 실행 완료: JobExecutionId={}, 상태={}", jobExecution.getId(), jobExecution.getStatus());
+            log.info("배치 실행 완료: JobExecutionId={}, 상태={}", jobExecution2.getId(), jobExecution2.getStatus());
 
         } catch (InvalidJobParametersException e) {
             log.error("파라미터가 유효하지 않음: {}", e.getMessage(), e);
