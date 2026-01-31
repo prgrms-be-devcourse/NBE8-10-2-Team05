@@ -104,17 +104,17 @@ public class BatchConfig {
         List<String> regions = Arrays.asList(
                 "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주");
 
-        SimpleJobBuilder builder =
-                new JobBuilder("fetchLawyerJob", jobRepository).start(createStep(factory, regions.get(0))); // 첫 지역 시작
+        SimpleJobBuilder builder = new JobBuilder("fetchLawyerJob", jobRepository)
+                .start(createCrawlingStep(factory, regions.get(0))); // 첫 지역 시작
 
         for (int i = 1; i < regions.size(); i++) {
-            builder.next(createStep(factory, regions.get(i))); // 다음 지역들 연결
+            builder.next(createCrawlingStep(factory, regions.get(i))); // 다음 지역들 연결
         }
 
         return builder.listener(batchJobListener).build();
     }
 
-    private Step createStep(BatchStepCrawlFactory factory, String region) {
+    private Step createCrawlingStep(BatchStepCrawlFactory factory, String region) {
         // Step 이름에 지역명을 넣어 구분 (중요!)
         return factory.createCrawlStep(
                 region,

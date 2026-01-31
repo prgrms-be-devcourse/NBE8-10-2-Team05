@@ -20,15 +20,31 @@ public class BatchJobLauncher {
 
     private final JobOperator jobOperator; // 권장 실행 방식
     private final Job fetchApiJob;
+    private final Job fetchLawyerJob;
 
     public void runJob() {
         try {
-            log.info("배치 실행 시작: JobName={}, time={}", fetchApiJob.getName(), System.currentTimeMillis());
+            log.info("배치[1/2] 실행 시작: JobName={}, time={}", fetchApiJob.getName(), System.currentTimeMillis());
 
             JobExecution jobExecution = jobOperator.start(
                     fetchApiJob,
                     new JobParametersBuilder()
                             .addString("job:", fetchApiJob.getName())
+                            .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
+                            .toJobParameters());
+
+            // API Job이 성공적으로 끝났는지 확인 (실패 시 중단하고 싶다면 조건문 추가)
+            if (jobExecution.getStatus().isUnsuccessful()) {
+                log.error(">>> API 수집 Job 실패로 인해 크롤링 Job을 시작하지 않습니다.");
+                return;
+            }
+
+            log.info("배치[1/2] 실행 시작: JobName={}, time={}", fetchLawyerJob.getName(), System.currentTimeMillis());
+
+            JobExecution jobExecution2 = jobOperator.start(
+                    fetchLawyerJob,
+                    new JobParametersBuilder()
+                            .addString("job:", fetchLawyerJob.getName())
                             .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
                             .toJobParameters());
 
