@@ -55,10 +55,10 @@ public class BaseInitData {
     ApplicationRunner baseInitDataApplicationRunner() {
         return args -> {
             self.initMember();
-            self.initPolicy();
-            self.initEstate();
-            self.initCenter();
-            self.initLawyer();
+            // self.initPolicy();
+            // self.initEstate();
+            // self.initCenter();
+            // self.initLawyer();
         };
     }
 
