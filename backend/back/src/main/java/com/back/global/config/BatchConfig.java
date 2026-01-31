@@ -21,7 +21,6 @@ import com.back.domain.welfare.estate.dto.EstateDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.policy.dto.PolicyFetchResponseDto;
 import com.back.domain.welfare.policy.entity.Policy;
-import com.back.global.springBatch.BatchCrawlingListener;
 import com.back.global.springBatch.BatchJobListener;
 import com.back.global.springBatch.BatchStepCrawlFactory;
 import com.back.global.springBatch.BatchStepFactory;
@@ -58,7 +57,6 @@ public class BatchConfig {
 
     private final LawyerApiItemReader lawyerApiItemReader;
     private final JpaItemWriter<Lawyer> lawyerJpaItemWriter;
-    private final BatchCrawlingListener batchCrawlingListener;
 
     @Bean
     public Job fetchApiJob(
