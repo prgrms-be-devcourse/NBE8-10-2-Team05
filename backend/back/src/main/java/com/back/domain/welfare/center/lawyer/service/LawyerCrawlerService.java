@@ -101,7 +101,7 @@ public class LawyerCrawlerService {
             }
 
             // 법무법인이 없는 노무사는 어차피 연락할 수단도 없기때문에 제거
-            if (lawyer.getCorporation() == null) {
+            if (lawyer.getCorporation() == null || lawyer.getCorporation().isEmpty()) {
                 continue;
             }
 
