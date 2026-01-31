@@ -54,11 +54,11 @@ public class BaseInitData {
     @Bean
     ApplicationRunner baseInitDataApplicationRunner() {
         return args -> {
-            self.initMember();
-            self.initPolicy();
-            self.initEstate();
-            self.initCenter();
-            self.initLawyer();
+            // self.initMember();
+            // self.initPolicy();
+            // self.initEstate();
+            // self.initCenter();
+            // self.initLawyer();
         };
     }
 
@@ -162,7 +162,7 @@ public class BaseInitData {
             return;
         }
 
-        lawyerCrawlerService.crawlAllPages();
+        // lawyerCrawlerService.crawlAllPages();
         // lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
 
         if (lawyerRepository.count() < 1) {
