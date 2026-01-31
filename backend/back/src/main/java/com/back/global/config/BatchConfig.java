@@ -60,11 +60,7 @@ public class BatchConfig {
 
     @Bean
     public Job fetchApiJob(
-            JobRepository jobRepository,
-            Step fetchCenterApiStep,
-            Step fetchEstateApiStep,
-            Step fetchPolicyApiStep,
-            Step fetchLawyerApiStep) {
+            JobRepository jobRepository, Step fetchCenterApiStep, Step fetchEstateApiStep, Step fetchPolicyApiStep) {
 
         return new JobBuilder("fetchApiJob", jobRepository)
                 .listener(batchJobListener)

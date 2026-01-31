@@ -87,13 +87,10 @@ public class LawyerCrawlerService {
             backoff = @Backoff(delay = 2000, multiplier = 2.0) // 2초 → 4초 → 8초
             )
     public List<Lawyer> crawlEachPage(String area1, int startPage) {
-        log.debug("crawlEachPage region:{} area1: {}", area1, startPage);
         List<Lawyer> lawyerList = new ArrayList<>();
 
         String url = String.format(SEARCH_URL, area1, startPage);
         Elements rows = crawlAndSelectRows(url);
-
-        log.debug("Elements rows: {} ", rows);
 
         for (Element row : rows) {
             // 열 별로 순회하면서 파싱
@@ -107,8 +104,6 @@ public class LawyerCrawlerService {
             if (lawyer.getCorporation() == null) {
                 continue;
             }
-
-            log.debug("lawyer : {} ", lawyer);
 
             lawyerList.add(lawyer);
         }
