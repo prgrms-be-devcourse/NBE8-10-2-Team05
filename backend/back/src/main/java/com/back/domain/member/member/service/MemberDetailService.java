@@ -1,5 +1,7 @@
 package com.back.domain.member.member.service;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,8 +88,8 @@ public class MemberDetailService {
         String newRrnFront = (req.rrnFront() != null ? req.rrnFront() : member.getRrnFront());
         String newRrnBackFirst = (req.rrnBackFirst() != null ? req.rrnBackFirst() : member.getRrnBackFirst());
 
-        // 이메일이 변경되는 경우에만 중복 체크
-        if (!member.getEmail().equals(newEmail)) {
+        // 이메일이 변경되는 경우에만 중복 체크. 이메일이 null인 경우도 안전하게 비교
+        if (!Objects.equals(member.getEmail(), newEmail)) {
 
             // ACTIVE 회원 중에서만 중복 체크
             if (memberRepository.existsByEmailAndStatus(newEmail, Member.MemberStatus.ACTIVE)) {

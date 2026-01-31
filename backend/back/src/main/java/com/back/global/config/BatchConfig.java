@@ -65,7 +65,7 @@ public class BatchConfig {
         return new JobBuilder("fetchApiJob", jobRepository)
                 .listener(batchJobListener)
                 .start(fetchCenterApiStep)
-                // .next(fetchEstateApiStep)
+                .next(fetchEstateApiStep)
                 .next(fetchPolicyApiStep)
                 // .next(fetchLawyerApiStep)
                 .build();

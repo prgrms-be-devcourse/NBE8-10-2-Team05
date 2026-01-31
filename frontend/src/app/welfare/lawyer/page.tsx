@@ -31,47 +31,54 @@ export default function LawyerSearchPage() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>법률 상담소 검색</h1>
-      
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="시/도 (예: 서울특별시)"
-          value={area1}
-          onChange={(e) => setArea1(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        <input
-          type="text"
-          placeholder="시/군/구 (선택)"
-          value={area2}
-          onChange={(e) => setArea2(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        <button onClick={handleSearch} disabled={loading} style={{ padding: "5px 10px" }}>
+    <main className="ds-page">
+      <h1 className="ds-title">법률 상담소 검색</h1>
+
+      <div className="ds-search-bar">
+        <div className="ds-form-group">
+          <label className="ds-label">시/도</label>
+          <input
+            type="text"
+            className="ds-input ds-input-inline"
+            placeholder="예: 서울특별시"
+            value={area1}
+            onChange={(e) => setArea1(e.target.value)}
+            style={{ width: "180px" }}
+          />
+        </div>
+        <div className="ds-form-group">
+          <label className="ds-label">시/군/구 (선택)</label>
+          <input
+            type="text"
+            className="ds-input ds-input-inline"
+            placeholder="시/군/구"
+            value={area2}
+            onChange={(e) => setArea2(e.target.value)}
+            style={{ width: "180px" }}
+          />
+        </div>
+        <button onClick={handleSearch} disabled={loading} className="ds-btn ds-btn-primary">
           {loading ? "검색 중..." : "검색"}
         </button>
       </div>
 
-      {error && <div style={{ color: "red", marginBottom: "20px" }}>{error}</div>}
+      {error && <div className="ds-alert-error">{error}</div>}
 
-      <div>
-        <h2>검색 결과 ({lawyers.length}건)</h2>
-        {lawyers.length === 0 ? (
-          <p>검색 결과가 없습니다.</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {lawyers.map((lawyer) => (
-              <li key={lawyer.id} style={{ border: "1px solid #ccc", margin: "10px 0", padding: "10px" }}>
-                <h3>{lawyer.name}</h3>
-                <p><strong>법인명:</strong> {lawyer.corporation}</p>
-                <p><strong>지역:</strong> {lawyer.districtArea1} {lawyer.districtArea2}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+      <h2 className="ds-subtitle">검색 결과 ({lawyers.length}건)</h2>
+
+      {lawyers.length === 0 ? (
+        <div className="ds-empty">검색 결과가 없습니다.</div>
+      ) : (
+        <div>
+          {lawyers.map((lawyer) => (
+            <div key={lawyer.id} className="ds-list-card">
+              <h3>{lawyer.name}</h3>
+              <p><strong>법인명:</strong> {lawyer.corporation}</p>
+              <p><strong>지역:</strong> {lawyer.districtArea1} {lawyer.districtArea2}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
