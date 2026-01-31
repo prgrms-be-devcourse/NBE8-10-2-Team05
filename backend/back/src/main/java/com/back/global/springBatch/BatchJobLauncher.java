@@ -37,18 +37,16 @@ public class BatchJobLauncher {
 
             log.info("배치 실행 완료: JobExecutionId={}, 상태={}", jobExecution.getId(), jobExecution.getStatus());
 
-            //            log.info("배치[2/2] 실행 시작: JobName={}, time={}", fetchLawyerJob.getName(),
-            // System.currentTimeMillis());
-            //
-            //            JobExecution jobExecution2 = jobOperator.start(
-            //                    fetchLawyerJob,
-            //                    new JobParametersBuilder()
-            //                            .addString("job:", fetchLawyerJob.getName())
-            //                            .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
-            //                            .toJobParameters());
-            //
-            //            log.info("배치 실행 완료: JobExecutionId={}, 상태={}", jobExecution2.getId(),
-            // jobExecution2.getStatus());
+            log.info("배치[2/2] 실행 시작: JobName={}, time={}", fetchLawyerJob.getName(), System.currentTimeMillis());
+
+            JobExecution jobExecution2 = jobOperator.start(
+                    fetchLawyerJob,
+                    new JobParametersBuilder()
+                            .addString("job:", fetchLawyerJob.getName())
+                            .addLong("time", System.currentTimeMillis()) // 매번 유니크하게 실행
+                            .toJobParameters());
+
+            log.info("배치 실행 완료: JobExecutionId={}, 상태={}", jobExecution2.getId(), jobExecution2.getStatus());
 
         } catch (InvalidJobParametersException e) {
             log.error("파라미터가 유효하지 않음: {}", e.getMessage(), e);
