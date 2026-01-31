@@ -116,6 +116,7 @@ public class LawyerCrawlerService {
         String area2 = cols.get(0).text();
 
         return Lawyer.builder()
+                .id(String.format("%s_%s_%s_%s", name, corporation, area1, area2))
                 .name(name)
                 .corporation(corporation)
                 .districtArea1(area1)
