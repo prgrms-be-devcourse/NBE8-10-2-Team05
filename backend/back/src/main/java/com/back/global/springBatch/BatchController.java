@@ -20,6 +20,6 @@ public class BatchController {
         batchJobLauncher.runJob();
 
         // 브라우저에는 즉시 응답 반환
-        return "배치(API & Crawling)가 백그라운드에서 순차적으로 시작되었습니다. 로그를 확인하세요!";
+        return null;
     }
 }

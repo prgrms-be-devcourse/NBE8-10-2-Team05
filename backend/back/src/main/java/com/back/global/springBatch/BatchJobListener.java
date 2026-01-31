@@ -21,7 +21,6 @@ public class BatchJobListener implements JobExecutionListener {
 
         if (start != null && end != null) {
             long duration = java.time.Duration.between(start, end).toMillis();
-            log.info(">>> [실패한 Step: {}]", jobExecution.getId());
             log.info(">>> [Job ID: {}] 최종 완료", jobExecution.getId());
             log.info(">>> 소요 시간: {}ms (약 {}초)", duration, duration / 1000.0);
             log.info(">>> 최종 상태: {}", jobExecution.getStatus());
