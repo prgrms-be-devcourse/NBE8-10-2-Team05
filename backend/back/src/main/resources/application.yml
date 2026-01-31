@@ -34,8 +34,8 @@ logging:
     com.back: DEBUG
     org.springframework.batch: DEBUG
     org.springframework.retry: DEBUG
-file:
-  name: logs/log.log
+  file:
+    name: logs/log.log
 custom:
   accessToken:
     expirationSeconds: 2000
