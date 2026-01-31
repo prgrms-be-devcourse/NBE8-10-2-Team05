@@ -89,15 +89,21 @@ public class LawyerCrawlerService {
 
         String url = String.format(SEARCH_URL, area1, startPage);
         Elements rows = crawlAndSelectRows(url);
-        // 테이블 내부 각각 행의 정보을 받아옴
 
         for (Element row : rows) {
             // 열 별로 순회하면서 파싱
             Lawyer lawyer = parseRowToLawyer(row, area1);
 
-            if (lawyer != null) {
-                lawyerList.add(lawyer);
+            if (lawyer == null) {
+                continue;
             }
+
+            // 법무법인이 없는 노무사는 어차피 연락할 수단도 없기때문에 제거
+            if (lawyer.getCorporation() == null) {
+                continue;
+            }
+
+            lawyerList.add(lawyer);
         }
 
         return lawyerList;

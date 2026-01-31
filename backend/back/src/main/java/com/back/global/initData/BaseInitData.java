@@ -162,7 +162,7 @@ public class BaseInitData {
             return;
         }
 
-        lawyerCrawlerService.crawlAllPages();
+        // lawyerCrawlerService.crawlAllPages();
         // lawyerCrawlerService.crawlMultiPages("서울", 1, 1);
 
         if (lawyerRepository.count() < 1) {
