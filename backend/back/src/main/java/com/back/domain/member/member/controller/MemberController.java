@@ -49,6 +49,7 @@ public class MemberController {
 
         MemberService.LogoutCookieHeaders headers = memberService.logout(request);
 
+        // TODO: 이 로직은 service안에 들어가야 할 것 같습니다.
         response.addHeader("Set-Cookie", headers.deleteAccessCookieHeader());
         response.addHeader("Set-Cookie", headers.deleteRefreshCookieHeader());
 

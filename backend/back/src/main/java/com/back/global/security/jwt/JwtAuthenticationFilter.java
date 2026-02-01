@@ -85,6 +85,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String role = String.valueOf(claims.get("role")); // 예: USER
 
             // 탈퇴 회원 차단 (soft delete)
+            // TODO: 탈퇴회원 처리는 respotiory를 조회하는 것이 아닌,
+            //      Client측의 cookie를 삭제 + redis의 refreshToken제거 가 더 좋을 듯 합니다.
             Member member = memberRepository
                     .findById(memberId)
                     .orElseThrow(() -> new ServiceException("AUTH-401", "존재하지 않는 회원입니다."));
@@ -106,7 +108,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
 
-        } catch (ServiceException se) {
+        }
+        // TODO: 이부분에 Service 예외를 던져도 globalException에서 잡지 않는 것으로 압니다.
+        //      어떤 예외를 던지려 하시는 걸까요?
+        catch (ServiceException se) {
             // 우리가 의도적으로 던진 401(탈퇴/없음 등)은 메시지 유지
             throw se;
         } catch (Exception e) {
@@ -115,6 +120,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    // TODO: JWTProvider에 있어야 더 좋을 것 같습니다.
     // Authorization: Bearer 토큰이 있으면 그걸 사용하고, 없으면 HttpOnly 쿠키(accessToken)에서 읽는다.
     private String resolveToken(HttpServletRequest request) {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

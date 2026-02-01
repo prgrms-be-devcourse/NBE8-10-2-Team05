@@ -37,6 +37,11 @@ public class ActorProvider {
             memberId = Long.valueOf(String.valueOf(auth.getPrincipal()));
         }
 
+        // TODO: authentication을 뚫고 securityContextHolde도 뚫고 여기까지 왔는데
+        //       그냥 principal에서 가져온 정보로는 안되는 건가요?
+        //       단순 조회(글 목록 보기 등): JWT 내부의 principal 정보만 믿고 DB 안 갑니다.
+        //       결제, 회원수정, 개인정보: 이때만 getActor()를 통해 DB에서 최신 정보를 확인합니다.
+
         // get actor같은 연할을 하는 곳인데 강사님은 DB조회를 안하고 나는 DB조희를 함
         return memberRepository
                 .findById(memberId)

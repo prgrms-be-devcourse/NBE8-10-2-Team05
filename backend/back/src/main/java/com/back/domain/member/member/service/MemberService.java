@@ -41,6 +41,9 @@ public class MemberService {
 
     public JoinResponse join(JoinRequest req) {
 
+        // TODO: service단에서의 이중방어인가요?
+        //      controller에 @Valid 사용하면 더 좋을 듯 합니다.
+
         // 요청값 검증
         if (req == null) {
             throw new ServiceException("MEMBER_400", "요청 바디가 비어 있습니다");
@@ -54,6 +57,8 @@ public class MemberService {
         if (req.name() == null || req.name().isBlank()) {
             throw new ServiceException("MEMBER_400", "이름은 필수 입력값입니다");
         }
+
+        // TODO: email 중복시 그대로 터지나? 프런트에서 받아서 다시 입력 가능한가?
 
         // 이메일 중복 체크
         if (memberRepository.existsByEmailAndStatus(req.email(), Member.MemberStatus.ACTIVE)) {
@@ -74,11 +79,16 @@ public class MemberService {
 
     @Transactional
     public void completeSocialSignup(CompleteSocialSignupRequest req) {
-        if (req == null) throw new ServiceException("MEMBER-400", "요청 바디가 비었습니다.");
 
+        // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
+        if (req == null) throw new ServiceException("MEMBER-400", "요청 바디가 비었습니다.");
         if (req.rrnFront() == null) throw new ServiceException("MEMBER-400", "rrnFront는 필수입니다.");
         if (req.rrnBackFirst() == null) throw new ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.");
 
+        // TODO: 실제로 가져와지는 건가? socialLogin할 때는 securityContext에 member정보가 없을텐데?
+        //       PRE_REGISTERED인 member는 OAuth2가입한 직후의 member?
+        //       member에 정보 다 넣으면 ACTIVE가 되는건가
+        //       그럼 loginType email은 뭐야? 위에거랑 겹치는거 아닌가?
         Member member = actorProvider.getActor();
 
         // 소셜 미완성 유저만 완료 처리
@@ -86,11 +96,14 @@ public class MemberService {
             throw new ServiceException("MEMBER-400", "이미 가입 완료된 회원입니다.");
         }
 
+        // TODO: JWT발급은 언제하죠?
+
         member.completeSocialSignup(req.rrnFront(), req.rrnBackFirst());
     }
 
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletResponse response) {
+        // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
         if (req.getEmail() == null || req.getEmail().isBlank()) {
             throw new ServiceException("AUTH-400", "email은 필수입니다.");
         }
@@ -113,6 +126,9 @@ public class MemberService {
         // 공통 발급 로직 호출 (access + refresh 쿠키 세팅 + DB 저장)
         String accessToken = issueLoginCookies(member, response);
 
+        // TODO: login이 성공했다면 성공한 member로 return하고
+        //      LoginResponse로 감싸는건 controller에서 해야할 것 같습니다.
+
         return new LoginResponse(member.getId(), member.getName(), accessToken);
     }
 
@@ -129,6 +145,8 @@ public class MemberService {
 
         // 1) refreshToken 쿠키 원문 읽기
         String rawRefreshToken = getCookieValue(request, "refreshToken");
+
+        // TODO: softDelete는 안쓰는게 맞네요.
 
         // 2) refreshToken이 있으면 Redis에서 삭제(폐기)
         // - DB의 revokedAt = now 로직 대신
@@ -185,6 +203,7 @@ public class MemberService {
         return null;
     }
 
+    // TODO: 이걸 쓰는 곳이 한곳인듯 한데 거기서 memberRepository 부르고 여기는 삭제하는게 저 좋지 않을까요
     @Transactional(readOnly = true)
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
@@ -230,6 +249,7 @@ public class MemberService {
     //        return accessToken;
     //    }
 
+    // TODO: 이 함수는 jwtProvider에 들어가야하지 않을까요?
     @Transactional
     public String issueLoginCookies(Member member, HttpServletResponse response) {
 
@@ -244,6 +264,8 @@ public class MemberService {
         // =========================
         // rawRefreshToken = 쿠키에 심는 "원문"
         // ※ DB/Redis 어디에도 원문을 저장하지 않는게 보안상 안전함
+
+        // TODO: 그냥 UUID쓰셔도될 듯 합니다.
         String rawRefreshToken = RefreshTokenGenerator.generate();
 
         // tokenHash = 서버 저장소(DB/Redis)에 저장하는 "식별자"
@@ -258,6 +280,8 @@ public class MemberService {
         redisRefreshTokenStore.save(
                 refreshTokenHash, member.getId(), Duration.ofDays(REFRESH_DAYS) // 14일
                 );
+
+        // TODO: 둘 다 cookie로 보내준다면 jwtFilter에서 authorization bearer check는 필요없는 건가요?
 
         // =========================
         // 4) AccessToken 쿠키 생성 + Set-Cookie 헤더로 내려주기
@@ -285,6 +309,8 @@ public class MemberService {
                     return member;
                 })
                 .orElseGet(() -> {
+                    // TODO: 전 여기서 PRE_REGISTRED가 나오는 줄 알았는데... ACTIVE대신 DISBLED나
+
                     // 최초 소셜 로그인 = 회원가입 처리
                     // email은 카카오에서 scope에 email을 안 받았으니 null 가능
                     // name은 nickname으로 일단 저장
@@ -307,6 +333,9 @@ public class MemberService {
         if (member.getStatus() == Member.MemberStatus.DELETED) {
             throw new ServiceException("MEMBER-400", "이미 탈퇴한 회원입니다.");
         }
+
+        // TODO: withdraw한 member는 repository에 반영이 안되겠네요?
+        //      redis에서 deleteAllByMemberId는 softDelete가 아닌것 같고
 
         // 1) soft delete
         member.withdraw(); // Status -> delete 로 바꾸는거임

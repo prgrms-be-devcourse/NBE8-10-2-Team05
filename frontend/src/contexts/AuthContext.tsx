@@ -30,6 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+
+
+  // TODO: 매번 실행이 아니라 User 없을 떄
+  //       그리고 accessToken 재발급 로직이 빠진 것 같다.
   useEffect(() => {
     let cancelled = false;
 

@@ -63,6 +63,19 @@ public class AuthServiceRedis {
             throw new ServiceException("AUTH-401", "refreshToken 쿠키가 없습니다.");
         }
 
+        // TODO: 유효성 검증 로직이 빠진 것 같습니다.
+        //       현재, 우리 redis에 토큰이 있는지만 검사하고 있습니다.
+        //       refreshToken자체의 검증로직이 필요합니다.
+        //       유효하지 않은 가짜 토큰이라면, 취소.
+        //       유효하지 않고 유통기한이 지난 토큰이라면 재발급.
+
+        // TODO: isActive 있던데 안쓰셨더라구요.
+        boolean valid = true;
+        boolean isExpired = true;
+        if (valid && isExpired) {
+            // System.out.println("이때만 재발급");
+        }
+
         // 2) refreshToken 원문을 SHA-256 해시로 변환 (기존 그대로)
         String tokenHash = TokenHasher.sha256Hex(rawRefreshToken);
 
@@ -72,6 +85,9 @@ public class AuthServiceRedis {
                 .findMemberId(tokenHash)
                 .orElseThrow(() -> new ServiceException("AUTH-401", "유효하지 않은 refresh token 입니다."));
 
+        // TODO: id를 가져오면서 role,email도 가져오게 하면 따로 db조회가 필요없을 것 같습니다.
+        //      email은 아예 빼도 되셔도 될 것 같습니다.
+
         // 4) accessToken 발급에 email/role이 필요하므로 Member 조회
         Member member = memberRepository
                 .findById(memberId)
@@ -80,6 +96,8 @@ public class AuthServiceRedis {
         // 5) JwtProvider로 새 accessToken 발급
         String newAccessToken =
                 jwtProvider.issueAccessToken(member.getId(), member.getEmail(), String.valueOf(member.getRole()));
+
+        // TODO: refreshToken 자체의 재발급 로직도 필요합니다.
 
         // 6) 새 access 토큰 쿠키 헤더 문자열 반환
         return buildAccessCookieHeader(newAccessToken);
@@ -101,6 +119,7 @@ public class AuthServiceRedis {
         return null;
     }
 
+    // TODO: 맨 처음 accessToken 발급할 때도 이런 설정이 있었나요?
     /**
      * accessToken을 HttpOnly 쿠키로 내려주는 Set-Cookie 헤더 문자열 생성
      */
