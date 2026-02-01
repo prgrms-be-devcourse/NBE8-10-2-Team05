@@ -33,23 +33,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 허용할 엔드포인트
-                        .requestMatchers("/favicon.ico")
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/favicon.ico", "/h2-console/**", "/error")
                         .permitAll()
-                        .requestMatchers("/h2-console/**")
+                        .requestMatchers(
+                                "/api/v1/member/member/login",
+                                "/api/v1/member/member/logout",
+                                "/api/v1" + "/member/member/join")
                         .permitAll()
-                        .requestMatchers("/api/v1/member/member/join")
+                        .requestMatchers("/api/v1/auth/reissue", "/batchTest")
                         .permitAll()
-                        .requestMatchers("/api/v1/member/member/login")
-                        .permitAll()
-                        .requestMatchers("/api/v1/member/member/logout")
-                        .permitAll()
-                        .requestMatchers("/api/v1/auth/reissue")
-                        .permitAll()
-                        .requestMatchers("/error")
-                        .permitAll()
-                        // 나머지는 인증 필요
                         .anyRequest()
                         .authenticated())
 
