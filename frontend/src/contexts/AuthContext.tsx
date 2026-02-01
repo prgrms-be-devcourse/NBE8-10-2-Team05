@@ -31,7 +31,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
 
-
   // TODO: 매번 실행이 아니라 User 없을 떄
   //       그리고 accessToken 재발급 로직이 빠진 것 같다.
   useEffect(() => {
@@ -52,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setUser(parsed);
             }
             // 로컬에서 복원되면 서버 조회는 생략
+              //서버조회를 통해 데이터 동기화. 대신 로그인 시 한번만 실행
+              //return;
             return;
           } catch {
             if (!cancelled && typeof window !== "undefined") {
@@ -76,6 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           if (!cancelled) {
             setUser(null);
+            // 유령 데이터 삭제
+            localStorage.removeItem(STORAGE_KEY);
           }
         }
       } finally {

@@ -48,13 +48,21 @@ async function fetchWithAuth(
       console.log("[fetchWithAuth] reissue 결과:", reissued);
       if (reissued) {
         console.log("[fetchWithAuth] 원래 요청 재시도...");
-        return fetch(url, {
+        return await fetch(url, {
           ...options,
           credentials: "include",
         });
+      }else{
+          //TODO: 중복로그인 혹은 refreshToken유효기간 만료 등 혹시나 하는 상황대비
+          throw new Error("reissue_failed");
       }
     } catch (reissueErr) {
-      console.error("[fetchWithAuth] reissue 실패:", reissueErr);
+      console.error("[fetchWithAuth] 인증 만료. 로그인 페이지로 이동합니다 : ", reissueErr);
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("auth_user"); // 유령 데이터 삭제
+            window.location.href = "/login";      // 강제 이동
+        }
+        return Promise.reject(reissueErr);
     }
   }
 
