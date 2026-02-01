@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import { getMemberDetail } from "@/api/member";
-import {isAuthRequired} from "@/api/apiAuth";
 
 // 저장할 사용자 정보
 interface User {
@@ -76,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // 2) 서버 세션 기반 복원 (소셜 로그인 포함)
             try {
                 const detail = await getMemberDetail();
-                if (!cancelled) {
+                if (!cancelled && detail) {
                     const serverUser: User = {
                         name: detail.name,
                         // memberId는 MemberDetailRes 계약에 없으므로 설정하지 않음

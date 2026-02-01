@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/h2-console")
+                || path.startsWith("/api/v1/welfare") // 기본적으로 조회는 모두 가능하도록
                 || path.equals("/api/v1/member/member/join")
                 || path.equals("/api/v1/member/member/login")
                 || path.equals("/api/v1/member/member/logout")

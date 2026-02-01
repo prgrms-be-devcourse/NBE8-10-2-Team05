@@ -35,6 +35,9 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/favicon.ico", "/h2-console/**", "/error")
                         .permitAll()
+                        // 기본적으로 모든 조회는 가능하지만 user인증이 필요한 기능만 block
+                        .requestMatchers("/api/v1/welfare/**")
+                        .permitAll()
                         .requestMatchers(
                                 "/api/v1/member/member/login",
                                 "/api/v1/member/member/logout",
