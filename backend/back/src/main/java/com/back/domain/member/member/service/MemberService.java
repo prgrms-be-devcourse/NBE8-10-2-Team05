@@ -85,18 +85,13 @@ public class MemberService {
         if (req.rrnFront() == null) throw new ServiceException("MEMBER-400", "rrnFront는 필수입니다.");
         if (req.rrnBackFirst() == null) throw new ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.");
 
-        // TODO: 실제로 가져와지는 건가? socialLogin할 때는 securityContext에 member정보가 없을텐데?
-        //       PRE_REGISTERED인 member는 OAuth2가입한 직후의 member?
-        //       member에 정보 다 넣으면 ACTIVE가 되는건가
-        //       그럼 loginType email은 뭐야? 위에거랑 겹치는거 아닌가?
+        // 가지고있는 JWT로 Filter에서 member를 받아서 쓴다.
         Member member = actorProvider.getActor();
 
         // 소셜 미완성 유저만 완료 처리
         if (member.getStatus() != Member.MemberStatus.PRE_REGISTERED) {
             throw new ServiceException("MEMBER-400", "이미 가입 완료된 회원입니다.");
         }
-
-        // TODO: JWT발급은 언제하죠?
 
         member.completeSocialSignup(req.rrnFront(), req.rrnBackFirst());
     }
@@ -125,9 +120,6 @@ public class MemberService {
 
         // 공통 발급 로직 호출 (access + refresh 쿠키 세팅 + DB 저장)
         String accessToken = issueLoginCookies(member, response);
-
-        // TODO: login이 성공했다면 성공한 member로 return하고
-        //      LoginResponse로 감싸는건 controller에서 해야할 것 같습니다.
 
         return new LoginResponse(member.getId(), member.getName(), accessToken);
     }
