@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.back.domain.welfare.estate.dto.EstateRegionResponseDto;
@@ -12,6 +11,7 @@ import com.back.domain.welfare.estate.dto.EstateSearchResonseDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.entity.EstateRegionCache;
 import com.back.domain.welfare.estate.service.EstateService;
+import com.back.standard.util.SidoNormalizer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +23,16 @@ public class EstateController {
     private final EstateRegionCache regionCache;
 
     @GetMapping("/location")
-    public EstateSearchResonseDto getEstateLocation(@RequestParam String sido, @RequestParam String signguNm) {
-        List<Estate> estateList = estateService.searchEstateLocation(sido, signguNm);
+    public EstateSearchResonseDto getEstateLocation(String keyword) {
+        String[] keywords = keyword.split(" ");
+
+        // 서울시 강남구
+        // 2개까지만 사용
+        // 추후 확장필요
+        String keyword1 = SidoNormalizer.normalizeSido(keywords[0]);
+        String keyword2 = SidoNormalizer.normalizeSido(keywords[1]);
+
+        List<Estate> estateList = estateService.searchEstateLocation(keyword1, keyword2);
 
         return new EstateSearchResonseDto(estateList);
     }
