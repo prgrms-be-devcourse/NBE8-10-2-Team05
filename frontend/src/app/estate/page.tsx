@@ -69,6 +69,9 @@ export default function EstatePage() {
         try {
             const response = await searchEstates({keyword});
             setEstates(response.estateList);
+            //전체검색시 selectItem 초기화
+            setSido("");
+            setSignguNm("");
         } catch (err: any) {
             setError(err.message || "검색 중 오류가 발생했습니다.");
         } finally {

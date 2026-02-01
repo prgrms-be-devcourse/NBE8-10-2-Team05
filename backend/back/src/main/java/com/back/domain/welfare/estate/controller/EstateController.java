@@ -29,10 +29,11 @@ public class EstateController {
 
         // 서울시 강남구
         // 2개까지만 사용
-        // 추후 확장필요
+        // TODO: 추후 확장필요
         String keyword1 = SidoNormalizer.normalizeSido(keywords[0]);
-        String keyword2 = SidoNormalizer.normalizeSido(keywords[1]);
+        String keyword2 = (keywords.length >= 2) ? SidoNormalizer.normalizeSido(keywords[1]) : keyword1;
 
+        // TODO: 추후 일반공공 정정공공가 있다면 정정공공만 나오게 하는 로직 추가 필요
         List<Estate> estateList = estateService.searchEstateLocation(keyword1, keyword2);
 
         return new EstateSearchResonseDto(estateList);
