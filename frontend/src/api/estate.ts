@@ -20,7 +20,7 @@ export async function searchEstates(
   const params = new URLSearchParams({
     // sido: req.sido,
     // signguNm: req.signguNm,
-      keyword: req.keyword
+      searchKeyword: req.searchKeyword
   });
 
   const response = await fetch(

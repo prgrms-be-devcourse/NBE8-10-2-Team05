@@ -64,14 +64,20 @@ export default function EstatePage() {
         //     return;
         // }
 
+        // 전체 검색을 했다면 검색 우선
+        // 전체 검색이 아니라면 selectbox사용
+        //TODO: 띄어쓰기로 구분 . 추후 리팩토링 
+        let searchKeyword = keyword ? keyword : sido + " " + signguNm;
+
         setLoading(true);
         setError(null);
         try {
-            const response = await searchEstates({keyword});
+            const response = await searchEstates({searchKeyword});
             setEstates(response.estateList);
             //전체검색시 selectItem 초기화
             setSido("");
             setSignguNm("");
+            setKeyword("");
         } catch (err: any) {
             setError(err.message || "검색 중 오류가 발생했습니다.");
         } finally {

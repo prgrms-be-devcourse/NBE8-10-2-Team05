@@ -34,7 +34,7 @@ export interface EstateRegionResponse {
 export interface EstateSearchRequest {
   // sido: string;
   // signguNm: string;
-    keyword: string;
+    searchKeyword: string;
 }
 
 export interface EstateSearchResponse {
