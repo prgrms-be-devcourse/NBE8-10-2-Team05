@@ -58,7 +58,7 @@ public class MemberService {
             throw new ServiceException("MEMBER_400", "이름은 필수 입력값입니다");
         }
 
-        // TODO: email 중복시 그대로 터지나? 프런트에서 받아서 다시 입력 가능한가?
+        // TODO: email 중복시 "[MEMBER_409] 이미 사용 중인 이메일입니다" 코드까지 사용자에게 보입니다.
 
         // 이메일 중복 체크
         if (memberRepository.existsByEmailAndStatus(req.email(), Member.MemberStatus.ACTIVE)) {

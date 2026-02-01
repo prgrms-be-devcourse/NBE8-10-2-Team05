@@ -62,7 +62,7 @@ export async function fetchWithAuth(
                     credentials: "include",
                 });
             }else{
-                //TODO: 중복로그인 혹은 refreshToken유효기간 만료 등 혹시나 하는 상황대비
+                //TODO: 중복로그인 혹은 refreshToken유효기간 만료 등
                 throw new Error("reissue_failed");
             }
         } catch (reissueErr) {

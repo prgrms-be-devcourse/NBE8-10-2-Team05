@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .oauth2Login(
                         oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                                 .successHandler(customOAuth2LoginSuccessHandler))
+                // TODO: customOAuth2LoginSuccessHandler 에서 socialLogin한 유저에게 accessToken과 refreshToken발급 x
 
                 // 토큰 없거나 인증 실패 → 401로 통일
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(
