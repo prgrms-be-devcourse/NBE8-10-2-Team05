@@ -10,28 +10,32 @@ import com.back.domain.welfare.estate.repository.EstateRepository;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class EstateRegionCache {
     @Getter
-    private final List<EstateRegionDto> regionList = new CopyOnWriteArrayList<>();
+    private List<EstateRegionDto> regionList = new CopyOnWriteArrayList<>();
 
     private final EstateRepository estateRepository;
 
     public void init() {
         this.regionList.clear();
 
-        List<Estate> parents = estateRepository.findDistinctBrtcNmBy();
-        parents.forEach(p -> regionList.add(new EstateRegionDto(p.getBrtcNm(), null, 1)));
+        List<String> parents = estateRepository.findDistinctBrtcNmBy();
+        parents.forEach(p -> regionList.add(new EstateRegionDto(p, null, 1)));
 
-        List<Estate> children = estateRepository.findDistinctBrtcNmAndSignguNmBy();
+        List<Object[]> children = estateRepository.findDistinctBrtcNmAndSignguNmBy();
         children.forEach(c -> {
-            String parentName = c.getBrtcNm();
-            String childName = c.getSignguNm();
+            String parentName = (String) c[0];
+            String childName = (String) c[1];
             if (childName != null) {
                 regionList.add(new EstateRegionDto(childName, parentName, 2));
             }
         });
+
+        log.info("regionList init 완료 : {}", regionList);
     }
 }

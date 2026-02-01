@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.back.domain.welfare.estate.dto.EstateRegionDto;
+import com.back.domain.welfare.estate.dto.EstateRegionResponseDto;
 import com.back.domain.welfare.estate.dto.EstateSearchResonseDto;
 import com.back.domain.welfare.estate.entity.Estate;
 import com.back.domain.welfare.estate.entity.EstateRegionCache;
@@ -30,7 +30,7 @@ public class EstateController {
     }
 
     @GetMapping("/regions")
-    public List<EstateRegionDto> getEstateRegions() {
-        return regionCache.getRegionList();
+    public EstateRegionResponseDto getEstateRegions() {
+        return new EstateRegionResponseDto(regionCache.getRegionList());
     }
 }
