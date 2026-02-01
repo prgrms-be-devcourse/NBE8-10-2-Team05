@@ -78,7 +78,7 @@ export default function EstatePage() {
             setEstates(response.estateList);
             //전체검색시 selectItem 초기화
             if(trimmedKeyword){
-                setKeyword(trimmedKeyword);
+                setKeyword("");
                 setSignguNm("");
                 setSido("");
             //키워드 검색시 keyword 초기화
@@ -122,7 +122,11 @@ export default function EstatePage() {
     const sidoList = estateRegions.filter(r => r.level === 1);
     const gunguList = estateRegions.filter(r => r.level === 2 && r.parentName === sido);
 
-
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
   return (
     <main className="ds-page">
@@ -182,6 +186,7 @@ export default function EstatePage() {
                 className="ds-input ds-input-inline"
                 placeholder="예: 서울시 강남구"
                 value={keyword}
+                onKeyDown={handleKeyDown}
                 onChange={(e) => setKeyword(e.target.value)}
                 style={{ width: "180px" }}
               />
