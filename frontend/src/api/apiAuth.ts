@@ -1,29 +1,27 @@
 const STORAGE_KEY = "auth_user";
 
 export function isAuthRequired(url: string): boolean {
-    // 1. API 요청이 아닌 경우(일반 페이지 이동 등)는 무조건 인증 체크 통과
+    // 1. API 요청이 아니면 무조건 통과 (모든 페이지 노출)
     const isApiRequest = url.startsWith("/api") || url.includes(window.location.origin + "/api");
-    if (!isApiRequest) {
-        return false;
-    }
+    if (!isApiRequest) return false;
 
-    // 2. API 중에서도 로그인과 회원가입은 인증 없이 호출 가능해야 함
-    const EXCLUDED_API_PATHS = [
-        "/api/v1/member/member/login",
-        "/api/v1/member/member/join",
-        "/api/v1/member/member/detail", //초기인증 확인용 api
-        "/api/v1/welfare/estate/regions" //행복주택 selectBox세팅용 api
+    // 2. 로그인이 반드시 필요한 API 목록 (신청, 북마크, 로그아웃 등)
+    const AUTH_REQUIRED_PATHS = [
+        "/api/v1/member/member/logout",
+        "/api/v1/member/bookmark/welfare-bookmarks",
+        "/api/v1/member/policy-aply/welfare-applications"
     ];
 
-    const isExcluded = EXCLUDED_API_PATHS.some(path => url.includes(path));
-    if (isExcluded) {
+    // 현재 요청이 위 목록에 포함되는지 확인
+    const needsLogin = AUTH_REQUIRED_PATHS.some(path => url.includes(path));
+
+    // [중요] 목록에 없는 API(조회 등)는 로그인 여부 상관없이 무조건 통과!
+    if (!needsLogin) {
         return false;
     }
 
-    // 3. 그 외 모든 /api 요청은 로컬스토리지에 유저 정보가 있어야 함
+    // 3. 목록에 있는 API인데 로컬스토리지에 정보가 없다면? 인증 필요(true) 반환
     const hasAuthInfo = typeof window !== "undefined" && !!localStorage.getItem(STORAGE_KEY);
-
-    // 정보가 없으면 인증이 필요한 상태(true) 반환
     return !hasAuthInfo;
 }
 
