@@ -80,6 +80,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //            System.out.println("JWT subject = " + claims.getSubject());
             //            System.out.println("JWT role = " + claims.get("role"));
 
+            // TODO: email은 따로 없는데 email까지 넣어서 refreshToken을 만드는 것 맞죠?
+
             // 4) Claims에서 필요한 정보 추출
             Long memberId = Long.valueOf(claims.getSubject());
             String role = String.valueOf(claims.get("role")); // 예: USER
@@ -107,17 +109,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
-
-        }
-        // TODO: 이부분에 Service 예외를 던져도 globalException에서 잡지 않는 것으로 압니다.
-        //      어떤 예외를 던지려 하시는 걸까요?
-        catch (ServiceException se) {
-            // 우리가 의도적으로 던진 401(탈퇴/없음 등)은 메시지 유지
-            throw se;
         } catch (Exception e) {
             // 토큰 위조/만료/파싱 실패
-            throw new ServiceException("AUTH-401", "유효하지 않은 토큰입니다.");
+            sendUnauthorizedResponse(response, e.getMessage());
         }
+    }
+
+    // 프론트의 fetchWithAuth가 읽음. 내용은 아무거나
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        response.setContentType("application/json;charset=UTF-8");
+        String json = String.format("{\"resultCode\": \"AUTH-401\", \"msg\": \"%s\"}", message);
+        response.getWriter().write(json);
     }
 
     // TODO: JWTProvider에 있어야 더 좋을 것 같습니다.

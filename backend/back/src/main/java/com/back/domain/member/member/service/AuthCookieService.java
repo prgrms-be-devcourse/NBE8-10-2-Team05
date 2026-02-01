@@ -23,7 +23,7 @@ public class AuthCookieService {
         return ResponseCookie.from("refreshToken", raw)
                 .httpOnly(true)
                 .secure(false) // TODO: 추후 true로 변경
-                .path("/") // TODO: refreshToken의 경로는 재발급을 담당하는 API 주소(예: /api/v1/auth/reissue)로 한정하는 것이 정석
+                .path("/api/v1/auth/reissue")
                 .sameSite("Lax") // TODO: 추후 배포시에는 None + secure(true)로 바꿔야 할 수 있음
                 .maxAge(maxAge)
                 .build()
@@ -31,6 +31,16 @@ public class AuthCookieService {
     }
 
     public String deleteCookie(String name) {
+        if (name.equals("refreshToken")) {
+            return ResponseCookie.from(name, "")
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/api/v1/auth/reissue")
+                    .sameSite("Lax")
+                    .maxAge(Duration.ZERO)
+                    .build()
+                    .toString();
+        }
         return ResponseCookie.from(name, "")
                 .httpOnly(true)
                 .secure(false) // TODO: 추후 true로 변경
