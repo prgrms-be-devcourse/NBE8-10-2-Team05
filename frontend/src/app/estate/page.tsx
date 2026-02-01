@@ -46,6 +46,7 @@ export default function EstatePage() {
             }
         };
         fetchRegions(); // 호출
+        setEstateRegions(dummyEstateRegions) //추후 삭제
     }, []); // 마운트 시 1회 실행
 
 
@@ -56,6 +57,50 @@ export default function EstatePage() {
 
     const sidoList = estateRegions.filter(r => r.level === 1);
     const gunguList = estateRegions.filter(r => r.level === 2 && r.parentName === sido);
+
+    const dummyEstateRegions: EstateRegion[] = [
+            // Level 1: 광역자치단체
+            { name: "강원특별자치도", parentName: "", level: 1 },
+            { name: "경기도", parentName: "", level: 1 },
+            { name: "경상남도", parentName: "", level: 1 },
+            { name: "경상북도", parentName: "", level: 1 },
+            { name: "대구광역시", parentName: "", level: 1 },
+            { name: "부산광역시", parentName: "", level: 1 },
+            { name: "서울특별시", parentName: "", level: 1 },
+            { name: "울산광역시", parentName: "", level: 1 },
+            { name: "인천광역시", parentName: "", level: 1 },
+            { name: "전라남도", parentName: "", level: 1 },
+            { name: "전북특별자치도", parentName: "", level: 1 },
+            { name: "충청남도", parentName: "", level: 1 },
+            { name: "충청북도", parentName: "", level: 1 },
+
+            // Level 2: 기초자치단체 (강원)
+            { name: "강릉시", parentName: "강원특별자치도", level: 2 },
+            { name: "동해시", parentName: "강원특별자치도", level: 2 },
+            { name: "삼척시", parentName: "강원특별자치도", level: 2 },
+            { name: "양양군", parentName: "강원특별자치도", level: 2 },
+            { name: "정선군", parentName: "강원특별자치도", level: 2 },
+
+            // Level 2: 기초자치단체 (경기)
+            { name: "광명시", parentName: "경기도", level: 2 },
+            { name: "광주시", parentName: "경기도", level: 2 },
+            { name: "김포시", parentName: "경기도", level: 2 },
+            { name: "안양시 동안구", parentName: "경기도", level: 2 },
+            { name: "평택시", parentName: "경기도", level: 2 },
+
+            // Level 2: 기타 지역
+            { name: "김해시", parentName: "경상남도", level: 2 },
+            { name: "영천시", parentName: "경상북도", level: 2 },
+            { name: "달서구", parentName: "대구광역시", level: 2 },
+            { name: "사상구", parentName: "부산광역시", level: 2 },
+            { name: "강북구", parentName: "서울특별시", level: 2 },
+            { name: "울주군", parentName: "울산광역시", level: 2 },
+            { name: "남동구", parentName: "인천광역시", level: 2 },
+            { name: "해남군", parentName: "전라남도", level: 2 },
+            { name: "군산시", parentName: "전북특별자치도", level: 2 },
+            { name: "당진시", parentName: "충청남도", level: 2 },
+            { name: "진천군", parentName: "충청북도", level: 2 }
+        ];
 
   return (
     <main className="ds-page">

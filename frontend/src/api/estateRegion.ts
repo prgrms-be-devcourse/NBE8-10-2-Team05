@@ -16,11 +16,8 @@ export class ApiError extends Error {
  */
 export async function searchEstateRegions(
 ): Promise<EstateRegionResponse> {
-    const params = new URLSearchParams({
-    });
-
     const response = await fetch(
-        `/api/v1/welfare/estate/location/regions}`,
+        `/api/v1/welfare/estate/regions`,
         {
             method: "GET",
             headers: {
