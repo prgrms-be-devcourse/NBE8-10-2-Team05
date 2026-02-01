@@ -138,8 +138,6 @@ public class MemberService {
         // 1) refreshToken 쿠키 원문 읽기
         String rawRefreshToken = getCookieValue(request, "refreshToken");
 
-        // TODO: softDelete는 안쓰는게 맞네요.
-
         // 2) refreshToken이 있으면 Redis에서 삭제(폐기)
         // - DB의 revokedAt = now 로직 대신
         // - Redis에서는 delete가 "폐기" 역할
@@ -195,7 +193,7 @@ public class MemberService {
         return null;
     }
 
-    // TODO: 이걸 쓰는 곳이 한곳인듯 한데 거기서 memberRepository 부르고 여기는 삭제하는게 저 좋지 않을까요
+    // TODO: 이걸 쓰는 곳이 한곳인듯 한데 거기서 memberRepository 부르고 여기는 삭제하는게 더 좋지 않을까요
     @Transactional(readOnly = true)
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
@@ -273,8 +271,6 @@ public class MemberService {
                 refreshTokenHash, member.getId(), Duration.ofDays(REFRESH_DAYS) // 14일
                 );
 
-        // TODO: 둘 다 cookie로 보내준다면 jwtFilter에서 authorization bearer check는 필요없는 건가요?
-
         // =========================
         // 4) AccessToken 쿠키 생성 + Set-Cookie 헤더로 내려주기
         // =========================
@@ -301,8 +297,6 @@ public class MemberService {
                     return member;
                 })
                 .orElseGet(() -> {
-                    // TODO: 전 여기서 PRE_REGISTRED가 나오는 줄 알았는데... ACTIVE대신 DISBLED나
-
                     // 최초 소셜 로그인 = 회원가입 처리
                     // email은 카카오에서 scope에 email을 안 받았으니 null 가능
                     // name은 nickname으로 일단 저장
