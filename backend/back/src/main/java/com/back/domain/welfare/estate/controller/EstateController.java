@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.back.domain.welfare.estate.dto.EstateRegionResponseDto;
@@ -23,7 +24,7 @@ public class EstateController {
     private final EstateRegionCache regionCache;
 
     @GetMapping("/location")
-    public EstateSearchResonseDto getEstateLocation(String keyword) {
+    public EstateSearchResonseDto getEstateLocation(@RequestParam String keyword) {
         String[] keywords = keyword.split(" ");
 
         // 서울시 강남구

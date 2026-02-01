@@ -18,8 +18,9 @@ export async function searchEstates(
   req: EstateSearchRequest
 ): Promise<EstateSearchResponse> {
   const params = new URLSearchParams({
-    sido: req.sido,
-    signguNm: req.signguNm,
+    // sido: req.sido,
+    // signguNm: req.signguNm,
+      keyword: req.keyword
   });
 
   const response = await fetch(

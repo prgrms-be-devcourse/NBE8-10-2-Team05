@@ -52,21 +52,22 @@ const dummyEstateRegions: EstateRegion[] = [
 export default function EstatePage() {
     const [sido, setSido] = useState("");
     const [signguNm, setSignguNm] = useState("");
+    const [keyword, setKeyword] = useState("");
     const [estates, setEstates] = useState<Estate[]>([]);
     const [estateRegions, setEstateRegions] = useState<EstateRegion[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleSearch = async () => {
-        if (!sido || !signguNm) {
-            alert("시/도와 시/군/구를 모두 입력해주세요.");
-            return;
-        }
+        // if (!sido || !signguNm) {
+        //     alert("시/도와 시/군/구를 모두 입력해주세요.");
+        //     return;
+        // }
 
         setLoading(true);
         setError(null);
         try {
-            const response = await searchEstates({sido, signguNm});
+            const response = await searchEstates({keyword});
             setEstates(response.estateList);
         } catch (err: any) {
             setError(err.message || "검색 중 오류가 발생했습니다.");
@@ -161,9 +162,9 @@ export default function EstatePage() {
               <input
                 type="text"
                 className="ds-input ds-input-inline"
-                placeholder="예: 강남, 서울"
-                value={signguNm}
-                onChange={(e) => setSignguNm(e.target.value)}
+                placeholder="예: 서울시 강남구"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
                 style={{ width: "180px" }}
               />
 
