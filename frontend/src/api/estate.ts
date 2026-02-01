@@ -1,4 +1,5 @@
 import { EstateSearchRequest, EstateSearchResponse } from "@/types/estate";
+import {fetchWithAuth} from "@/api/apiAuth";
 
 export class ApiError extends Error {
   constructor(
@@ -23,14 +24,13 @@ export async function searchEstates(
       keyword: req.searchKeyword
   });
 
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `/api/v1/welfare/estate/location?${params.toString()}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-      },
-      credentials: "include",
+      }
     }
   );
 
