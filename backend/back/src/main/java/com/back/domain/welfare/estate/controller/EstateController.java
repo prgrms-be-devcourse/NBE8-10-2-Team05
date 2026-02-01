@@ -25,6 +25,9 @@ public class EstateController {
 
     @GetMapping("/location")
     public EstateSearchResonseDto getEstateLocation(@RequestParam String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new EstateSearchResonseDto(estateService.searchEstateLocation("", ""));
+        }
         String[] keywords = keyword.split(" ");
 
         // 서울시 강남구
