@@ -8,11 +8,17 @@ import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.stereotype.Component;
 
+import com.back.domain.welfare.estate.entity.EstateRegionCache;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class BatchJobListener implements JobExecutionListener {
+    private EstateRegionCache regionCache;
+
     @Override
     public void afterJob(JobExecution jobExecution) {
         // 종료 시간에서 시작 시간을 빼서 계산
@@ -40,5 +46,7 @@ public class BatchJobListener implements JobExecutionListener {
             }
             log.error("========================");
         }
+
+        regionCache.init();
     }
 }
