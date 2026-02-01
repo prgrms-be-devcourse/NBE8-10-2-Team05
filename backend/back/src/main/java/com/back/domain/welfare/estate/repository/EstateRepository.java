@@ -11,7 +11,7 @@ public interface EstateRepository extends JpaRepository<Estate, Integer> {
 
     List<Estate> findByBrtcNmContainingAndSignguNmContaining(String sido, String signguNm);
 
-    List<String> findDistinctBrtcNmBy();
+    List<Estate> findDistinctBrtcNmBy();
 
-    List<Object[]> findDistinctBrtcNmAndSignguNmBy();
+    List<Estate> findDistinctBrtcNmAndSignguNmBy();
 }
