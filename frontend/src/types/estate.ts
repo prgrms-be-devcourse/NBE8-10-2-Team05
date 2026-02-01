@@ -21,6 +21,16 @@ export interface Estate {
   url: string;
 }
 
+export interface EstateRegion {
+    name: string;
+    parentName: string;
+    level: number;
+}
+
+export interface EstateRegionResponse {
+    estateRegionList : EstateRegion[]
+}
+
 export interface EstateSearchRequest {
   sido: string;
   signguNm: string;
