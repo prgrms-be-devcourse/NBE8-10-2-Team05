@@ -19,6 +19,7 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+const STORAGE_KEY = "auth_user";
 
 // accessToken 재발급 요청
 // POST /api/v1/auth/reissue
@@ -59,7 +60,7 @@ async function fetchWithAuth(
     } catch (reissueErr) {
       console.error("[fetchWithAuth] 인증 만료. 로그인 페이지로 이동합니다 : ", reissueErr);
         if (typeof window !== "undefined") {
-            localStorage.removeItem("auth_user"); // 유령 데이터 삭제
+            localStorage.removeItem(STORAGE_KEY); // 유령 데이터 삭제
             window.location.href = "/login";      // 강제 이동
         }
         return Promise.reject(reissueErr);

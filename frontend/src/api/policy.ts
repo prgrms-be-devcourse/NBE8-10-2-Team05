@@ -37,8 +37,6 @@ export async function searchPolicies(
     credentials: "include",
   });
 
-  //TODO: accessToken만료시 reissue한뒤 자동으로 갱신하는 부분 없음
-
   if (!response.ok) {
     const errorData: ApiErrorResponse = await response.json();
     throw new ApiError(errorData.resultCode, errorData.msg);
