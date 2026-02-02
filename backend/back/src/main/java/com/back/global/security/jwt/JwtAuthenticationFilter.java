@@ -12,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
 import com.back.global.exception.ServiceException;
 
@@ -81,8 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //            System.out.println("JWT subject = " + claims.getSubject());
             //            System.out.println("JWT role = " + claims.get("role"));
 
-            // TODO: email은 따로 없는데 email까지 넣어서 refreshToken을 만드는 것 맞죠?
-
             // 4) Claims에서 필요한 정보 추출
             Long memberId = Long.valueOf(claims.getSubject());
             String role = String.valueOf(claims.get("role")); // 예: USER
@@ -90,13 +87,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 탈퇴 회원 차단 (soft delete)
             // TODO: 탈퇴회원 처리는 respotiory를 조회하는 것이 아닌,
             //      Client측의 cookie를 삭제 + redis의 refreshToken제거 가 더 좋을 듯 합니다.
-            Member member = memberRepository
-                    .findById(memberId)
-                    .orElseThrow(() -> new ServiceException("AUTH-401", "존재하지 않는 회원입니다."));
-
-            if (member.getStatus() == Member.MemberStatus.DELETED) {
-                throw new ServiceException("AUTH-401", "탈퇴한 회원입니다.");
-            }
+            //      현재 withdraw하실 때 token다 날리니까 이부분은 주석처리 하셔도 될듯 합니다.
+            //            Member member = memberRepository
+            //                    .findById(memberId)
+            //                    .orElseThrow(() -> new ServiceException("AUTH-401", "존재하지 않는 회원입니다."));
+            //
+            //            if (member.getStatus() == Member.MemberStatus.DELETED) {
+            //                throw new ServiceException("AUTH-401", "탈퇴한 회원입니다.");
+            //            }
 
             // 5) Spring Security 인증 객체 생성
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));

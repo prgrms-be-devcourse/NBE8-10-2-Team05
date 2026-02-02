@@ -246,6 +246,7 @@ public class MemberService {
         // =========================
         // 1) AccessToken 발급
         // =========================
+        // TODO: 안쓰는 email은 지우는게 좋을 것 같습니다.
         String accessToken = jwtProvider.issueAccessToken(
                 member.getId(), member.getEmail() == null ? "" : member.getEmail(), String.valueOf(member.getRole()));
 
@@ -287,6 +288,26 @@ public class MemberService {
     }
 
     @Transactional
+    public void issueLoginCookiesWithoutMemberEntity(
+            Long memberId, Member.Role memberRole, HttpServletResponse response) {
+
+        String accessToken = jwtProvider.issueAccessTokenWithoutEmail(memberId, String.valueOf(memberRole));
+
+        String rawRefreshToken = RefreshTokenGenerator.generate();
+
+        String refreshTokenHash = TokenHasher.sha256Hex(rawRefreshToken);
+
+        redisRefreshTokenStore.save(
+                refreshTokenHash, memberId, Duration.ofDays(REFRESH_DAYS) // 14일
+                );
+
+        response.addHeader("Set-Cookie", authCookieService.accessCookie(accessToken, Duration.ofMinutes(20)));
+
+        response.addHeader(
+                "Set-Cookie", authCookieService.refreshCookie(rawRefreshToken, Duration.ofDays(REFRESH_DAYS)));
+    }
+
+    @Transactional
     public Member getOrCreateKakaoMember(String kakaoId, String nickname, String profileImgUrl) {
 
         return memberRepository
@@ -319,9 +340,6 @@ public class MemberService {
         if (member.getStatus() == Member.MemberStatus.DELETED) {
             throw new ServiceException("MEMBER-400", "이미 탈퇴한 회원입니다.");
         }
-
-        // TODO: withdraw한 member는 repository에 반영이 안되겠네요?
-        //      redis에서 deleteAllByMemberId는 softDelete가 아닌것 같고
 
         // 1) soft delete
         member.withdraw(); // Status -> delete 로 바꾸는거임
