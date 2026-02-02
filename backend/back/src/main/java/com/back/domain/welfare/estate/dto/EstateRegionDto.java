@@ -1,7 +1,9 @@
 package com.back.domain.welfare.estate.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class EstateRegionDto {
     private String name;
