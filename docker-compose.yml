@@ -161,6 +161,9 @@ services:
     networks:
       - monitoring-net
     restart: always
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
   # 2. Redis 도우미 (마무리 못한 부분 포함)
   redis-exporter:
@@ -173,6 +176,9 @@ services:
     networks:
       - monitoring-net
     restart: always
+    depends_on:
+      redis:
+        condition: service_healthy
 
   # 3. MySQL 도우미
   mysql-exporter:
@@ -185,6 +191,9 @@ services:
     networks:
       - monitoring-net
     restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 networks:
   monitoring-net:
