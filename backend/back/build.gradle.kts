@@ -124,6 +124,10 @@ dependencies {
     implementation("org.elasticsearch.client:elasticsearch-rest-client:8.11.3")
     implementation("org.apache.httpcomponents.client5:httpclient5")
 
+    //monitoring
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
 }
 
 tasks.withType<Test> {

@@ -46,6 +46,14 @@ logging:
       max-history: 4
       max-file-size: 100MB
       total-size-cap: 500MB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus  # prometheus 엔드포인트를 외부에 공개
+  endpoint:
+    prometheus:
+      enabled: true
 custom:
   accessToken:
     expirationSeconds: 2000

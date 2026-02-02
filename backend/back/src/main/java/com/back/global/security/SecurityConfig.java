@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 "/api/v1/member/member/logout",
                                 "/api/v1" + "/member/member/join")
                         .permitAll()
-                        .requestMatchers("/api/v1/auth/reissue", "/batchTest")
+                        .requestMatchers("/api/v1/auth/reissue", "/batchTest", "/actuator/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())

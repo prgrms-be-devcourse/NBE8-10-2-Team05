@@ -1,0 +1,198 @@
+version: '3.8'
+
+services:
+  # 1. 모니터링: Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-net
+    restart: always
+
+  # 2. 시각화: Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-net
+    restart: always
+
+  # 3. DB: MySQL
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    volumes:
+      - mysql-db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=my_db
+    ports:
+      - "3306:3306"
+    networks:
+      - monitoring-net
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=200
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prow_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # 4. Cache: Redis
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - redis-db-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - monitoring-net
+    command: redis-server --maxmemory 450mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # 5. Search: Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: elasticsearch
+    volumes:
+      - es-db-data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # JVM 힙 메모리 명시적 제한
+    ports:
+      - "9200:9200"
+    networks:
+      - monitoring-net
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q 'status.*green\\|yellow'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+#  app:
+#    build: . # Dockerfile이 있는 경로
+#    container_name: spring-boot-app
+#    volumes:
+#      - uploads-data:/app/uploads # 사용자 업로드 파일 저장 (도커 볼륨 사용)
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/my_db
+#      - SPRING_DATA_REDIS_HOST=redis
+#      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+#    networks:
+#      - monitoring-net
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '2.0'      # AWS EC2 t3.micro 스펙
+#          memory: 980M
+#        reservations:
+#          cpus: '1.0'
+#          memory: 512M
+#    healthcheck:
+#      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 60s
+#    # DB들이 모두 건강할 때만 앱이 시작됨
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#      elasticsearch:
+#        condition: service_healthy
+
+  elasticsearch-exporter:
+    image: prometheuscommunity/elasticsearch-exporter:latest
+    container_name: elasticsearch-exporter
+    command:
+      - '--es.uri=http://elasticsearch:9200'
+    ports:
+      - "9114:9114"
+    networks:
+      - monitoring-net
+    restart: always
+
+  # 2. Redis 도우미 (마무리 못한 부분 포함)
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring-net
+    restart: always
+
+  # 3. MySQL 도우미
+  mysql-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysql-exporter
+    environment:
+      - DATA_SOURCE_NAME=root:root_password@(mysql:3306)/
+    ports:
+      - "9104:9104"
+    networks:
+      - monitoring-net
+    restart: always
+
+networks:
+  monitoring-net:
+    driver: bridge
+
+volumes:
+  mysql-db-data:
+  es-db-data:
+  redis-db-data:
+  grafana_data:
+  uploads-data:
