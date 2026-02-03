@@ -47,6 +47,9 @@ logging:
       max-file-size: 100MB
       total-size-cap: 500MB
 management:
+  metrics:
+    tags:
+      application: spring-boot-app
   endpoints:
     web:
       exposure:

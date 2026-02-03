@@ -20,7 +20,7 @@ services:
     volumes:
       - ./grafana_data:/var/lib/grafana
     ports:
-      - "3000:3000"
+      - "3001:3000" # front와 겹쳐서 3001로 설정
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
@@ -93,8 +93,8 @@ services:
     volumes:
       - es-db-data:/usr/share/elasticsearch/data
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
+      - discovery.type=single-node # 단일 노드로 실행 시 필수
+      - xpack.security.enabled=false # 로컬 개발 시 인증(ID/PW) 없이 접속하려면 필수
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # JVM 힙 메모리 명시적 제한
     ports:
       - "9200:9200"
