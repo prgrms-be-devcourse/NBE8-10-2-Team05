@@ -6,7 +6,6 @@ data class CenterApiRequestDto(
     val returnType: String? // json xml (default = json)
 ) {
     companion object {
-        @JvmStatic
         fun from(pageNum: Int, pageSize: Int): CenterApiRequestDto {
             return CenterApiRequestDto(
                 if (pageNum > 0) pageNum else 1,  // page 기본값 1
