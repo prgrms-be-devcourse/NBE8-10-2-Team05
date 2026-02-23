@@ -16,4 +16,18 @@ class Center(
     var contact: String? = null,
     var operator: String? = null,
     var corpType: String? = null
-) {}
+) {
+    companion object {
+        @JvmStatic
+        fun dtoToEntity(centerDto: CenterDto): Center {
+            return Center(
+                location = centerDto.city,
+                name = centerDto.facilityName,
+                address = centerDto.address,
+                contact = centerDto.phoneNumber,
+                operator = centerDto.operator,
+                corpType = centerDto.corporationType
+            )
+        }
+    }
+}

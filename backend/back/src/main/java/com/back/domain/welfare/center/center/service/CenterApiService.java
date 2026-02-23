@@ -23,8 +23,8 @@ public class CenterApiService {
     public CenterApiResponseDto fetchCenter(CenterApiRequestDto centerApiRequestDto) {
 
         String requestUrl = centerApiProperties.url()
-                + "?page=" + centerApiRequestDto.page()
-                + "&perPage=" + centerApiRequestDto.perPage()
+                + "?page=" + centerApiRequestDto.page
+                + "&perPage=" + centerApiRequestDto.perPage
                 + "&serviceKey=" + centerApiProperties.key();
 
         CenterApiResponseDto responseDto = Optional.ofNullable(webClient

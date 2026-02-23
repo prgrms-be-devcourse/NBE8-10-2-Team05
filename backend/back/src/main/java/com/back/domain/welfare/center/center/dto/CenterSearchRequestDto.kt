@@ -1,3 +1,3 @@
-package com.back.domain.welfare.center.center.dto;
+package com.back.domain.welfare.center.center.dto
 
-public record CenterSearchRequestDto() {}
+class CenterSearchRequestDto 

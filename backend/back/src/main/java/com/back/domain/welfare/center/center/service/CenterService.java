@@ -30,11 +30,11 @@ public class CenterService {
         CenterApiRequestDto centerApiRequestDto = CenterApiRequestDto.from(1, pageSize);
         CenterApiResponseDto responseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
-        int totalCnt = responseDto.totalCount();
+        int totalCnt = responseDto.totalCount;
         int totalPages = (int) Math.ceil((double) totalCnt / pageSize);
 
         List<Center> centerList = new ArrayList<>(
-                responseDto.data().stream().map(Center::dtoToEntity).toList());
+                responseDto.data.stream().map(Center::dtoToEntity).toList());
 
         centerRepository.saveAll(centerList);
 
@@ -45,7 +45,7 @@ public class CenterService {
             CenterApiResponseDto nextResponseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
             List<Center> updatedCenterList =
-                    nextResponseDto.data().stream().map(Center::dtoToEntity).toList();
+                    nextResponseDto.data.stream().map(Center::dtoToEntity).toList();
 
             centerRepository.saveAll(updatedCenterList);
             centerList.addAll(updatedCenterList);
