@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController
 class CenterController(private val centerService: CenterService) {
     @GetMapping("/location")
     fun getCenterList(@RequestParam sido: String?, @RequestParam signguNm: String?): CenterSearchResponseDto {
-        val estateList: List<Center> = centerService.searchCenterList(sido, signguNm)
+        val centerList= centerService.searchCenterList(sido, signguNm)
 
-        return CenterSearchResponseDto(estateList)
+        return CenterSearchResponseDto(centerList)
     }
 }
