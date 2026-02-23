@@ -150,7 +150,7 @@ public class BaseInitData {
             CenterApiResponseDto response = objectMapper.readValue(is, CenterApiResponseDto.class);
 
             List<Center> centerList =
-                    response.data().stream().map(Center::dtoToEntity).toList();
+                    response.data.stream().map(Center::dtoToEntity).toList();
 
             centerRepository.saveAll(centerList);
 

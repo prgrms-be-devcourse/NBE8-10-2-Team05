@@ -1,45 +1,19 @@
-package com.back.domain.welfare.center.center.entity;
+package com.back.domain.welfare.center.center.entity
 
-import com.back.domain.welfare.center.center.dto.CenterApiResponseDto;
-
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.back.domain.welfare.center.center.dto.CenterApiResponseDto.CenterDto
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "center")
-@Getter
-@NoArgsConstructor
-public class Center {
-
+class Center(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    val id: Long? = null,
 
-    private String location;
-    private String name;
-    private String address;
-    private String contact;
-    private String operator;
-    private String corpType;
-
-    public Center(String location, String name, String address, String contact, String operator, String corpType) {
-        this.location = location;
-        this.name = name;
-        this.address = address;
-        this.contact = contact;
-        this.operator = operator;
-        this.corpType = corpType;
-    }
-
-    public static Center dtoToEntity(CenterApiResponseDto.CenterDto centerDto) {
-        return new Center(
-                centerDto.city(), // location
-                centerDto.facilityName(), // name
-                centerDto.address(), // address
-                centerDto.phoneNumber(), // contact
-                centerDto.operator(), // operator
-                centerDto.corporationType() // corpType
-                );
-    }
-}
+    var location: String? = null,
+    var name: String? = null,
+    var address: String? = null,
+    var contact: String? = null,
+    var operator: String? = null,
+    var corpType: String? = null
+) {}

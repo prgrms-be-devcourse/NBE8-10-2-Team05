@@ -1,4 +1,12 @@
 plugins {
+    // 1. Kotlin 관련 플러그인 추가
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.spring") version "2.1.0" // Spring의 final 클래스 문제를 해결 (all-open)
+    kotlin("plugin.jpa") version "2.1.0"    // JPA Entity의 기본 생성자 문제를 해결 (no-arg)
+
+    // 2. Querydsl을 위한 KSP (Annotation Processor 대체)
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+
     java
     id("org.springframework.boot") version "4.0.1"
     id("io.spring.dependency-management") version "1.1.7"
@@ -10,6 +18,12 @@ group = "com"
 version = "0.0.1-SNAPSHOT"
 description = "back"
 val querydslVersion = "6.10.1"
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
+}
 
 java {
     toolchain {
@@ -69,6 +83,10 @@ sourceSets {
 }
 
 dependencies {
+
+    // 6. Kotlin 필수 라이브러리
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
     // Social Login
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")

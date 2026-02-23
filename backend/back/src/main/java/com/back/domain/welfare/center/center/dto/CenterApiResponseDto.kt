@@ -1,23 +1,39 @@
-package com.back.domain.welfare.center.center.dto;
+package com.back.domain.welfare.center.center.dto
 
-import java.util.List;
+import com.back.domain.welfare.center.center.entity.Center
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+@JvmRecord
+data class CenterApiResponseDto(
+    val page: Int,
+    val perPage: Int,
+    @JvmField val totalCount: Int,
+    val currentCount: Int,
+    val matchCount: Int,
+    @JvmField val data: MutableList<CenterDto?>?
+) {
+    @JvmRecord
+    data class CenterDto(
+        val id: Int,
 
-public record CenterApiResponseDto(
-        int page, int perPage, int totalCount, int currentCount, int matchCount, List<CenterDto> data) {
-    public record CenterDto(
-            @JsonProperty("연번") int id,
+        val city: String?,
 
-            @JsonProperty("시도") String city,
+        val facilityName: String?,
 
-            @JsonProperty("기관명") String facilityName,
+        val address: String?,
 
-            @JsonProperty("주소") String address,
+        val phoneNumber: String?,
 
-            @JsonProperty("전화번호") String phoneNumber,
+        val operator: String?,
 
-            @JsonProperty("운영주체") String operator,
-
-            @JsonProperty("법인유형") String corporationType) {}
+        val corporationType: String?
+    )
 }
+
+fun CenterApiResponseDto.CenterDto.dtoToEntity(): Center = Center(
+    location = city,
+    name = facilityName,
+    address = address,
+    contact = phoneNumber,
+    operator = operator,
+    corpType = corporationType
+)

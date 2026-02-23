@@ -30,8 +30,8 @@ class CenterApiServiceTest {
         CenterApiResponseDto responseDto = centerApiService.fetchCenter(centerApiRequestDto);
 
         assertNotNull(responseDto);
-        assertNotNull(responseDto.data());
-        assertFalse(responseDto.data().isEmpty());
-        assertTrue(responseDto.data().size() < 101);
+        assertNotNull(responseDto.data);
+        assertFalse(responseDto.data.isEmpty());
+        assertTrue(responseDto.data.size() < 101);
     }
 }
