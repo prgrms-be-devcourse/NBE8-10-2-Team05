@@ -22,10 +22,6 @@ class CenterService(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    /**
-     * 데이터를 가져와 저장하고 리스트를 반환합니다.
-     * 코틀린에서는 Checked Exception을 강제하지 않으므로 SneakyThrows가 필요 없습니다.
-     */
     @Transactional
     fun getCenterData(): MutableList<Center> {
         val pageSize = 100
@@ -34,7 +30,6 @@ class CenterService(
         val totalCnt = firstResponse.totalCount
         val totalPages = ceil(totalCnt.toDouble() / pageSize).toInt()
 
-        // 1페이지 데이터 변환 및 저장
         val allCenterList = firstResponse.data
             .map { it.dtoToEntity() }
             .toMutableList()
@@ -47,7 +42,6 @@ class CenterService(
 
             val nextResponse = centerApiService.fetchCenter(CenterApiRequestDto.from(pageNo, pageSize))
 
-            // 데이터 변환 (Stream 대신 mapNotNull 사용)
             val updatedCenterList = nextResponse.data
                 .map { it.dtoToEntity() }
                 .toMutableList()
