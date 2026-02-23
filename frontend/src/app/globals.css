@@ -1,0 +1,556 @@
+@import "tailwindcss";
+
+/* ===== Design System: Color Tokens ===== */
+:root {
+  /* Base */
+  --bg-primary: #F3EFEA;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8E4DF;
+
+  /* Text */
+  --text-primary: #2C2C2C;
+  --text-secondary: #5A5A5A;
+  --text-tertiary: #8A8A8A;
+  --text-inverse: #FFFFFF;
+
+  /* Accent */
+  --accent-primary: #6B8F9E;
+  --accent-primary-hover: #5A7D8C;
+  --accent-secondary: #8FA89B;
+  --accent-secondary-hover: #7D968A;
+  --accent-danger: #C0544F;
+  --accent-danger-hover: #A84540;
+
+  /* Border */
+  --border-default: #D5D0CB;
+  --border-strong: #B5B0AB;
+
+  /* Misc */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Success / Error */
+  --color-success: #4A8C6F;
+  --color-error: #C0544F;
+
+  /* Background for body */
+  --background: #F3EFEA;
+  --foreground: #2C2C2C;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1E1E1E;
+    --bg-secondary: #2A2A2A;
+    --bg-tertiary: #353535;
+
+    --text-primary: #E8E4DF;
+    --text-secondary: #B5B0AB;
+    --text-tertiary: #8A8A8A;
+    --text-inverse: #1E1E1E;
+
+    --accent-primary: #7DA8B7;
+    --accent-primary-hover: #8FBACE;
+    --accent-secondary: #8FA89B;
+    --accent-secondary-hover: #A0BBA9;
+    --accent-danger: #D4726D;
+    --accent-danger-hover: #E0857F;
+
+    --border-default: #404040;
+    --border-strong: #555555;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    --color-success: #6BAF8D;
+    --color-error: #D4726D;
+
+    --background: #1E1E1E;
+    --foreground: #E8E4DF;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ===== Global Reset & Base ===== */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
+
+/* ===== Header ===== */
+.ds-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.ds-header-logo {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent-primary);
+  text-decoration: none;
+  margin-right: 24px;
+  white-space: nowrap;
+}
+
+.ds-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.ds-header-nav a {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.ds-header-nav a:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.ds-header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ds-header-user a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.ds-header-user a:hover {
+  color: var(--text-primary);
+}
+
+/* ===== Page Container ===== */
+.ds-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.ds-page-narrow {
+  max-width: 480px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+.ds-page-mid {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ===== Typography ===== */
+.ds-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 24px 0;
+}
+
+.ds-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+.ds-meta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.ds-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+/* ===== Cards ===== */
+.ds-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s;
+}
+
+.ds-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.ds-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.ds-card-sub {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.ds-card-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.ds-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.ds-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ===== List card (estate, center, lawyer) ===== */
+.ds-list-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ds-list-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.ds-list-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 4px 0;
+}
+
+.ds-list-card strong {
+  color: var(--text-primary);
+}
+
+.ds-list-card a {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.ds-list-card a:hover {
+  text-decoration: underline;
+}
+
+.ds-list-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+/* ===== Buttons ===== */
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.ds-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary */
+.ds-btn-primary {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.ds-btn-primary:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
+}
+
+/* Secondary / Outline */
+.ds-btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.ds-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+/* Danger */
+.ds-btn-danger {
+  background: var(--bg-secondary);
+  color: var(--accent-danger);
+  border-color: var(--accent-danger);
+}
+
+.ds-btn-danger:hover:not(:disabled) {
+  background: var(--accent-danger);
+  color: var(--text-inverse);
+}
+
+/* Done / Completed state */
+.ds-btn-done {
+  background: var(--accent-secondary);
+  color: var(--text-inverse);
+  border-color: var(--accent-secondary);
+}
+
+/* Full width */
+.ds-btn-full {
+  width: 100%;
+}
+
+/* Small */
+.ds-btn-sm {
+  padding: 5px 14px;
+  font-size: 13px;
+}
+
+/* ===== Forms ===== */
+.ds-form-group {
+  margin-bottom: 16px;
+}
+
+.ds-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.ds-input,
+.ds-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.ds-input:focus,
+.ds-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(107, 143, 158, 0.15);
+}
+
+.ds-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.ds-input-inline {
+  width: auto;
+}
+
+/* ===== Search Bar (inline filters) ===== */
+.ds-search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.ds-search-bar .ds-form-group {
+  margin-bottom: 0;
+}
+
+/* ===== Section / Card container ===== */
+.ds-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ds-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+/* ===== Alert / Error ===== */
+.ds-alert-error {
+  background: rgba(192, 84, 79, 0.08);
+  color: var(--color-error);
+  border: 1px solid rgba(192, 84, 79, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.ds-alert-success {
+  background: rgba(74, 140, 111, 0.08);
+  color: var(--color-success);
+  border: 1px solid rgba(74, 140, 111, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ===== Divider ===== */
+.ds-divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.ds-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-default);
+}
+
+.ds-divider span {
+  position: relative;
+  background: var(--bg-primary);
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ===== Social Login ===== */
+.ds-social-btn {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* ===== Link ===== */
+.ds-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.ds-link:hover {
+  text-decoration: underline;
+  color: var(--accent-primary-hover);
+}
+
+/* ===== Empty State ===== */
+.ds-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-tertiary);
+  font-size: 15px;
+}
+
+/* ===== Pagination ===== */
+.ds-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ds-pagination span {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ===== Logout Button in Header ===== */
+.ds-header-logout {
+  background: none;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ds-header-logout:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* ===== Badge ===== */
+.ds-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 99px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}

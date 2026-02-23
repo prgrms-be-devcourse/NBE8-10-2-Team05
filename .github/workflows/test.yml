@@ -10,6 +10,29 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        options: >-
+          --ulimit nofile=65536:65536
+          
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,12 +41,55 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        working-directory: ./backend/back
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          build-root-directory: ./backend/back
+          cache-encryption-key: "force-refresh-v2"
+          cache-disabled: true
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-v3-${{ hashFiles('backend/back/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('backend/back/**/*.gradle*', 'backend/back/gradle.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-v3-
+
+      - name: Wait for Elasticsearch to be ready
+        run: |
+          echo "Waiting for Elasticsearch to be ready..."
+          for i in {1..30}; do
+            if curl -f http://localhost:9200/_cluster/health > /dev/null 2>&1; then
+              echo "Elasticsearch is ready!"
+              exit 0
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+          echo "Elasticsearch did not become ready in time"
+          exit 1
 
       - name: Test with Gradle6
-        run: ./gradlew test
+        run: ./gradlew test --build-cache
         working-directory: ./backend/back
+        env:
+          SPRING_CACHE_TYPE: none
+          SPRING_APPLICATION_JSON: >
+            {
+              "custom": {
+                "jwt": {
+                  "secretKey": "${{ secrets.CUSTOM_JWT_SECRET_KEY }}"
+                }
+              }
+            }
+          CUSTOM_API_ESTATE_KEY: ${{secrets.CUSTOM_API_ESTATE_KEY}}
+          CUSTOM_API_ESTATE_URL: ${{secrets.CUSTOM_API_ESTATE_URL}}
+          SPRING_DATA_REDIS_HOST: localhost
+          SPRING_DATA_REDIS_PORT: 6379
+          CUSTOM_ELASTICSEARCH_HOST: localhost
+          CUSTOM_ELASTICSEARCH_PORT: 9200
+          CUSTOM_ELASTICSEARCH_SCHEME: http
