@@ -22,14 +22,6 @@ class JwtProvider(
     private val accessTokenExpSeconds: Long =
         props.accessToken.expirationSeconds
 
-    // 👇 여기 추가
-    init {
-        println("===== JWT DEBUG =====")
-        println("secret length = ${props.jwt.secretKey.length}")
-        println("expiration = ${props.accessToken.expirationSeconds}")
-        println("=====================")
-    }
-
     fun issueAccessToken(
         memberId: Long,
         email: String,
