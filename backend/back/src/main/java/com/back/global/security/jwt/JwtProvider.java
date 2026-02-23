@@ -19,8 +19,8 @@ public class JwtProvider {
     private final long accessTokenExpSeconds;
 
     public JwtProvider(JwtProperties props) {
-        this.key = Keys.hmacShaKeyFor(props.jwt().secretKey().getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpSeconds = props.accessToken().expirationSeconds();
+        this.key = Keys.hmacShaKeyFor(props.getJwt().getSecretKey().getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpSeconds = props.getAccessToken().getExpirationSeconds();
     }
 
     public String issueAccessToken(long memberId, String email, String role) {
