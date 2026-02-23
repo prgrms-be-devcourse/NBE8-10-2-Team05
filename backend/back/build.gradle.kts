@@ -13,6 +13,7 @@ plugins {
     id("com.diffplug.spotless") version "8.1.0"
     id("checkstyle")
     kotlin("jvm") version "2.2.0"
+    kotlin("plugin.spring") version "2.2.0"
 }
 
 group = "com"
