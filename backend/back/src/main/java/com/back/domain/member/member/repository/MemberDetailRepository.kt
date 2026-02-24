@@ -1,7 +1,6 @@
-package com.back.domain.member.member.repository;
+package com.back.domain.member.member.repository
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.back.domain.member.member.entity.MemberDetail
+import org.springframework.data.jpa.repository.JpaRepository
 
-import com.back.domain.member.member.entity.MemberDetail;
-
-public interface MemberDetailRepository extends JpaRepository<MemberDetail, Long> {}
+interface MemberDetailRepository : JpaRepository<MemberDetail, Long>
