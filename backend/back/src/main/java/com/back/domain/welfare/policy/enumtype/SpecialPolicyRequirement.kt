@@ -1,14 +1,14 @@
-package com.back.domain.welfare.policy.enumtype;
+package com.back.domain.welfare.policy.enumtype
 
-import com.back.global.enumtype.CodeEnum;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.back.global.enumtype.CodeEnum
+import lombok.Getter
+import lombok.RequiredArgsConstructor
 
 // 정책 특화요건 코드
-@Getter
-@RequiredArgsConstructor
-public enum SpecialPolicyRequirement implements CodeEnum {
+enum class SpecialPolicyRequirement(
+    override val code: String,
+    override val description: String
+) : CodeEnum {
     SME("014001", "중소기업"),
     WOMEN("014002", "여성"),
     BASIC_LIVELIHOOD("014003", "기초생활수급자"),
@@ -19,7 +19,4 @@ public enum SpecialPolicyRequirement implements CodeEnum {
     LOCAL_TALENT("014008", "지역인재"),
     ETC("014009", "기타"),
     NO_LIMIT("014010", "제한없음");
-
-    private final String code;
-    private final String description;
 }
