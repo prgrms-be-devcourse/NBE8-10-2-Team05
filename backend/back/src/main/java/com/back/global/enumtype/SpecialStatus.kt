@@ -1,12 +1,13 @@
-package com.back.global.enumtype;
+package com.back.global.enumtype
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter
+import lombok.RequiredArgsConstructor
 
 // 정책 특화요건 코드
-@Getter
-@RequiredArgsConstructor
-public enum SpecialStatus implements CodeEnum {
+enum class SpecialStatus(
+    override val code: String,
+    override val description: String
+) : CodeEnum {
     SME("014001", "중소기업"),
     WOMEN("014002", "여성"),
     BASIC_LIVELIHOOD("014003", "기초생활수급자"),
@@ -15,7 +16,4 @@ public enum SpecialStatus implements CodeEnum {
     FARMER("014006", "농업인"),
     SOLDIER("014007", "군인"),
     LOCAL_TALENT("014008", "지역인재");
-
-    private final String code;
-    private final String description;
 }
