@@ -12,7 +12,7 @@ interface MemberRepository : JpaRepository<Member, Long> {
     // 회원가입에서 이메일 중복 체크
     fun existsByEmail(email: String): Boolean
 
-    fun existsByEmailAndStatus(email: String, status: Member.MemberStatus): Boolean
+    fun existsByEmailAndStatus(email: String?, status: Member.MemberStatus): Boolean
 
     fun findByTypeAndProviderId(type: Member.LoginType, providerId: String): Optional<Member>
 }
