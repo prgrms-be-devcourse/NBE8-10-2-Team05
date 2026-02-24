@@ -1,11 +1,12 @@
-package com.back.global.enumtype;
+package com.back.global.enumtype
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter
+import lombok.RequiredArgsConstructor
 
-@Getter
-@RequiredArgsConstructor
-public enum EducationLevel implements CodeEnum {
+enum class EducationLevel(
+    override val code: String,
+    override val description: String
+) : CodeEnum {
     BELOW_HIGH_SCHOOL("049001", "고졸 미만"),
     HIGH_SCHOOL_ENROLLED("049002", "고교 재학"),
     HIGH_SCHOOL_EXPECTED("049003", "고졸 예정"),
@@ -14,7 +15,4 @@ public enum EducationLevel implements CodeEnum {
     UNIVERSITY_EXPECTED("049006", "대졸 예정"),
     UNIVERSITY_GRADUATED("049007", "대학 졸업"),
     MASTER_DOCTOR("049008", "석·박사");
-
-    private final String code;
-    private final String description;
 }
