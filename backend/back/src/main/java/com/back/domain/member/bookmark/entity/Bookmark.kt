@@ -1,47 +1,38 @@
-package com.back.domain.member.bookmark.entity;
+package com.back.domain.member.bookmark.entity
 
-import java.time.LocalDateTime;
-
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.welfare.policy.entity.Policy;
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.back.domain.member.member.entity.Member
+import com.back.domain.welfare.policy.entity.Policy
+import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "bookmark")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Bookmark {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+class Bookmark(
 
     @ManyToOne
     @JoinColumn(name = "policy_id")
-    private Policy policy;
+    var policy: Policy? = null,
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member applicant;
+    var applicant: Member? = null
 
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private var id: Long? = null
+
+    private var createdAt: LocalDateTime? = null
+    private var modifiedAt: LocalDateTime? = null
 
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        modifiedAt = LocalDateTime.now();
+    protected fun onCreate() {
+        createdAt = LocalDateTime.now()
+        modifiedAt = LocalDateTime.now()
     }
 
     @PreUpdate
-    protected void onUpdate() {
-        modifiedAt = LocalDateTime.now();
+    protected fun onUpdate() {
+        modifiedAt = LocalDateTime.now()
     }
 }

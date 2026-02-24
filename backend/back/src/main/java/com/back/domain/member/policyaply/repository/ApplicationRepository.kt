@@ -1,14 +1,10 @@
-package com.back.domain.member.policyaply.repository;
+package com.back.domain.member.policyaply.repository
 
-import java.util.List;
+import com.back.domain.member.policyaply.entity.Application
+import org.springframework.data.jpa.repository.JpaRepository
 
-import org.springframework.data.jpa.repository.JpaRepository;
+interface ApplicationRepository : JpaRepository<Application, Long> {
+    fun findAllByApplicant_Id(applicantId: Long?): MutableList<Application?>?
 
-import com.back.domain.member.policyaply.entity.Application;
-
-public interface ApplicationRepository extends JpaRepository<Application, Long> {
-
-    List<Application> findAllByApplicant_Id(Long applicantId);
-
-    Application getApplicationById(Long id);
+    fun getApplicationById(id: Long?): Application?
 }

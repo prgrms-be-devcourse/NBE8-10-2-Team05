@@ -1,3 +1,3 @@
-package com.back.domain.member.policyaply.dto;
+package com.back.domain.member.policyaply.dto
 
-public record AddApplicationResponseDto(int status, String message) {}
+class AddApplicationResponseDto(val status: Int, val message: String?)

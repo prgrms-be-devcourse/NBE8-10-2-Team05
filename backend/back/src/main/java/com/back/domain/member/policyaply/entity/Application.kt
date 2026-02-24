@@ -1,40 +1,36 @@
-package com.back.domain.member.policyaply.entity;
+package com.back.domain.member.policyaply.entity
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import com.back.domain.member.member.entity.Member;
-import com.back.domain.welfare.policy.entity.Policy;
-
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.back.domain.member.member.entity.Member
+import com.back.domain.welfare.policy.entity.Policy
+import jakarta.persistence.*
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "apply")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Application {
-
+class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    val id: Long? = null
 
     @ManyToOne
     @JoinColumn(name = "policy_id")
-    private Policy policy;
+    var policy: Policy? = null
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member applicant;
+    var applicant: Member? = null
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private val createdAt: LocalDateTime? = null
 
     @UpdateTimestamp
-    private LocalDateTime modifiedAt;
+    private val modifiedAt: LocalDateTime? = null
 }

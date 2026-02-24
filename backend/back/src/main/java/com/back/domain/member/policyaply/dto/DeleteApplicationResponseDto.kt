@@ -1,3 +1,3 @@
-package com.back.domain.member.policyaply.dto;
+package com.back.domain.member.policyaply.dto
 
-public record DeleteApplicationResponseDto(int code, String message) {}
+class DeleteApplicationResponseDto(@JvmField val code: Int, val message: String?)

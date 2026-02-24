@@ -1,3 +1,3 @@
-package com.back.domain.member.bookmark.dto;
+package com.back.domain.member.bookmark.dto
 
-public record BookmarkUpdateResponseDto(int code, String message) {}
+class BookmarkUpdateResponseDto(val code: Int, val message: String?)
