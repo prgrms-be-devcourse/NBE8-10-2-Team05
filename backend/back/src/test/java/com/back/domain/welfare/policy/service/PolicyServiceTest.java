@@ -31,7 +31,7 @@ public class PolicyServiceTest {
         MockitoAnnotations.openMocks(this);
 
         // 테스트용 PolicyRequestDto
-        PolicySearchRequestDto requestDto = new PolicySearchRequestDto(
+        requestDto = new PolicySearchRequestDto(
                 20, // sprtTrgtMinAge
                 30, // sprtTrgtMaxAge
                 "12345", // zipCd
