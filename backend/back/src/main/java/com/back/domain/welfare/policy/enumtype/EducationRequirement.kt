@@ -1,14 +1,15 @@
-package com.back.domain.welfare.policy.enumtype;
+package com.back.domain.welfare.policy.enumtype
 
-import com.back.global.enumtype.CodeEnum;
+import com.back.global.enumtype.CodeEnum
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+/**
+ * 정책 학력요건코드
+ */
+enum class EducationRequirement(
+    override val code: String,
+    override val description: String
+) : CodeEnum {
 
-// 정책 학력요건코드
-@Getter
-@RequiredArgsConstructor
-public enum EducationRequirement implements CodeEnum {
     BELOW_HIGH_SCHOOL("049001", "고졸 미만"),
     HIGH_SCHOOL_ENROLLED("049002", "고교 재학"),
     HIGH_SCHOOL_EXPECTED("049003", "고졸 예정"),
@@ -20,6 +21,8 @@ public enum EducationRequirement implements CodeEnum {
     ETC("049009", "기타"),
     NO_LIMIT("049010", "제한없음");
 
-    private final String code;
-    private final String description;
+    companion object {
+        fun fromCode(code: String): EducationRequirement? =
+            entries.find { it.code == code }
+    }
 }

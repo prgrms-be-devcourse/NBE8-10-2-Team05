@@ -1,14 +1,14 @@
-package com.back.domain.welfare.policy.enumtype;
+package com.back.domain.welfare.policy.enumtype
 
-import com.back.global.enumtype.CodeEnum;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.back.global.enumtype.CodeEnum
+import lombok.Getter
+import lombok.RequiredArgsConstructor
 
 // 정책 취업요건 코드
-@Getter
-@RequiredArgsConstructor
-public enum JobRequirement implements CodeEnum {
+enum class JobRequirement(
+    override val code: String,
+    override val description: String
+) : CodeEnum {
     EMPLOYED("013001", "재직자"),
     SELF_EMPLOYED("013002", "자영업자"),
     UNEMPLOYED("013003", "미취업자"),
@@ -19,7 +19,4 @@ public enum JobRequirement implements CodeEnum {
     AGRICULTURAL_WORKER("013008", "영농종사자"),
     ETC("013009", "기타"),
     NO_LIMIT("013010", "제한없음");
-
-    private final String code;
-    private final String description;
 }
