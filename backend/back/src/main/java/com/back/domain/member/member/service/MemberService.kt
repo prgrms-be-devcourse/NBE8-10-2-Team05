@@ -64,11 +64,6 @@ class MemberService(
 
     @Transactional
     fun completeSocialSignup(req: CompleteSocialSignupRequest) {
-
-        // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
-        if (req.rrnFront == null) throw ServiceException("MEMBER-400", "rrnFront는 필수입니다.")
-        if (req.rrnBackFirst == null) throw ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.")
-
         // 가지고있는 JWT로 Filter에서 member를 받아서 쓴다.
         val member = actorProvider.getActor()
 
