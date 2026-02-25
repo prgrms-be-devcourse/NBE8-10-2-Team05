@@ -1,33 +1,30 @@
-package com.back.domain.member.geo.service;
+package com.back.domain.member.geo.service
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
-import com.back.domain.member.geo.dto.AddressDto;
-import com.back.domain.member.geo.dto.GeoApiResponseDto;
-import com.back.domain.member.geo.entity.Address;
-import com.back.global.exception.ServiceException;
-
-import lombok.RequiredArgsConstructor;
+import com.back.domain.member.geo.dto.AddressDto
+import com.back.domain.member.geo.dto.GeoApiResponseDto
+import com.back.domain.member.geo.entity.Address
+import com.back.global.exception.ServiceException
+import org.springframework.stereotype.Service
+import java.util.*
+import java.util.function.Function
+import java.util.function.Predicate
+import java.util.function.Supplier
 
 @Service
-@RequiredArgsConstructor
-public class GeoService {
-    private final GeoApiService geoApiService;
+class GeoService(private val geoApiService: GeoApiService) {
+    fun getGeoCode(addressDto: AddressDto): Address {
+        val responseDto = geoApiService.fetchGeoCode(addressDto)
 
-    public Address getGeoCode(AddressDto addressDto) {
-        GeoApiResponseDto responseDto = geoApiService.fetchGeoCode(addressDto);
+        val updatedDto = responseDto?.documents
+            ?.takeIf { it.isNotEmpty() } // 리스트가 비어있지 않은지 확인
+            ?.firstOrNull()              // 첫 번째 Document 꺼내기 (안전하게)
+            ?.address                    // address 추출
+            ?.let { Address.of(addressDto, it) } // Address 엔티티로 변환
+            ?: throw ServiceException(   // 위 과정 중 하나라도 null이면 예외 발생
+                "501",
+                "kakao local api return값에서 parsing에 실패하였습니다."
+            )
 
-        Address updatedDto = Optional.ofNullable(responseDto)
-                .map(GeoApiResponseDto::documents)
-                .filter(docs -> !docs.isEmpty()) // 리스트가 비어있지 않은지 확인
-                .map(List::getFirst) // 첫 번째 Document 꺼내기
-                .map(GeoApiResponseDto.Document::address)
-                .map(address -> Address.of(addressDto, address))
-                .orElseThrow(() -> new ServiceException("501", "kakao local api return값에서 parsing에 실패하였습니다."));
-
-        return updatedDto;
+        return updatedDto
     }
 }
