@@ -3,6 +3,8 @@ package com.back.domain.welfare.policy.controller
 import com.back.domain.welfare.policy.document.PolicyDocument
 import com.back.domain.welfare.policy.dto.PolicyElasticSearchRequestDto
 import com.back.domain.welfare.policy.dto.PolicyFetchRequestDto
+import com.back.domain.welfare.policy.dto.PolicySearchRequestDto
+import com.back.domain.welfare.policy.dto.PolicySearchResponseDto
 import com.back.domain.welfare.policy.search.PolicySearchCondition
 import com.back.domain.welfare.policy.service.PolicyElasticSearchService
 import com.back.domain.welfare.policy.service.PolicyFetchService
@@ -34,6 +36,12 @@ class PolicyController(                                         // ✅ 생성자
             keywords = dto.keywords
         )
         return policyElasticSearchService.search(condition, dto.from, dto.size)
+    }
+
+    //QueryDSL이 적용된 검색 api -> 조건기반 검색은 더 빠름
+    @GetMapping("/search/filter")
+    fun filter(dto: PolicySearchRequestDto): List<PolicySearchResponseDto> {
+        return policyService.search(dto)
     }
 
     @GetMapping("/list")
