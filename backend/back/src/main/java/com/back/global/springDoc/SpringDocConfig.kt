@@ -1,23 +1,22 @@
-package com.back.global.springDoc;
+package com.back.global.springDoc
 
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
+import io.swagger.v3.oas.annotations.info.Info
+import io.swagger.v3.oas.annotations.security.SecurityScheme
+import org.springdoc.core.models.GroupedOpenApi
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
 @Configuration
-@OpenAPIDefinition(info = @Info(title = "API 서버", version = "beta", description = "API 서버 문서입니다."))
+@OpenAPIDefinition(info = Info(title = "API 서버", version = "beta", description = "API 서버 문서입니다."))
 @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme = "bearer")
-public class SpringDocConfig {
+class SpringDocConfig {
     @Bean
-    public GroupedOpenApi groupApiV1() {
+    fun groupApiV1(): GroupedOpenApi? {
         return GroupedOpenApi.builder()
-                .group("apiV1")
-                .pathsToMatch("/api/v1/**")
-                .build();
+            .group("apiV1")
+            .pathsToMatch("/api/v1/**")
+            .build()
     }
 }
