@@ -85,16 +85,16 @@ class MemberDetail private constructor(
         companion object {
             fun from(dto: AddressDto): Address {
                 return Address(
-                    postcode = dto.postcode(),
-                    addressName = dto.addressName(),
-                    sigunguCode = dto.sigunguCode(),
-                    bCode = dto.bCode(),
-                    roadAddress = dto.roadAddress(),
-                    sigungu = dto.sigungu(),
-                    sido = dto.sido(),
-                    hCode = dto.hCode(),
-                    latitude = dto.latitude(),
-                    longitude = dto.longitude()
+                    postcode = dto.postcode,
+                    addressName = dto.addressName,
+                    sigunguCode = dto.sigunguCode,
+                    bCode = dto.bCode,
+                    roadAddress = dto.roadAddress,
+                    sigungu = dto.sigungu,
+                    sido = dto.sido,
+                    hCode = dto.hCode,
+                    latitude = dto.latitude,
+                    longitude = dto.longitude
                 )
             }
         }
