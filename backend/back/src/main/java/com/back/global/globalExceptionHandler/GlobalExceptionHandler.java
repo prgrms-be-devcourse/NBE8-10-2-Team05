@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -48,4 +50,22 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(httpStatus).body(Map.of("resultCode", fullCode, "msg", ex.getMsg()));
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handle(MethodArgumentNotValidException ex) {
+
+        // 첫 번째 필드 에러 메시지만 내려주기 (너희 msg 스타일 유지)
+        FieldError fe = ex.getBindingResult().getFieldError();
+        String msg = fe != null ? fe.getDefaultMessage() : "잘못된 요청입니다.";
+
+        // 너희 포맷 유지: resultCode / msg
+        // 기존 ServiceException 규칙처럼 "400"이 들어가야 400으로 매핑됨
+        String resultCode = "VALIDATION-400";
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(Map.of("resultCode", resultCode, "msg", msg));
+    }
+
+
 }
