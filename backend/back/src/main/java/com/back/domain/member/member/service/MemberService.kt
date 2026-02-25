@@ -36,7 +36,7 @@ class MemberService(
         private const val REFRESH_DAYS = 14
     }
 
-    fun join(req: JoinRequest?): JoinResponse {
+    fun join(req: JoinRequest): JoinResponse {
 
         // TODO: service단에서의 이중방어인가요?
         //      controller에 @Valid 사용하면 더 좋을 듯 합니다.
@@ -80,7 +80,7 @@ class MemberService(
     }
 
     @Transactional
-    fun completeSocialSignup(req: CompleteSocialSignupRequest?) {
+    fun completeSocialSignup(req: CompleteSocialSignupRequest) {
 
         // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
         if (req == null) throw ServiceException("MEMBER-400", "요청 바디가 비었습니다.")
