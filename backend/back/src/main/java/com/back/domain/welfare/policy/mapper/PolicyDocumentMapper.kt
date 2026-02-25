@@ -1,66 +1,81 @@
-package com.back.domain.welfare.policy.mapper
+package com.back.domain.welfare.policy.mapper;
 
-import com.back.domain.welfare.policy.document.PolicyDocument
-import com.back.domain.welfare.policy.entity.Policy
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+import com.back.domain.welfare.policy.document.PolicyDocument;
+import com.back.domain.welfare.policy.entity.Policy;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
-class PolicyDocumentMapper {
+public class PolicyDocumentMapper {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(PolicyDocumentMapper::class.java)
-    }
-
-    fun toDocument(policy: Policy): PolicyDocument? {
+    public PolicyDocument toDocument(Policy policy) {
         return PolicyDocument.builder()
-            .policyId(policy.id)
-            .plcyNo(policy.plcyNo)
-            .plcyNm(policy.plcyNm)
+                .policyId(policy.getId())
+                .plcyNo(policy.getPlcyNo())
+                .plcyNm(policy.getPlcyNm())
 
-            .minAge(parseInteger(policy.sprtTrgtMinAge))
-            .maxAge(parseInteger(policy.sprtTrgtMaxAge))
-            .ageLimited(parseBoolean(policy.sprtTrgtAgeLmtYn))
+                // 나이
+                .minAge(parseInteger(policy.getSprtTrgtMinAge()))
+                .maxAge(parseInteger(policy.getSprtTrgtMaxAge()))
+                .ageLimited(parseBoolean(policy.getSprtTrgtAgeLmtYn()))
 
-            .earnCondition(policy.earnCndSeCd)
-            .earnMin(parseInteger(policy.earnMinAmt))
-            .earnMax(parseInteger(policy.earnMaxAmt))
+                // 소득
+                .earnCondition(policy.getEarnCndSeCd())
+                .earnMin(parseInteger(policy.getEarnMinAmt()))
+                .earnMax(parseInteger(policy.getEarnMaxAmt()))
 
-            .regionCode(policy.zipCd)
-            .jobCode(policy.jobCd)
-            .schoolCode(policy.schoolCd)
-            .marriageStatus(policy.mrgSttsCd)
+                // 대상 조건
+                .regionCode(policy.getZipCd())
+                .jobCode(policy.getJobCd())
+                .schoolCode(policy.getSchoolCd())
+                .marriageStatus(policy.getMrgSttsCd())
 
-            .keywords(parseKeywords(policy.plcyKywdNm))
-            .specialBizCode(policy.sBizCd)
+                // 태그 / 분류
+                .keywords(parseKeywords(policy.getPlcyKywdNm()))
+                .specialBizCode(policy.getSBizCd())
 
-            .description(buildDescription(policy.plcyExplnCn, policy.plcySprtCn))
-            .build()
+                // 검색용 텍스트
+                .description(buildDescription(policy.getPlcyExplnCn(), policy.getPlcySprtCn()))
+                .build();
     }
 
-    private fun parseInteger(value: String?): Int? {
-        return try {
-            if (value.isNullOrBlank()) null else value.toInt()
-        } catch (e: NumberFormatException) {
-            null
+    /* ===== 유틸 메서드 ===== */
+
+    private Integer parseInteger(String value) {
+        try {
+            return (value == null || value.isBlank()) ? null : Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
-    private fun parseBoolean(value: String?): Boolean? {
-        return value?.equals("Y", ignoreCase = true)
+    private Boolean parseBoolean(String value) {
+        if (value == null) return null;
+        return "Y".equalsIgnoreCase(value);
     }
 
-    private fun parseKeywords(keywords: String?): MutableList<String?> {
-        if (keywords.isNullOrBlank()) return mutableListOf()
-        return keywords.split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toMutableList()
+    private List<String> parseKeywords(String keywords) {
+        if (keywords == null || keywords.isBlank()) {
+            return Collections.emptyList();
+        }
+        // 예: "청년,주거,취업"
+        return Arrays.stream(keywords.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 
-    private fun buildDescription(vararg texts: String?): String? {
-        return texts.filterNotNull()
-            .filter { it.isNotBlank() }
-            .reduceOrNull { a, b -> "$a $b" }
+    private String buildDescription(String... texts) {
+        return Arrays.stream(texts)
+                .filter(t -> t != null && !t.isBlank())
+                .reduce((a, b) -> a + " " + b)
+                .orElse(null);
     }
 }
