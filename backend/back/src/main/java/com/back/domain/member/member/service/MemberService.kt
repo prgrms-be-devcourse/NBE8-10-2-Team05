@@ -42,9 +42,6 @@ class MemberService(
         //      controller에 @Valid 사용하면 더 좋을 듯 합니다.
 
         // 요청값 검증
-        if (req == null) {
-            throw ServiceException("MEMBER_400", "요청 바디가 비어 있습니다")
-        }
         if (req.email == null || req.email.isBlank()) {
             throw ServiceException("MEMBER_400", "이메일은 필수 입력값입니다")
         }
@@ -83,7 +80,6 @@ class MemberService(
     fun completeSocialSignup(req: CompleteSocialSignupRequest) {
 
         // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
-        if (req == null) throw ServiceException("MEMBER-400", "요청 바디가 비었습니다.")
         if (req.rrnFront == null) throw ServiceException("MEMBER-400", "rrnFront는 필수입니다.")
         if (req.rrnBackFirst == null) throw ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.")
 
