@@ -21,21 +21,4 @@ data class EstateFetchResponseDto(
             @JvmField val items: List<EstateDto?>? = null // MutableList일 필요가 없다면 List 권장
         )
     }
-
-    // Java 호환을 위한 빌더 클래스
-    class EstateFetchResponseDtoBuilder internal constructor() {
-        private var response: Response? = null
-
-        @JsonProperty("response")
-        fun response(response: Response?) = apply { this.response = response }
-
-        fun build() = EstateFetchResponseDto(response)
-
-        override fun toString() = "EstateFetchResponseDto.EstateFetchResponseDtoBuilder(response=$response)"
-    }
-
-    companion object {
-        @JvmStatic
-        fun builder() = EstateFetchResponseDtoBuilder()
-    }
 }

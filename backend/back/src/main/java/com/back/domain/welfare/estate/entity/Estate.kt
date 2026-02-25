@@ -73,8 +73,6 @@ class Estate(
     @Column(length = 1000)
     var url: String? = null
 ) {
-    // 생성자 로직을 companion object의 팩토리 메서드로 옮기거나,
-    // 아래와 같이 보조 생성자를 유지할 수 있습니다.
     constructor(dto: EstateDto) : this(
         pblancId = dto.pblancId,
         pblancNm = dto.pblancNm,
@@ -90,18 +88,10 @@ class Estate(
         hsmpNm = dto.hsmpNm,
         brtcNm = dto.brtcNm,
         signguNm = dto.signguNm,
-        signguCode = extractSignguCodeStatic(dto.pnu),
+        signguCode = dto.pnu?.takeIf { it.length >= 5 }?.substring(0, 5) ?: "",
         fullAdres = dto.fullAdres,
         rentGtn = dto.rentGtn,
         mtRntchrg = dto.mtRntchrg,
         url = dto.url
     )
-
-    companion object {
-        private fun extractSignguCodeStatic(pnu: String?): String {
-            return if (StringUtils.hasText(pnu) && pnu!!.length >= 5) {
-                pnu.substring(0, 5)
-            } else ""
-        }
-    }
 }

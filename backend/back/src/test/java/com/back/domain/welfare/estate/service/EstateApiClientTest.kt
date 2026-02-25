@@ -1,10 +1,7 @@
 package com.back.domain.welfare.estate.service
 
 import com.back.domain.welfare.estate.dto.EstateFetchRequestDto
-import com.back.domain.welfare.estate.dto.EstateFetchRequestDto.Companion.builder
-import com.back.domain.welfare.estate.dto.EstateFetchResponseDto.Response.BodyDto
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

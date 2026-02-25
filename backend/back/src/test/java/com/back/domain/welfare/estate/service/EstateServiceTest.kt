@@ -7,10 +7,10 @@ import com.back.domain.welfare.estate.repository.EstateRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -53,7 +53,7 @@ internal class EstateServiceTest {
     fun t1() {
         // Given
         val mockRes = mockResponse(10, 9)
-        given(estateApiClient.fetchEstatePage(any(EstateFetchRequestDto::class.java)))
+        given(estateApiClient.fetchEstatePage(any()))
             .willReturn(mockRes)
 
         val requestDto = EstateFetchRequestDto(numOfRows = 100, pageNo = 1)
@@ -72,7 +72,7 @@ internal class EstateServiceTest {
     fun t2() {
         // Given
         val mockRes = mockResponse(10, 9)
-        given(estateApiClient.fetchEstatePage(any(EstateFetchRequestDto::class.java)))
+        given(estateApiClient.fetchEstatePage(any()))
             .willReturn(mockRes)
 
         val responseDto = estateApiClient.fetchEstatePage(EstateFetchRequestDto(numOfRows = 10, pageNo = 1))
@@ -90,7 +90,7 @@ internal class EstateServiceTest {
     fun t3() {
         // Given
         val mockRes = mockResponse(10, 9)
-        given(estateApiClient.fetchEstatePage(any(EstateFetchRequestDto::class.java)))
+        given(estateApiClient.fetchEstatePage(any()))
             .willReturn(mockRes)
 
         // When
@@ -108,7 +108,7 @@ internal class EstateServiceTest {
         // Given
         val mockRes1 = mockResponse(200, 100)
         val mockRes2 = mockResponse(200, 100)
-        given(estateApiClient.fetchEstatePage(any(EstateFetchRequestDto::class.java)))
+        given(estateApiClient.fetchEstatePage(any()))
             .willReturn(mockRes1)
             .willReturn(mockRes2)
 
@@ -117,7 +117,7 @@ internal class EstateServiceTest {
         val savedCount = estateRepository.count().toInt()
 
         // Then
-        verify(estateApiClient, times(2)).fetchEstatePage(any(EstateFetchRequestDto::class.java))
+        verify(estateApiClient, times(2)).fetchEstatePage(any())
         assertThat(estateList).hasSize(200)
         assertThat(savedCount).isEqualTo(200)
     }
