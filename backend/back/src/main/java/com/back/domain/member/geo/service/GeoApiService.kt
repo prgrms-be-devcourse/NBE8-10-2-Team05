@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
 import java.util.function.Supplier
+import org.springframework.web.reactive.function.client.bodyToMono
+
 
 @Service
 class GeoApiService(private val geoApiProperties: GeoApiProperties) {
@@ -23,10 +25,10 @@ class GeoApiService(private val geoApiProperties: GeoApiProperties) {
                 .uri(requestUrl)
                 .header("Authorization", "KakaoAK " + geoApiProperties.key)
                 .retrieve()
-                .bodyToMono<GeoApiResponseDto?>(GeoApiResponseDto::class.java)
+                .bodyToMono<GeoApiResponseDto>()
                 .block()
         )
-            .orElseThrow<ServiceException?>(Supplier { ServiceException("501", "kakao geo api 오류가 생겼습니다.") })
+            .orElseThrow(Supplier { ServiceException("501", "kakao geo api 오류가 생겼습니다.") })
 
         return responseDto
     }
