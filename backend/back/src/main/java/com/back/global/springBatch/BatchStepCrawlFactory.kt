@@ -18,13 +18,12 @@ class BatchStepCrawlFactory(
     private val transactionManager: PlatformTransactionManager,
     private val crawlingTaskExecutor: AsyncTaskExecutor
 ) {
-    fun <I, O> createCrawlStep(
-        region: String?, reader: ItemReader<I>, processor: ItemProcessor<I, O>?, writer: ItemWriter<O>
+    fun <I :Any, O :Any> createCrawlStep(
+        region: String?, reader: ItemReader<I>, writer: ItemWriter<O>
     ): Step {
         return StepBuilder("fetchLawyerStep_" + region, jobRepository)
             .chunk<I, O>(8)
             .reader(reader)
-            .processor(processor)
             .writer(writer)
             .listener(
                 object : StepExecutionListener {

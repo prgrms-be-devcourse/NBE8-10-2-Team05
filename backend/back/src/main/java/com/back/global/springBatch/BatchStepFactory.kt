@@ -18,7 +18,7 @@ class BatchStepFactory(
     private val taskExecutor: AsyncTaskExecutor,
     private val retryPolicy: RetryPolicy
 ) {
-    fun <I, O> createApiStep(
+    fun <I :Any, O : Any> createApiStep(
         stepName: String, reader: ItemReader<I>, processor: ItemProcessor<I, O>, writer: ItemWriter<O>
     ): Step {
         return StepBuilder(stepName, jobRepository)

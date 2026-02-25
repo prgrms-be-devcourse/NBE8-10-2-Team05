@@ -106,7 +106,6 @@ class BatchConfig(
         return batchStepCrawlFactory.createCrawlStep<Lawyer, Lawyer>(
             region,
             lawyerApiItemReader,
-            null, // Processor가 없는 경우 null 전달 가능하도록 Factory 설계 확인 필요
             lawyerJpaItemWriter
         )
     }
