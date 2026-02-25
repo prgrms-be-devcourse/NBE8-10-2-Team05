@@ -43,13 +43,7 @@ class MemberController(
 
     @PostMapping("/logout")
     fun logout(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Void> {
-
-        val headers = memberService.logout(request)
-
-        // TODO: 이 로직은 service안에 들어가야 할 것 같습니다. 지금까지의 코드를 보면.
-        response.addHeader("Set-Cookie", headers.deleteAccessCookieHeader)
-        response.addHeader("Set-Cookie", headers.deleteRefreshCookieHeader)
-
+        memberService.logout(request, response)
         return ResponseEntity.ok().build()
     }
 

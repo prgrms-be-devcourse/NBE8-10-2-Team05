@@ -128,13 +128,8 @@ class MemberService(
         return MeResponse(requireNotNull(member.id), member.name, member.email)
     }
 
-    data class LogoutCookieHeaders(
-        val deleteAccessCookieHeader: String,
-        val deleteRefreshCookieHeader: String
-    )
-
     @Transactional
-    fun logout(request: HttpServletRequest): LogoutCookieHeaders {
+    fun logout(request: HttpServletRequest, response: HttpServletResponse) {
 
         // 1) refreshToken 쿠키 원문 읽기
         val rawRefreshToken = getCookieValue(request, "refreshToken")
@@ -147,11 +142,12 @@ class MemberService(
             redisRefreshTokenStore.delete(hash)
         }
 
-        // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
+        // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 응답에 세팅
         val deleteAccessCookie = authCookieService.deleteCookie("accessToken")
         val deleteRefreshCookie = authCookieService.deleteCookie("refreshToken")
 
-        return LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie)
+        response.addHeader("Set-Cookie", deleteAccessCookie)
+        response.addHeader("Set-Cookie", deleteRefreshCookie)
     }
 
     //    @Transactional
