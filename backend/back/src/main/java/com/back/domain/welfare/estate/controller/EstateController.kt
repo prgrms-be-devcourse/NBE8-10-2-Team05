@@ -1,49 +1,45 @@
-package com.back.domain.welfare.estate.controller;
+package com.back.domain.welfare.estate.controller
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.back.domain.welfare.estate.dto.EstateRegionResponseDto;
-import com.back.domain.welfare.estate.dto.EstateSearchResonseDto;
-import com.back.domain.welfare.estate.entity.Estate;
-import com.back.domain.welfare.estate.entity.EstateRegionCache;
-import com.back.domain.welfare.estate.service.EstateService;
-import com.back.standard.util.SidoNormalizer;
-
-import lombok.RequiredArgsConstructor;
+import com.back.domain.welfare.estate.dto.EstateRegionResponseDto
+import com.back.domain.welfare.estate.dto.EstateSearchResonseDto
+import com.back.domain.welfare.estate.entity.EstateRegionCache
+import com.back.domain.welfare.estate.service.EstateService
+import com.back.standard.util.SidoNormalizer
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/welfare/estate")
-@RequiredArgsConstructor
-public class EstateController {
-    private final EstateService estateService;
-    private final EstateRegionCache regionCache;
+class EstateController(
+    private val estateService: EstateService,
+    private val regionCache: EstateRegionCache
+) {
 
     @GetMapping("/location")
-    public EstateSearchResonseDto getEstateLocation(@RequestParam String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return new EstateSearchResonseDto(estateService.searchEstateLocation("", ""));
+    fun getEstateLocation(@RequestParam keyword: String?): EstateSearchResonseDto {
+        // null 또는 공백 문자열 체크를 한 번에 처리
+        if (keyword.isNullOrBlank()) {
+            return EstateSearchResonseDto(estateService.searchEstateLocation("", ""))
         }
-        String[] keywords = keyword.split(" ");
 
-        // 서울시 강남구
-        // 2개까지만 사용
-        // TODO: 추후 확장필요
-        String keyword1 = SidoNormalizer.normalizeSido(keywords[0]);
-        String keyword2 = (keywords.length >= 2) ? SidoNormalizer.normalizeSido(keywords[1]) : keyword1;
+        // 공백으로 분리 후 유효한 키워드만 필터링
+        val keywords = keyword.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
 
-        // TODO: 추후 일반공공 정정공공가 있다면 정정공공만 나오게 하는 로직 추가 필요
-        List<Estate> estateList = estateService.searchEstateLocation(keyword1, keyword2);
+        // 키워드 정규화 로직 (1개일 때는 동일하게, 2개 이상일 때는 각각 처리)
+        val keyword1 = SidoNormalizer.normalizeSido(keywords[0])
+        val keyword2 = if (keywords.size >= 2) SidoNormalizer.normalizeSido(keywords[1]) else keyword1
 
-        return new EstateSearchResonseDto(estateList);
+        // TODO: 추후 공고 중복 필터링 로직 추가 필요
+        val estateList = estateService.searchEstateLocation(keyword1, keyword2)
+
+        return EstateSearchResonseDto(estateList)
     }
 
+    // Java의 Getter 메서드 스타일을 Kotlin의 프로퍼티 스타일로 간결하게 표현
     @GetMapping("/regions")
-    public EstateRegionResponseDto getEstateRegions() {
-        return new EstateRegionResponseDto(regionCache.getRegionList());
+    fun getEstateRegions(): EstateRegionResponseDto {
+        return EstateRegionResponseDto(regionCache.regionList)
     }
 }
