@@ -14,8 +14,8 @@ class PolicyDocumentMapper {
 
     fun toDocument(policy: Policy): PolicyDocument? {
         return PolicyDocument.builder()
-            .policyId(policy.id)                          // ✅ getId() → .id
-            .plcyNo(policy.plcyNo)                        // ✅ getPlcyNo() → .plcyNo
+            .policyId(policy.id)
+            .plcyNo(policy.plcyNo)
             .plcyNm(policy.plcyNm)
 
             .minAge(parseInteger(policy.sprtTrgtMinAge))
