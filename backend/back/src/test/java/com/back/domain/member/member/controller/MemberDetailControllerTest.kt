@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.BDDMockito
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -151,7 +152,7 @@ class MemberDetailControllerTest {
             .longitude(127.044)
             .build()
 
-        BDDMockito.given(geoService.getGeoCode(ArgumentMatchers.any(AddressDto::class.java)))
+        BDDMockito.given(geoService.getGeoCode(any()))
             .willReturn(enrichedDto)
 
         mvc.perform(
