@@ -1,9 +1,12 @@
-package com.back.global.redis;
+package com.back.global.redis
 
-import org.springframework.data.redis.core.RedisHash;
+import jakarta.persistence.Id
+import org.springframework.data.redis.core.RedisHash
 
-import lombok.*;
-
-@Builder(toBuilder = true)
 @RedisHash("example")
-public record RedisCustomEntity(Integer id, String nickname, String apiKey) {}
+data class RedisCustomEntity(
+    @Id
+    val id: Int? = null,
+    val nickname: String? = null,
+    val apiKey: String? = null
+) {}

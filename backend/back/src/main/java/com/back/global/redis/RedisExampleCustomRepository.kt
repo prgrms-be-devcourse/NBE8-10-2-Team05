@@ -1,7 +1,7 @@
-package com.back.global.redis;
+package com.back.global.redis
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
 
 @Repository
-public interface RedisExampleCustomRepository extends CrudRepository<RedisCustomEntity, Integer> {}
+interface RedisExampleCustomRepository : CrudRepository<RedisCustomEntity, Int>

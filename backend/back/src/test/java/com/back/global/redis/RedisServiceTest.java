@@ -97,8 +97,8 @@ class RedisServiceTest {
         assertThat(actualValue).isInstanceOf(RedisEntity.class); // 직렬화가 잘 되어 객체로 복원되는지 확인
 
         RedisEntity cachedEntity = (RedisEntity) actualValue;
-        assertThat(cachedEntity.id()).isEqualTo(redisId);
-        assertThat(cachedEntity.nickname()).isEqualTo("redis");
+        assertThat(cachedEntity.id).isEqualTo(redisId);
+        assertThat(cachedEntity.nickname).isEqualTo("redis");
 
         // 삭제
         redisTemplate.delete(expectedKey);
@@ -128,8 +128,8 @@ class RedisServiceTest {
         RedisEntity result2 = redisService.getUser(redisId);
 
         // 검증
-        assertThat(result2.id()).isEqualTo(testEntity.id());
-        assertThat(result2.nickname()).isEqualTo(testEntity.nickname());
+        assertThat(result2.id).isEqualTo(testEntity.id);
+        assertThat(result2.nickname).isEqualTo(testEntity.nickname);
         verify(redisExampleCustomRepository, times(1)).findById(redisId); // DB 조회가 딱 1번만 일어났는지 검증
 
         // 캐시 정리
@@ -156,18 +156,18 @@ class RedisServiceTest {
                 () -> {
                     Object val = redisTemplate.opsForValue().get(physicalKey);
                     if (val instanceof RedisEntity cached) {
-                        return "newApiKey".equals(cached.apiKey()); // 원하는 값으로 바뀌었는지 확인
+                        return "newApiKey".equals(cached.apiKey); // 원하는 값으로 바뀌었는지 확인
                     }
                     return false;
                 },
                 500,
                 50);
 
-        assertThat(result.apiKey()).isEqualTo("newApiKey");
+        assertThat(result.apiKey).isEqualTo("newApiKey");
 
         Object actualValue = redisTemplate.opsForValue().get(physicalKey);
         assertThat(actualValue).isNotNull();
-        assertThat(((RedisEntity) actualValue).apiKey()).isEqualTo("newApiKey");
+        assertThat(((RedisEntity) actualValue).apiKey).isEqualTo("newApiKey");
 
         cleanCache(redisId);
     }

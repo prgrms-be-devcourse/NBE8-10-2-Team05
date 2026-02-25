@@ -1,13 +1,21 @@
-package com.back.global.redis;
+package com.back.global.redis
 
-import org.springframework.data.redis.core.index.Indexed;
+import jakarta.persistence.Id
 
-import jakarta.persistence.Id;
-import lombok.*;
-
-@Builder(toBuilder = true)
-public record RedisEntity(@Id @Indexed Integer id, String nickname, String apiKey) {
-    public static RedisEntity from(RedisCustomEntity dto) {
-        return new RedisEntity(dto.id(), dto.nickname(), dto.apiKey());
+data class RedisEntity(
+    @Id
+    val id: Int? = null,
+    val nickname: String? = null,
+    val apiKey: String? = null
+) {
+    companion object {
+        @JvmStatic
+        fun from(dto: RedisCustomEntity): RedisEntity {
+            return RedisEntity(
+                id = dto.id,
+                nickname = dto.nickname,
+                apiKey = dto.apiKey
+            )
+        }
     }
 }
