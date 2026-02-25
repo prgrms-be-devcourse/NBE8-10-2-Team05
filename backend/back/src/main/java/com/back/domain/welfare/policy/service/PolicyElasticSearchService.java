@@ -148,20 +148,28 @@ public class PolicyElasticSearchService {
      * @throws IOException Elasticsearch 연결/쿼리 오류 시
      */
     public List<PolicyDocument> search(PolicySearchCondition condition, int from, int size) throws IOException {
-        // PolicyQueryBuilder로 ES Query 생성
+        // 인덱스 없으면 빈 리스트 반환
+        boolean exists = esClient.indices()
+            .exists(ExistsRequest.of(r -> r.index(INDEX)))
+            .value();
+        if (!exists) {
+            log.warn("Elasticsearch index '{}' does not exist. Returning empty result.", INDEX);
+            return List.of();
+        }
+
         Query query = policyQueryBuilder.build(condition);
 
         SearchResponse<PolicyDocument> response = esClient.search(
-                s -> s.index(INDEX)
-                        .from(Math.max(from, 0))
-                        .size(Math.min(Math.max(size, 1), 100))
-                        .query(query),
-                PolicyDocument.class);
+            s -> s.index(INDEX)
+                .from(Math.max(from, 0))
+                .size(Math.min(Math.max(size, 1), 100))
+                .query(query),
+            PolicyDocument.class);
 
         return response.hits().hits().stream()
-                .map(hit -> hit.source())
-                .filter(Objects::nonNull)
-                .toList();
+            .map(hit -> hit.source())
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     /**
