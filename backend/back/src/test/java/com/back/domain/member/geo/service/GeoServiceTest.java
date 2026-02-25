@@ -49,9 +49,9 @@ class GeoServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.hCode()).isEqualTo("4113500000");
-        assertThat(result.latitude()).isEqualTo(37.3947);
-        assertThat(result.longitude()).isEqualTo(127.1111);
+        assertThat(result.hCode).isEqualTo("4113500000");
+        assertThat(result.latitude).isEqualTo(37.3947);
+        assertThat(result.longitude).isEqualTo(127.1111);
 
         // repository의 search 메서드가 정확히 1번 호출되었는지 검증
         verify(geoApiService, times(1)).fetchGeoCode(addressDto);
