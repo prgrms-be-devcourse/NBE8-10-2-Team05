@@ -32,15 +32,15 @@ public class GeoApiServiceTest {
         GeoApiResponseDto result = geoApiService.fetchGeoCode(addressDto);
 
         assertThat(result).isNotNull();
-        assertThat(result.documents()).isNotNull();
-        assertThat(result.documents()).isNotEmpty();
-        assertThat(result.documents().getFirst().address()).isNotNull();
+        assertThat(result.documents).isNotNull();
+        assertThat(result.documents).isNotEmpty();
+        assertThat(result.documents.getFirst().address).isNotNull();
 
-        GeoApiResponseDto.Address resultAddress = result.documents().getFirst().address();
+        GeoApiResponseDto.Address resultAddress = result.documents.getFirst().address;
 
-        assertThat(resultAddress.hCode()).isNotNull();
-        assertThat(resultAddress.hCode()).isNotEmpty();
-        assertThat(resultAddress.x()).isNotNull();
-        assertThat(resultAddress.y()).isNotNull();
+        assertThat(resultAddress.hCode).isNotNull();
+        assertThat(resultAddress.hCode).isNotEmpty();
+        assertThat(resultAddress.x).isNotNull();
+        assertThat(resultAddress.y).isNotNull();
     }
 }

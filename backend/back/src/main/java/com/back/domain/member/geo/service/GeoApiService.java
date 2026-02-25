@@ -20,7 +20,7 @@ public class GeoApiService {
 
     // 카카오 Local API
     public GeoApiResponseDto fetchGeoCode(AddressDto addressDto) {
-        String requestUrl = geoApiProperties.url() + "?query=" + addressDto.roadAddress();
+        String requestUrl = geoApiProperties.url() + "?query=" + addressDto.roadAddress;
 
         GeoApiResponseDto responseDto = Optional.ofNullable(webClient
                         .get()

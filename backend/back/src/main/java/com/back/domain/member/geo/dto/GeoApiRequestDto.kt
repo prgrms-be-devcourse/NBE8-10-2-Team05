@@ -1,20 +1,28 @@
-package com.back.domain.member.geo.dto;
+package com.back.domain.member.geo.dto
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
 
-public record GeoApiRequestDto(
-        @NotBlank String query, // 검색 질의어 (필수)
+class GeoApiRequestDto(
+    @param:NotBlank val query: @NotBlank String?,
+    analyze_type: String?,
+    @Min(1) @Max(45) page: Int?,
+    @Min(1) @Max(30) size: Int?
+) {
+    val analyze_type: String?
+    val page: @Min(1) @Max(45) Int?
+    val size: @Min(1) @Max(30) Int?
 
-        String analyze_type, // similar 또는 exact (기본값 similar)
-
-        @Min(1) @Max(45) Integer page, // 결과 페이지 번호 (1~45, 기본값 1)
-
-        @Min(1) @Max(30) Integer size) {
-    public GeoApiRequestDto {
-        if (analyze_type == null) analyze_type = "similar";
-        if (page == null) page = 1;
-        if (size == null) size = 10;
+    init {
+        var analyze_type = analyze_type
+        var page = page
+        var size = size
+        if (analyze_type == null) analyze_type = "similar"
+        if (page == null) page = 1
+        if (size == null) size = 10
+        this.analyze_type = analyze_type
+        this.page = page
+        this.size = size
     }
 }
