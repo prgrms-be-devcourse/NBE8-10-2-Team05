@@ -1,71 +1,64 @@
-package com.back.global.globalExceptionHandler;
+package com.back.global.globalExceptionHandler
 
-import java.util.Map;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.back.global.exception.ServiceException;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.back.global.exception.ServiceException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
-@RequiredArgsConstructor
-@Slf4j
-public class GlobalExceptionHandler {
-    @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<Map<String, Object>> handle(ServiceException ex) {
-        log.debug("[{}] : {} , {}", ex.getLocation(), ex.getResultCode(), ex.getMsg(), ex);
+class GlobalExceptionHandler {
 
-        int httpStatus = 500;
-        String fullCode = ex.getResultCode();
+    @ExceptionHandler(ServiceException::class)
+    fun handle(ex: ServiceException): ResponseEntity<Map<String, Any?>> {
+        log.debug("[{}] : {} , {}", ex.location, ex.resultCode, ex.msg, ex)
+
+        var httpStatus = 500
+        val fullCode = ex.resultCode
 
         try {
-            int parsedCode = Integer.parseInt(fullCode.substring(0, 3));
+            val parsedCode = fullCode.substring(0, 3).toInt()
             if (HttpStatus.resolve(parsedCode) != null) {
-                httpStatus = parsedCode;
+                httpStatus = parsedCode
             } else {
-                log.warn("정의되지 않은 HTTP 상태 코드: {} (기본값 500 사용하여 에러 나지 않음)", parsedCode);
+                log.warn("정의되지 않은 HTTP 상태 코드: {} (기본값 500 사용하여 에러 나지 않음)", parsedCode)
             }
-        } catch (NumberFormatException exception) {
-            log.error("유효하지 않은 에러 코드 형식: {}", fullCode);
+        } catch (exception: NumberFormatException) {
+            log.error("유효하지 않은 에러 코드 형식: {}", fullCode)
         }
 
         if (httpStatus == 500) {
             if (fullCode.contains("401")) {
-                httpStatus = 401;
+                httpStatus = 401
             } else if (fullCode.contains("404")) {
-                httpStatus = 404;
+                httpStatus = 404
             } else if (fullCode.contains("409")) {
-                httpStatus = 409;
+                httpStatus = 409
             } else if (fullCode.contains("400")) {
-                httpStatus = 400;
+                httpStatus = 400
             }
         }
 
-        return ResponseEntity.status(httpStatus).body(Map.of("resultCode", fullCode, "msg", ex.getMsg()));
+        return ResponseEntity.status(httpStatus)
+            .body(mapOf("resultCode" to fullCode, "msg" to ex.msg))
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handle(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handle(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Any?>> {
+        val fe = ex.bindingResult.fieldError
+        val msg = fe?.defaultMessage ?: "잘못된 요청입니다."
 
-        // 첫 번째 필드 에러 메시지만 내려주기 (너희 msg 스타일 유지)
-        FieldError fe = ex.getBindingResult().getFieldError();
-        String msg = fe != null ? fe.getDefaultMessage() : "잘못된 요청입니다.";
-
-        // 너희 포맷 유지: resultCode / msg
-        // 기존 ServiceException 규칙처럼 "400"이 들어가야 400으로 매핑됨
-        String resultCode = "VALIDATION-400";
+        val resultCode = "VALIDATION-400"
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("resultCode", resultCode, "msg", msg));
+            .body(mapOf("resultCode" to resultCode, "msg" to msg))
     }
 
-
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+    }
 }
