@@ -38,7 +38,7 @@ class PolicyElasticSearchServiceUsageExample {
         @RequestParam(required = false) keywords: MutableList<String?>?,
         @RequestParam(defaultValue = "0") from: Int,
         @RequestParam(defaultValue = "10") size: Int
-    ): MutableList<PolicyDocument?>? {
+    ): List<PolicyDocument?> {
         // 1. PolicySearchCondition 객체 생성
 
         val condition = PolicySearchCondition(
@@ -92,7 +92,7 @@ class PolicyElasticSearchServiceUsageExample {
         @RequestParam(required = false) keyword: String?,
         @RequestParam(defaultValue = "0") from: Int,
         @RequestParam(defaultValue = "10") size: Int
-    ): MutableList<PolicyDocument?>? {
+    ): List<PolicyDocument?> {
         return policyElasticSearchService!!.searchByKeyword(keyword, from, size)
     }
 }

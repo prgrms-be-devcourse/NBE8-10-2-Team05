@@ -20,7 +20,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
@@ -48,14 +47,20 @@ internal class PolicyElasticSearchServiceTest {
     @Mock
     private val indicesClient: ElasticsearchIndicesClient? = null
 
-    @InjectMocks
-    private val sut: PolicyElasticSearchService? = null
+    private var sut: PolicyElasticSearchService? = null
 
     @Mock
     private val booleanResponse: co.elastic.clients.transport.endpoints.BooleanResponse? = null
 
     @BeforeEach
     fun setUp() {
+        sut = PolicyElasticSearchService(
+            esClient!!,
+            policyRepository!!,
+            policyDocumentMapper!!,
+            policyQueryBuilder!!,
+            "policy"
+        )
         Mockito.lenient().`when`(esClient!!.indices()).thenReturn(indicesClient)
 
         // exists() 가 null 반환하지 않도록 stub 추가

@@ -20,18 +20,18 @@ class PolicyController(  // ✅ 생성자 주입으로 변경
 
     @GetMapping("/search")
     @Throws(IOException::class)
-    fun search(policyElasticSearchRequestDto: PolicyElasticSearchRequestDto): MutableList<PolicyDocument?>? {
+    fun search(policyElasticSearchRequestDto: PolicyElasticSearchRequestDto): List<PolicyDocument?> {
         val condition = PolicySearchCondition(
-            keyword = policyElasticSearchRequestDto.keyword(),
-            age = policyElasticSearchRequestDto.age(),
-            earn = policyElasticSearchRequestDto.earn(),
-            regionCode = policyElasticSearchRequestDto.regionCode(),
-            jobCode = policyElasticSearchRequestDto.jobCode(),
-            schoolCode = policyElasticSearchRequestDto.schoolCode(),
-            marriageStatus = policyElasticSearchRequestDto.marriageStatus(),
-            keywords = policyElasticSearchRequestDto.keywords()
+            keyword = policyElasticSearchRequestDto.keyword,
+            age = policyElasticSearchRequestDto.age,
+            earn = policyElasticSearchRequestDto.earn,
+            regionCode = policyElasticSearchRequestDto.regionCode,
+            jobCode = policyElasticSearchRequestDto.jobCode,
+            schoolCode = policyElasticSearchRequestDto.schoolCode,
+            marriageStatus = policyElasticSearchRequestDto.marriageStatus,
+            keywords = policyElasticSearchRequestDto.keywords
         )
-        return policyElasticSearchService.search(  // ✅ !! 불필요
+        return policyElasticSearchService.search(
             condition, policyElasticSearchRequestDto.from, policyElasticSearchRequestDto.size
         )
     }

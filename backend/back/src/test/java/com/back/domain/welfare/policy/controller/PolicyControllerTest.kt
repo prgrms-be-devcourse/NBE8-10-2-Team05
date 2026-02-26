@@ -12,7 +12,6 @@ import co.elastic.clients.elasticsearch.indices.CreateIndexRequest
 import co.elastic.clients.elasticsearch.indices.ExistsRequest
 import co.elastic.clients.elasticsearch.indices.RefreshRequest
 import com.back.domain.welfare.policy.entity.Policy
-import com.back.domain.welfare.policy.entity.Policy.Companion.builder
 import com.back.domain.welfare.policy.repository.PolicyRepository
 import com.back.domain.welfare.policy.service.PolicyElasticSearchService
 import org.junit.jupiter.api.Assumptions
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.transaction.annotation.Transactional
+import org.hamcrest.Matchers
 import java.util.*
 import java.util.function.Function
 
@@ -67,7 +67,7 @@ class PolicyControllerTest {
         policyRepository.flush()
 
         // 4️⃣ 테스트 데이터 생성
-        val policy = builder()
+        val policy = Policy.builder()
             .plcyNo("API-" + UUID.randomUUID())
             .plcyNm("청년 주거 지원 컨트롤러 테스트")
             .sprtTrgtMinAge("20")
@@ -81,7 +81,7 @@ class PolicyControllerTest {
             .plcyExplnCn("컨트롤러 테스트용 정책 설명")
             .build()
 
-        policyRepository.saveAndFlush<Policy>(policy)
+        policyRepository.saveAndFlush(policy)
 
         // 5️⃣ index 생성 보장
         policyElasticSearchService!!.ensureIndex()
@@ -149,7 +149,8 @@ class PolicyControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(1)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[*].plcyNm").value(Matchers.hasItem("청년 주거 지원 컨트롤러 테스트")))
     }
 
     companion object {

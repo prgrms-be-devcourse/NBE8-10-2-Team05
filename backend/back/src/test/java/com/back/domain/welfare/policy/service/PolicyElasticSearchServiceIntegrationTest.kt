@@ -10,7 +10,7 @@ import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest
 import co.elastic.clients.elasticsearch.indices.ExistsRequest
 import co.elastic.clients.elasticsearch.indices.RefreshRequest
 import com.back.domain.welfare.policy.document.PolicyDocument
-import com.back.domain.welfare.policy.entity.Policy.Companion.builder
+import com.back.domain.welfare.policy.entity.Policy
 import com.back.domain.welfare.policy.mapper.PolicyDocumentMapper
 import com.back.domain.welfare.policy.repository.PolicyRepository
 import com.back.domain.welfare.policy.search.PolicySearchCondition
@@ -246,7 +246,7 @@ internal class PolicyElasticSearchServiceIntegrationTest {
             val uniqueId1 = UUID.randomUUID().toString().substring(0, 8)
             val uniqueId2 = UUID.randomUUID().toString().substring(0, 8)
 
-            val policy1 = builder()
+            val policy1 = Policy.builder()
                 .plcyNo("TEST-001-" + uniqueId1)
                 .plcyNm("청년 주거 지원 정책")
                 .sprtTrgtMinAge("20")
@@ -263,7 +263,7 @@ internal class PolicyElasticSearchServiceIntegrationTest {
                 .plcyExplnCn("청년을 위한 주거 지원 정책입니다")
                 .build()
 
-            val policy2 = builder()
+            val policy2 = Policy.builder()
                 .plcyNo("TEST-002-" + uniqueId2)
                 .plcyNm("중장년 취업 지원")
                 .sprtTrgtMinAge("40")
@@ -276,8 +276,8 @@ internal class PolicyElasticSearchServiceIntegrationTest {
                 .plcyExplnCn("중장년층 취업을 지원하는 정책입니다")
                 .build()
 
-            policyRepository!!.save(policy1)
-            policyRepository.save(policy2)
+            policyRepository!!.save<Policy>(policy1)
+            policyRepository.save<Policy>(policy2)
             policyRepository.flush()
 
             policyElasticSearchService!!.ensureIndex()
@@ -331,7 +331,7 @@ internal class PolicyElasticSearchServiceIntegrationTest {
             val uniqueId2 = UUID.randomUUID().toString().substring(0, 8)
             val uniqueId3 = UUID.randomUUID().toString().substring(0, 8)
 
-            val policy1 = builder()
+            val policy1 = Policy.builder()
                 .plcyNo("SEARCH-001-" + uniqueId1)
                 .plcyNm("청년 주거 지원")
                 .sprtTrgtMinAge("20")
@@ -348,7 +348,7 @@ internal class PolicyElasticSearchServiceIntegrationTest {
                 .plcyExplnCn("청년을 위한 주거 지원 정책")
                 .build()
 
-            val policy2 = builder()
+            val policy2 = Policy.builder()
                 .plcyNo("SEARCH-002-" + uniqueId2)
                 .plcyNm("중장년 취업 지원")
                 .sprtTrgtMinAge("40")
@@ -361,7 +361,7 @@ internal class PolicyElasticSearchServiceIntegrationTest {
                 .plcyExplnCn("중장년 취업을 지원합니다")
                 .build()
 
-            val policy3 = builder()
+            val policy3 = Policy.builder()
                 .plcyNo("SEARCH-003-" + uniqueId3)
                 .plcyNm("전체 교육 지원")
                 .sprtTrgtMinAge("18")
@@ -377,9 +377,9 @@ internal class PolicyElasticSearchServiceIntegrationTest {
                 .plcyExplnCn("모든 연령 교육 지원")
                 .build()
 
-            policyRepository.save(policy1)
-            policyRepository.save(policy2)
-            policyRepository.save(policy3)
+            policyRepository.save<Policy>(policy1)
+            policyRepository.save<Policy>(policy2)
+            policyRepository.save<Policy>(policy3)
             policyRepository.flush()
 
             policyElasticSearchService!!.ensureIndex()
@@ -558,13 +558,13 @@ internal class PolicyElasticSearchServiceIntegrationTest {
 
             for (i in 1..5) {
                 val uniqueId = UUID.randomUUID().toString().substring(0, 8)
-                val policy = builder()
+                val policy = Policy.builder()
                     .plcyNo("TOTAL-" + i + "-" + uniqueId)
                     .plcyNm("테스트 정책 " + i)
                     .plcyKywdNm("테스트")
                     .plcyExplnCn("테스트 정책 설명 " + i)
                     .build()
-                policyRepository.save(policy)
+                policyRepository.save<Policy>(policy)
             }
             policyRepository.flush()
 
@@ -586,10 +586,10 @@ internal class PolicyElasticSearchServiceIntegrationTest {
             val result =
                 policyElasticSearchService!!.searchWithTotal(condition, 0, 10)
 
-            Assertions.assertThat<PolicyDocument?>(result.getDocuments()).isNotEmpty()
-            Assertions.assertThat(result.getTotal()).isGreaterThanOrEqualTo(5)
-            Assertions.assertThat(result.getTotal())
-                .isGreaterThanOrEqualTo(result.getDocuments().size.toLong())
+            Assertions.assertThat<PolicyDocument?>(result.documents).isNotEmpty()
+            Assertions.assertThat(result.total).isGreaterThanOrEqualTo(5)
+            Assertions.assertThat(result.total)
+                .isGreaterThanOrEqualTo(result.documents.size.toLong())
         }
 
         @Test
@@ -603,8 +603,8 @@ internal class PolicyElasticSearchServiceIntegrationTest {
             val page1 = policyElasticSearchService!!.searchWithTotal(condition, 0, 2)
             val page2 = policyElasticSearchService.searchWithTotal(condition, 2, 2)
 
-            Assertions.assertThat(page1.getTotal()).isEqualTo(page2.getTotal())
-            Assertions.assertThat(page1.getTotal()).isGreaterThanOrEqualTo(5)
+            Assertions.assertThat(page1.total).isEqualTo(page2.total)
+            Assertions.assertThat(page1.total).isGreaterThanOrEqualTo(5)
         }
 
         @Test
@@ -618,8 +618,8 @@ internal class PolicyElasticSearchServiceIntegrationTest {
             val result =
                 policyElasticSearchService!!.searchWithTotal(condition, 0, 10)
 
-            Assertions.assertThat<PolicyDocument?>(result.getDocuments()).isEmpty()
-            Assertions.assertThat(result.getTotal()).isEqualTo(0)
+            Assertions.assertThat<PolicyDocument?>(result.documents).isEmpty()
+            Assertions.assertThat(result.total).isEqualTo(0)
         }
     }
 
