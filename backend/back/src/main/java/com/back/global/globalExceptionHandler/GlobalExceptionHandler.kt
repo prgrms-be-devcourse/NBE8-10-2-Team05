@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
@@ -13,14 +14,12 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceException::class)
     fun handle(ex: ServiceException): ResponseEntity<Map<String, Any?>> {
-        // 기존 로그 출력 로직 그대로 유지
         log.debug("[{}] : {} , {}", ex.location, ex.resultCode, ex.msg, ex)
 
         var httpStatus = 500
         val fullCode = ex.resultCode
 
         try {
-            // resultCode의 앞 3자리를 파싱하여 HTTP 상태 코드 결정
             val parsedCode = fullCode.substring(0, 3).toInt()
             if (HttpStatus.resolve(parsedCode) != null) {
                 httpStatus = parsedCode
@@ -31,7 +30,6 @@ class GlobalExceptionHandler {
             log.error("유효하지 않은 에러 코드 형식: {}", fullCode)
         }
 
-        // 특정 키워드 포함 시 상태 코드 보정 로직 유지
         if (httpStatus == 500) {
             if (fullCode.contains("401")) {
                 httpStatus = 401
@@ -44,9 +42,20 @@ class GlobalExceptionHandler {
             }
         }
 
-        // 응답 바디 생성 및 반환
         return ResponseEntity.status(httpStatus)
             .body(mapOf("resultCode" to fullCode, "msg" to ex.msg))
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handle(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Any?>> {
+        val fe = ex.bindingResult.fieldError
+        val msg = fe?.defaultMessage ?: "잘못된 요청입니다."
+
+        val resultCode = "VALIDATION-400"
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(mapOf("resultCode" to resultCode, "msg" to msg))
     }
 
     companion object {

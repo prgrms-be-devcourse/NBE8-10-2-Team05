@@ -9,6 +9,7 @@ import com.back.domain.member.member.dto.MeResponse
 import com.back.domain.member.member.service.MemberService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -20,7 +21,7 @@ class MemberController(
 
     // 회원가입
     @PostMapping("/join")
-    fun join(@RequestBody req: JoinRequest): ResponseEntity<JoinResponse> {
+    fun join(@Valid @RequestBody req: JoinRequest): ResponseEntity<JoinResponse> {
         val res = memberService.join(req)
         return ResponseEntity.ok(res)
     }
@@ -28,7 +29,7 @@ class MemberController(
     // 로그인
     @PostMapping("/login")
     fun login(
-        @RequestBody req: LoginRequest,
+        @Valid @RequestBody req: LoginRequest,
         response: HttpServletResponse
     ): ResponseEntity<LoginResponse> {
         val res = memberService.login(req, response)
@@ -43,18 +44,12 @@ class MemberController(
 
     @PostMapping("/logout")
     fun logout(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Void> {
-
-        val headers = memberService.logout(request)
-
-        // TODO: 이 로직은 service안에 들어가야 할 것 같습니다. 지금까지의 코드를 보면.
-        response.addHeader("Set-Cookie", headers.deleteAccessCookieHeader)
-        response.addHeader("Set-Cookie", headers.deleteRefreshCookieHeader)
-
+        memberService.logout(request, response)
         return ResponseEntity.ok().build()
     }
 
     @PostMapping("/complete-social")
-    fun completeSocial(@RequestBody req: CompleteSocialSignupRequest): ResponseEntity<Void> {
+    fun completeSocial(@Valid @RequestBody req: CompleteSocialSignupRequest): ResponseEntity<Void> {
         memberService.completeSocialSignup(req)
         return ResponseEntity.ok().build()
     }

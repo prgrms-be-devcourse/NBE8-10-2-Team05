@@ -38,20 +38,6 @@ class MemberService(
 
     fun join(req: JoinRequest): JoinResponse {
 
-        // TODO: service단에서의 이중방어인가요?
-        //      controller에 @Valid 사용하면 더 좋을 듯 합니다.
-
-        // 요청값 검증
-        if (req.email == null || req.email.isBlank()) {
-            throw ServiceException("MEMBER_400", "이메일은 필수 입력값입니다")
-        }
-        if (req.password == null || req.password.isBlank()) {
-            throw ServiceException("MEMBER_400", "비밀번호는 필수 입력값입니다")
-        }
-        if (req.name == null || req.name.isBlank()) {
-            throw ServiceException("MEMBER_400", "이름은 필수 입력값입니다")
-        }
-
         // TODO: email 중복시 "[MEMBER_409] 이미 사용 중인 이메일입니다" 코드까지 사용자에게 보입니다.
 
         // 이메일 중복 체크
@@ -67,8 +53,8 @@ class MemberService(
             req.name,
             req.email,
             encodedPassword,
-            req.rrnFront ?: "",
-            req.rrnBackFirst ?: ""
+            req.rrnFront,
+            req.rrnBackFirst
         )
 
         val savedMember = memberRepository.save(member)
@@ -78,11 +64,6 @@ class MemberService(
 
     @Transactional
     fun completeSocialSignup(req: CompleteSocialSignupRequest) {
-
-        // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
-        if (req.rrnFront == null) throw ServiceException("MEMBER-400", "rrnFront는 필수입니다.")
-        if (req.rrnBackFirst == null) throw ServiceException("MEMBER-400", "rrnBackFirst는 필수입니다.")
-
         // 가지고있는 JWT로 Filter에서 member를 받아서 쓴다.
         val member = actorProvider.getActor()
 
@@ -96,13 +77,6 @@ class MemberService(
 
     @Transactional
     fun login(req: LoginRequest, response: HttpServletResponse): LoginResponse {
-        // TODO: controller 단에서 @Valid 사용하면 더 좋을 듯 합니다.
-        if (req.email == null || req.email.isBlank()) {
-            throw ServiceException("AUTH-400", "email은 필수입니다.")
-        }
-        if (req.password == null || req.password.isBlank()) {
-            throw ServiceException("AUTH-400", "password는 필수입니다.")
-        }
 
         val member = memberRepository
             .findByEmail(req.email)
@@ -128,13 +102,8 @@ class MemberService(
         return MeResponse(requireNotNull(member.id), member.name, member.email)
     }
 
-    data class LogoutCookieHeaders(
-        val deleteAccessCookieHeader: String,
-        val deleteRefreshCookieHeader: String
-    )
-
     @Transactional
-    fun logout(request: HttpServletRequest): LogoutCookieHeaders {
+    fun logout(request: HttpServletRequest, response: HttpServletResponse) {
 
         // 1) refreshToken 쿠키 원문 읽기
         val rawRefreshToken = getCookieValue(request, "refreshToken")
@@ -147,11 +116,12 @@ class MemberService(
             redisRefreshTokenStore.delete(hash)
         }
 
-        // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 반환
+        // 3) access/refresh 쿠키 둘 다 삭제 헤더 생성해서 응답에 세팅
         val deleteAccessCookie = authCookieService.deleteCookie("accessToken")
         val deleteRefreshCookie = authCookieService.deleteCookie("refreshToken")
 
-        return LogoutCookieHeaders(deleteAccessCookie, deleteRefreshCookie)
+        response.addHeader("Set-Cookie", deleteAccessCookie)
+        response.addHeader("Set-Cookie", deleteRefreshCookie)
     }
 
     //    @Transactional
